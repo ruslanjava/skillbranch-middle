@@ -31,8 +31,14 @@ internal object IceAndFireServiceFactory {
     }
 
     private fun provideLoggingInterceptor() : HttpLoggingInterceptor {
-        val logger = HttpLoggingInterceptor.Logger { message -> println(message) }
-        return HttpLoggingInterceptor(logger).setLevel(HttpLoggingInterceptor.Level.BODY)
+        val logger = object: HttpLoggingInterceptor.Logger {
+            override fun log(message: String) {
+                println(message)
+            }
+        }
+        val interceptor = HttpLoggingInterceptor(logger)
+        interceptor.level = HttpLoggingInterceptor.Level.BODY
+        return interceptor
     }
 
 }

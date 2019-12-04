@@ -1,4 +1,4 @@
-package ru.skillbranch.gameofthrones.app
+package ru.skillbranch.gameofthrones.app.ui.characters
 
 import android.os.Bundle
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -6,9 +6,9 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import androidx.viewpager.widget.ViewPager
 import androidx.appcompat.app.AppCompatActivity
-import ru.skillbranch.gameofthrones.app.ui.main.SectionsPagerAdapter
+import ru.skillbranch.gameofthrones.app.R
 
-class ChartersListScreen : AppCompatActivity() {
+class CharactersListScreen : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

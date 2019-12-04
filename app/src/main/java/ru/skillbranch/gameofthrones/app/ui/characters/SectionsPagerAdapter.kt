@@ -1,4 +1,4 @@
-package ru.skillbranch.gameofthrones.app.ui.main
+package ru.skillbranch.gameofthrones.app.ui.characters
 
 import android.content.Context
 import androidx.fragment.app.Fragment

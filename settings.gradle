@@ -1,3 +1,4 @@
 include ':app'
 include ':http'
 include ':config'
+include ':database'

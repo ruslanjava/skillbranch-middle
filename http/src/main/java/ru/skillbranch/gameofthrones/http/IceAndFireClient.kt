@@ -3,6 +3,7 @@ package ru.skillbranch.gameofthrones.http
 import ru.skillbranch.gameofthrones.data.remote.res.CharacterRes
 import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -10,11 +11,12 @@ import kotlin.collections.HashSet
 
 object IceAndFireClient {
 
+    // значения получены эмпирическим путем
     private const val THREADS = 12
     private const val PAGE_SIZE = THREADS * 5
+    private const val THREAD_POOL_SIZE = 180
 
     private val service = IceAndFireServiceFactory.newInstance()
-    private val executorService = Executors.newFixedThreadPool(100)
 
     fun getAllHouses(): List<HouseRes> {
         val lock = Any()
@@ -25,6 +27,7 @@ object IceAndFireClient {
         val start = CountDownLatch(1)
         val finish = CountDownLatch(THREADS)
 
+        val executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE)
         for (offset in 0..THREADS) {
             executorService.submit {
                 start.await()
@@ -48,6 +51,7 @@ object IceAndFireClient {
         }
         start.countDown()
         finish.await(30, TimeUnit.SECONDS)
+        executorService.shutdown()
 
         // окончательный результат, который можно не спеша отфильтровать в одном потоке
         // без блокировки
@@ -70,7 +74,13 @@ object IceAndFireClient {
 
         val houses = getAllHouses()
 
-        return houses.filter{ house -> hashedHouses.contains(house.name)}.toList()
+        val result = mutableListOf<HouseRes>()
+        for (house in houses) {
+            if (hashedHouses.contains(house.name)) {
+                result.add(house)
+            }
+        }
+        return result
     }
 
     fun getNeedHousesWithCharacters(houseNames: Array<out String>): List<Pair<HouseRes, List<CharacterRes>>> {
@@ -83,6 +93,8 @@ object IceAndFireClient {
         val start = CountDownLatch(1)
         val finish = CountDownLatch(houseNames.size)
 
+        val executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE)
+
         houses.forEach {
             val house = it
             val houseMembers = house.swornMembers
@@ -94,7 +106,7 @@ object IceAndFireClient {
                         val id = url.substringAfterLast("/")
                         ids.add(id)
                     }
-                    val characters = loadCharacters(ids)
+                    val characters = loadCharacters(executorService, ids)
                     synchronized(resultLock) {
                         result.add(house to characters)
                     }
@@ -108,10 +120,12 @@ object IceAndFireClient {
         finish.await(10, TimeUnit.SECONDS)
         houseExecutorService.shutdown()
 
+        executorService.shutdown()
+
         return result;
     }
 
-    private fun loadCharacters(ids : List<String>) : List<CharacterRes> {
+    private fun loadCharacters(executorService: ExecutorService, ids : List<String>) : List<CharacterRes> {
         val result = ArrayList<CharacterRes>()
 
         val start = CountDownLatch(1)

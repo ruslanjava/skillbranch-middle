@@ -35,7 +35,7 @@ class IceAndFireClientUnitTest {
 
         val timePassed = (endTime - startTime)
         println("Time passed: $timePassed")
-        assertThat(timePassed, lessThan(10000L))
+        assertThat(timePassed, lessThan(5000L))
 
         val starkMembers = getCharacters(pairs, "House Stark of Winterfell")
         assertThat(starkMembers.size, `is`(88))

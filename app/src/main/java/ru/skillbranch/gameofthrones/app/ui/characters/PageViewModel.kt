@@ -1,10 +1,9 @@
-package ru.skillbranch.gameofthrones.app.ui.main
+package ru.skillbranch.gameofthrones.app.ui.characters
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 
 class PageViewModel : ViewModel() {
 
