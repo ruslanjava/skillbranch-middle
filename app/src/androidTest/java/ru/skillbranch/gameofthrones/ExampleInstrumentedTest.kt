@@ -9,8 +9,6 @@ import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
 import ru.skillbranch.gameofthrones.data.remote.res.CharacterRes
 import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
 import ru.skillbranch.gameofthrones.repositories.RootRepository
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 
 /**
@@ -157,75 +155,75 @@ class ExampleInstrumentedTest {
     @Test
     fun insert_house_and_drop_db() {
         //Запись в базу
-        val latch = CountDownLatch(1)
+        val lock0 = Object()
         RootRepository.insertHouses(listOf(stubHouseStark)) {
-            latch.countDown()
+            synchronized(lock0) { lock0.notify() }
         }
-        latch.await(30, TimeUnit.SECONDS)
+        synchronized(lock0) { lock0.wait() }
 
         //Обновление не нужно
-        val latch1 = CountDownLatch(1)
+        val lock1 = Object()
         var needResult: Boolean? = null
         RootRepository.isNeedUpdate {
             needResult = it
-            latch1.countDown()
+            synchronized(lock1) { lock1.notify() }
         }
-        latch1.await(30, TimeUnit.SECONDS)
+        synchronized(lock1) { lock1.wait() }
         assertEquals(false, needResult)
 
         //Дроп базы
-        val latch2 = CountDownLatch(1)
+        val lock = Object()
         RootRepository.dropDb {
-            latch2.countDown()
+            synchronized(lock) { lock.notify() }
         }
-        latch2.await(30, TimeUnit.SECONDS)
+        synchronized(lock) { lock.wait() }
 
         //Обновление нужно
-        val latch3 = CountDownLatch(1)
+        val lock3 = Object()
         var needResult2: Boolean? = null
         RootRepository.isNeedUpdate {
             needResult2 = it
-            latch3.countDown()
+            synchronized(lock3) { lock3.notify() }
         }
-        latch3.await(30, TimeUnit.SECONDS)
+        synchronized(lock3) { lock3.wait() }
         assertEquals(true, needResult2)
     }
 
     @Test
     fun insert_characters_and_find() {
         ///Дроп базы
-        val latch = CountDownLatch(1)
+        val lock = Object()
         RootRepository.dropDb {
-            latch.countDown()
+            synchronized(lock) { lock.notify() }
         }
-        latch.await(30, TimeUnit.SECONDS)
+        synchronized(lock) { lock.wait() }
 
         //Запись домов
-        val latch0 = CountDownLatch(1)
+        val lock0 = Object()
         RootRepository.insertHouses(listOf(stubHouseStark, stubHouseTargaryen)) {
-            latch0.countDown()
+            synchronized(lock0) { lock0.notify() }
         }
-        latch0.await(30, TimeUnit.SECONDS)
+        synchronized(lock0) { lock0.wait() }
 
         //Запись персонажей
-        val latch1 = CountDownLatch(1)
+        val lock1 = Object()
         val characters = listOf(
             stubCharacterJonSnow.apply { houseId = "Stark" },
             stubCharacterLyanna.apply { houseId = "Stark" },
             stubCharacterRhaegar.apply { houseId = "Targaryen" }
         )
         RootRepository.insertCharacters(characters) {
-            latch1.countDown()
+            synchronized(lock1) { lock1.notify() }
         }
-        latch1.await(30, TimeUnit.SECONDS)
+        synchronized(lock1) { lock1.wait() }
 
-        val latch2 = CountDownLatch(1)
+        val lock2 = Object()
         var actualCharacters: List<CharacterItem>? = null
         RootRepository.findCharactersByHouseName("Stark") {
             actualCharacters = it
-            latch2.countDown()
+            synchronized(lock2) { lock2.notify() }
         }
-        latch2.await(30, TimeUnit.SECONDS)
+        synchronized(lock2) { lock2.wait() }
 
         assertEquals(stubCharacterJonSnow.name, actualCharacters?.first()?.name)
         assertEquals(stubCharacterJonSnow.aliases, actualCharacters?.first()?.aliases)
@@ -237,38 +235,38 @@ class ExampleInstrumentedTest {
     @Test
     fun insert_characters_and_full() {
         ///Дроп базы
-        val latch = CountDownLatch(1)
+        val lock = Object()
         RootRepository.dropDb {
-            latch.countDown()
+            synchronized(lock) { lock.notify() }
         }
-        latch.await(30, TimeUnit.SECONDS)
+        synchronized(lock) { lock.wait() }
 
         //Запись домов
-        val latch0 = CountDownLatch(1)
+        val lock0 = Object()
         RootRepository.insertHouses(listOf(stubHouseStark, stubHouseTargaryen)) {
-            latch0.countDown()
+            synchronized(lock0) { lock0.notify() }
         }
-        latch0.await(30, TimeUnit.SECONDS)
+        synchronized(lock0) { lock0.wait() }
 
         //Запись персонажей
-        val latch1 = CountDownLatch(1)
+        val lock1 = Object()
         val characters = listOf(
             stubCharacterJonSnow.apply { houseId = "Stark" },
             stubCharacterLyanna.apply { houseId = "Stark" },
             stubCharacterRhaegar.apply { houseId = "Targaryen" }
         )
         RootRepository.insertCharacters(characters) {
-            latch1.countDown()
+            synchronized(lock1) { lock1.notify() }
         }
-        latch1.await(30, TimeUnit.SECONDS)
+        synchronized(lock1) { lock1.wait() }
 
-        val latch2 = CountDownLatch(1)
+        val lock2 = Object()
         var actualCharacter: CharacterFull? = null
         RootRepository.findCharacterFullById("583") {
             actualCharacter = it
-            latch2.countDown()
+            synchronized(lock2) { lock2.notify() }
         }
-        latch2.await(30, TimeUnit.SECONDS)
+        synchronized(lock2) { lock2.wait() }
 
         assertEquals(stubCharacterJonSnow.name, actualCharacter?.name)
         assertEquals(stubCharacterJonSnow.aliases, actualCharacter?.aliases)
@@ -283,14 +281,13 @@ class ExampleInstrumentedTest {
     @Test
     fun get_all_houses() {
         //Запись персонажей
-        val latch = CountDownLatch(1)
+        val lock1 = Object()
         var actualHouses: List<HouseRes>? = null
         RootRepository.getAllHouses {
             actualHouses = it
-            latch.countDown()
+            synchronized(lock1) { lock1.notify() }
         }
-
-        latch.await(30, TimeUnit.SECONDS)
+        synchronized(lock1) { lock1.wait() }
 
         val actualCharacters = actualHouses?.fold(mutableListOf<String>()) { acc, houses ->
             acc.also { it.addAll(houses.swornMembers) }
@@ -302,17 +299,16 @@ class ExampleInstrumentedTest {
     @Test
     fun get_need_houses() {
         //Запись персонажей
-        val latch = CountDownLatch(1)
+        val lock1 = Object()
         var actualHouses: List<HouseRes>? = null
         RootRepository.getNeedHouses(
             "House Greyjoy of Pyke",
             "House Tyrell of Highgarden"
         ) {
             actualHouses = it
-            latch.countDown()
+            synchronized(lock1) { lock1.notify() }
         }
-
-        latch.await(30, TimeUnit.SECONDS)
+        synchronized(lock1) { lock1.wait() }
 
         val actualCharacters = actualHouses?.fold(mutableListOf<String>()) { acc, houses ->
             acc.also { it.addAll(houses.swornMembers) }
@@ -323,20 +319,17 @@ class ExampleInstrumentedTest {
 
     @Test
     fun get_need_houses_with_characters() {
-        val latch = CountDownLatch(1)
-
+        val lock1 = Object()
         var actualHouses: List<Pair<HouseRes, List<CharacterRes>>>? = null
         RootRepository.getNeedHouseWithCharacters(
             "House Greyjoy of Pyke"
         ) {
             actualHouses = it
-            latch.countDown()
+            synchronized(lock1) { lock1.notify() }
         }
-
-        latch.await(30, TimeUnit.SECONDS)
+        synchronized(lock1) { lock1.wait() }
 
         assertEquals("We Do Not Sow", actualHouses?.first()?.first?.words)
         assertEquals(42, actualHouses?.first()?.second?.size)
     }
-
 }

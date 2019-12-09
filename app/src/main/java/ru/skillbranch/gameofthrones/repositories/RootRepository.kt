@@ -1,6 +1,7 @@
 package ru.skillbranch.gameofthrones.repositories
 
 import androidx.annotation.VisibleForTesting
+import kotlinx.coroutines.*
 import ru.skillbranch.gameofthrones.HouseName
 import ru.skillbranch.gameofthrones.app.application.GameOfThronesApplication
 import ru.skillbranch.gameofthrones.data.local.entities.CharacterFull
@@ -13,14 +14,19 @@ import ru.skillbranch.gameofthrones.http.IceAndFireClient
 
 object RootRepository {
 
+    private val job = Job()
+    private val ioScope = CoroutineScope(Dispatchers.IO + job)
+
     /**
      * Получение данных о всех домах
      * @param result - колбек содержащий в себе список данных о домах
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun getAllHouses(result : (houses : List<HouseRes>) -> Unit) {
-        val houses = IceAndFireClient.getAllHouses()
-        result.invoke(houses)
+        ioScope.launch {
+            val houses = IceAndFireClient.getAllHouses()
+            result.invoke(houses)
+        }
     }
 
     /**
@@ -30,8 +36,10 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun getNeedHouses(vararg houseNames: String, result : (houses : List<HouseRes>) -> Unit) {
-        val neededHouses = IceAndFireClient.getNeededHouses(houseNames)
-        result.invoke(neededHouses)
+        ioScope.launch {
+            val neededHouses = IceAndFireClient.getNeededHouses(houseNames)
+            result.invoke(neededHouses)
+        }
     }
 
     /**
@@ -41,16 +49,18 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun getNeedHouseWithCharacters(vararg houseNames: String, result : (houses : List<Pair<HouseRes, List<CharacterRes>>>) -> Unit) {
-        val pairs = IceAndFireClient.getNeedHousesWithCharacters(houseNames)
-        for (pair in pairs) {
-            val house = pair.first
-            val houseId = shortHouseName(house.name)
-            val characters = pair.second
-            for (character in characters) {
-                character.houseId = houseId
+        ioScope.launch {
+            val pairs = IceAndFireClient.getNeedHousesWithCharacters(houseNames)
+            for (pair in pairs) {
+                val house = pair.first
+                val houseId = shortHouseName(house.name)
+                val characters = pair.second
+                for (character in characters) {
+                    character.houseId = houseId
+                }
             }
+            result.invoke(pairs)
         }
-        result.invoke(pairs)
     }
 
     /**
@@ -61,13 +71,15 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun insertHouses(houses : List<HouseRes>, complete: () -> Unit) {
-        val dbHouses = mutableListOf<House>()
-        for (houseRes in houses) {
-            dbHouses.add(houseRes.toHouse())
+        ioScope.launch {
+            val dbHouses = mutableListOf<House>()
+            for (houseRes in houses) {
+                dbHouses.add(houseRes.toHouse())
+            }
+            val database = HousesDatabase.getInstance(GameOfThronesApplication.context)
+            database?.housesDao()?.insert(dbHouses)
+            complete.invoke()
         }
-        val database = HousesDatabase.getInstance(GameOfThronesApplication.context)
-        database?.housesDao()?.insert(dbHouses)
-        complete.invoke()
     }
 
     /**
@@ -78,10 +90,13 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun insertCharacters(characters : List<CharacterRes>, complete: () -> Unit) {
-        val dbCharacters = characters.map { characterRes -> characterRes.toCharacter() }.toList()
-        val database = HousesDatabase.getInstance(GameOfThronesApplication.context)
-        database?.charactersDao()?.insert(dbCharacters)
-        complete.invoke()
+        ioScope.launch {
+            val dbCharacters =
+                characters.map { characterRes -> characterRes.toCharacter() }.toList()
+            val database = HousesDatabase.getInstance(GameOfThronesApplication.context)
+            database?.charactersDao()?.insert(dbCharacters)
+            complete.invoke()
+        }
     }
 
     /**
@@ -90,9 +105,11 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun dropDb(complete: () -> Unit) {
-        val database = HousesDatabase.getInstance(GameOfThronesApplication.context)
-        database?.dropDatabase()
-        complete.invoke()
+        ioScope.launch {
+            val database = HousesDatabase.getInstance(GameOfThronesApplication.context)
+            database?.dropDatabase()
+            complete.invoke()
+        }
     }
 
     /**
@@ -103,9 +120,11 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun findCharactersByHouseName(name : String, result: (charters : List<CharacterItem>) -> Unit) {
-        val database = HousesDatabase.getInstance(GameOfThronesApplication.context)
-        val characters = database?.charactersDao()?.findCharactersByHouseName(name)
-        result.invoke(characters!!)
+        ioScope.launch {
+            val database = HousesDatabase.getInstance(GameOfThronesApplication.context)
+            val characters = database?.charactersDao()?.findCharactersByHouseName(name)
+            result.invoke(characters!!)
+        }
     }
 
     /**
@@ -116,10 +135,12 @@ object RootRepository {
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun findCharacterFullById(id : String, result: (charter : CharacterFull) -> Unit) {
-        val database = HousesDatabase.getInstance(GameOfThronesApplication.context)
-        val character = database?.charactersDao()?.findCharacterFullById(id)
-        if (character != null) {
-            result.invoke(character)
+        ioScope.launch {
+            val database = HousesDatabase.getInstance(GameOfThronesApplication.context)
+            val character = database?.charactersDao()?.findCharacterFullById(id)
+            if (character != null) {
+                result.invoke(character)
+            }
         }
     }
 
@@ -127,19 +148,20 @@ object RootRepository {
      * Метод возвращет true если в базе нет ни одной записи, иначе false
      * @param result - колбек о завершении очистки db
      */
-    fun isNeedUpdate(result: (isNeed : Boolean) -> Unit){
-        val database = HousesDatabase.getInstance(GameOfThronesApplication.context)
-        val house = database?.housesDao()?.getFirstHouse()
+    fun isNeedUpdate(result: (isNeed : Boolean) -> Unit) {
+        ioScope.launch {
+            val database = HousesDatabase.getInstance(GameOfThronesApplication.context)
+            val house = database?.housesDao()?.getFirstHouse()
 
-        // если в базе есть хотя бы 1 дом, значит, база уже непустая -> возвращаем false
-        if (house != null) {
-            result.invoke(false)
-            return
+            // если в базе есть хотя бы 1 дом, значит, база уже непустая -> возвращаем false
+            if (house != null) {
+                result.invoke(false)
+            } else {
+                // если в базе нет ни одного персонажа, возвращаем true
+                val character = database?.charactersDao()?.getFirstCharacter()
+                result.invoke(character == null)
+            }
         }
-
-        // если в базе нет ни одного персонажа, возвращаем true
-        val character = database?.charactersDao()?.getFirstCharacter()
-        result.invoke(character == null)
     }
 
     private fun shortHouseName(name: String) : String {
