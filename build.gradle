@@ -8,15 +8,6 @@ ext {
     minSdkVersion = 24
     buildToolsVersion = "29.0.2"
 
-    // common libraries
-    roomVersion = '2.2.2'
-    daggerVersion = '2.21'
-    retrofitVersion = '2.6.2'
-    okVersion = '4.2.1'
-    rxJava = '2.2.6'
-    rxAndroid = '2.1.1'
-    rxBinding = '2.0.0'
-
     // Google's deps
     ktxVersion = '1.1.0'
     appCompatVersion = '1.1.0'
@@ -30,12 +21,8 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.0-beta04'
+        classpath 'com.android.tools.build:gradle:3.6.0-beta05'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
     }
 }
 
