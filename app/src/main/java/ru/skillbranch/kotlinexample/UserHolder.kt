@@ -47,4 +47,26 @@ object UserHolder {
         }
     }
 
+    fun importUsers(list: List<String>) : List<User> {
+        val result = mutableListOf<User>()
+
+        list.forEach {
+            val parts = it.split(";")
+            val fullName = parts[0].trim()
+            val firstName = fullName.substringBefore(" ")
+            val lastName = fullName.substringAfter(" ")
+
+            val email = parts[1].trim()
+
+            val saltAndHash = parts[2].trim()
+            val salt = saltAndHash.substringBefore(":")
+            val passwordHash = saltAndHash.substringAfter(":")
+
+            val user = User(firstName, lastName, email, salt, passwordHash)
+            result.add(user)
+        }
+
+        return result
+    }
+
 }

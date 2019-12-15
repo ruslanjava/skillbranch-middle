@@ -64,6 +64,19 @@ class User private constructor(
         reassignCode()
     }
 
+    // for csv
+    constructor(
+        firstName: String,
+        lastName: String?,
+        email: String,
+        salt: String,
+        passwordHash: String
+    ): this(firstName, lastName, email = email, meta = mapOf("src" to "csv")) {
+        println("Third csv constructor")
+        this.salt = salt
+        this.passwordHash = passwordHash
+    }
+
     init {
         println("First init block, primary constructor was called ")
 
@@ -94,9 +107,18 @@ class User private constructor(
         else IllegalArgumentException("The entered pasword does not match the current password")
     }
 
-    private val salt: String by lazy {
-        ByteArray(16).also { SecureRandom().nextBytes(it) }.toString()
-    }
+    private var _salt: String? = null
+
+    private var salt: String
+        get() {
+            if (_salt == null) {
+                _salt = ByteArray(16).also { SecureRandom().nextBytes(it) }.toString()
+            }
+            return _salt!!
+        }
+        set(value) {
+            _salt = value
+        }
 
     private fun encrypt(password: String) : String = salt.plus(password).md5()
 
@@ -123,6 +145,7 @@ class User private constructor(
     }
 
     companion object Factory {
+
         fun makeUser(
             fullName: String,
             email: String? = null,
@@ -148,6 +171,7 @@ class User private constructor(
                     }
                 }
         }
+
     }
 
     internal fun reassignCode() : User {
