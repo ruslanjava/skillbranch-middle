@@ -70,11 +70,23 @@ class User private constructor(
         lastName: String?,
         email: String,
         salt: String,
-        passwordHash: String
-    ): this(firstName, lastName, email = email, meta = mapOf("src" to "csv")) {
+        passwordHash: String,
+        meta: Map<String, Any>?
+    ): this(firstName, lastName, email = email, meta = meta) {
         println("Third csv constructor")
         this.salt = salt
         this.passwordHash = passwordHash
+    }
+
+    // for csv (phone)
+    constructor(
+        firstName: String,
+        lastName: String?,
+        rawPhone: String,
+        meta: Map<String, Any>?
+    ): this(firstName, lastName, email = null, rawPhone = rawPhone, meta = meta) {
+        println("Forth phone constructor")
+        reassignCode()
     }
 
     init {
