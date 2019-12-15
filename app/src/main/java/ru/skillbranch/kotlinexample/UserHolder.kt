@@ -76,6 +76,7 @@ object UserHolder {
 
             val user = User(firstName, lastName, email, salt, passwordHash)
             result.add(user)
+            map[user.login.trim()] = user
         }
 
         return result
