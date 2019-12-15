@@ -54,9 +54,9 @@ object UserHolder {
             val parts = it.split(";")
             val fullName = parts[0].trim()
             val firstName = fullName.substringBefore(" ")
-            val lastName = fullName.substringAfter(" ")
+            val lastName = fullName.substringAfterLast(" ")
 
-            val email = parts[1].trim()
+            val email = parts[1].trim().trim()
 
             val saltAndHash = parts[2].trim()
             val salt = saltAndHash.substringBefore(":")
