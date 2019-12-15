@@ -20,22 +20,22 @@ object UserHolder {
         email: String,
         password: String
     ): User {
-        return User.makeUser(fullName, email=email, password = password)
+        return User.makeUser(fullName, email = email, password = password)
             .also { user ->
                 require(map[user.login] == null) { "A user with this email already exists" }
             }
-            .also {
-                user -> map[user.login] = user
+            .also { user ->
+                map[user.login] = user
             }
     }
 
-    fun registerUserByPhone(fullName: String, rawPhone: String) : User {
+    fun registerUserByPhone(fullName: String, rawPhone: String): User {
         val phones = phoneRegex.split(rawPhone)
         require(phones.size == 1) { "Enter a valid phone number starting with a + and containing 11 digits" }
         val phone = phones.first()
         require((map[phone] == null)) { "A user with this phone already exists" }
         return User.makeUser(fullName, phone = phone)
-            .also {user -> map[phone] = user }
+            .also { user -> map[phone] = user }
     }
 
     fun requestAccessCode(phone: String) {
@@ -43,21 +43,30 @@ object UserHolder {
         map[phone] = user.reassignCode()
     }
 
-    fun loginUser(login: String, password: String) : String? {
+    fun loginUser(login: String, password: String): String? {
         return map[login.trim()]?.run {
             if (checkPassword(password)) this.userInfo
             else null
         }
     }
 
-    fun importUsers(list: List<String>) : List<User> {
+    fun importUsers(list: List<String>): List<User> {
         val result = mutableListOf<User>()
 
         list.forEach {
             val parts = it.split(";")
             val fullName = parts[0].trim()
-            val firstName = fullName.substringBefore(" ")
-            val lastName = fullName.substringAfterLast(" ")
+            val middleIndex = fullName.indexOf(' ')
+
+            val firstName: String
+            val lastName: String?
+            if (middleIndex == -1) {
+                firstName = fullName
+                lastName = null
+            } else {
+                firstName = fullName.substring(0, middleIndex).trim()
+                lastName = fullName.substring(middleIndex + 1).trim()
+            }
 
             val email = parts[1].trim().trim()
 
