@@ -1,5 +1,7 @@
 package ru.skillbranch.kotlinexample
 
+import androidx.annotation.VisibleForTesting
+
 object UserHolder {
 
     private val map = mutableMapOf<String, User>()
@@ -8,6 +10,7 @@ object UserHolder {
         "\\+\\[1-9]\\[0-9]{10}".toRegex()
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     fun clear() {
         map.clear()
     }
