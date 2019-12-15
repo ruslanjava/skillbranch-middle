@@ -68,12 +68,11 @@ object UserHolder {
                 lastName = fullName.substring(middleIndex + 1).trim()
             }
 
-            val email = parts[1].trim().trim()
+            val email = parts[1].trim()
 
-            val saltAndHash = parts[2].trim()
-
-            val user: User
-            if (saltAndHash.isNotEmpty()) {
+            val user:User
+            if (email.isNotEmpty()) {
+                val saltAndHash = parts[2].trim()
                 val salt = saltAndHash.substringBefore(":")
                 val passwordHash = saltAndHash.substringAfter(":")
                 user = User(firstName, lastName, email, salt, passwordHash, mapOf("src" to "csv"))
@@ -82,8 +81,8 @@ object UserHolder {
                 user = User(firstName, lastName, phone, mapOf("src" to "csv"))
             }
 
-            result.add(user)
             map[user.login.trim()] = user
+            result.add(user)
         }
 
         return result
