@@ -77,6 +77,12 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
     }
 
     fun handleBookmark() {
+        val info = currentState.toArticlePersonalInfo()
+        repository.updateArticlePersonalInfo(info.copy(isBookmark = !info.isBookmark))
+
+        val msg = if (currentState.isBookmark) Notify.TextMessage("Add to bookmarks") else Notify.TextMessage("Removed from bookmarks")
+
+        notify(msg)
     }
 
     fun handleLike() {
@@ -110,8 +116,8 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
 
 data class ArticleState(
         val isAuth: Boolean = false, // пользователь авторизован
-        val isLoadingContent: Boolean = false, // контент загружается
-        val isLoadingReviews: Boolean = false, // отзывы загружаются
+        val isLoadingContent: Boolean = true, // контент загружается
+        val isLoadingReviews: Boolean = true, // отзывы загружаются
         val isLike: Boolean = false, // отмечено как Like
         val isBookmark: Boolean = false, // в закладках
         val isShowMenu: Boolean = false, // отображается меню
@@ -126,7 +132,7 @@ data class ArticleState(
         val category: String? = null, // категория
         val categoryIcon: Any? = null, // иконка категории
         val date: String? = null, // дата публикации
-        val author: Any? = false, // автор статьи
+        val author: Any? = null, // автор статьи
         val poster: String? = null, // обложка статьи
         val content: List<Any> = emptyList(), // контент
         val reviews: List<Any> = emptyList() // комментарии

@@ -70,6 +70,11 @@ class Event<out E>(private val content: E) {
 
     var hasBeenHandled = false
 
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    fun peekContent(): E {
+        return content
+    }
+
     // возвращает контент, который еще не был обработан, иначе Null
     fun getContentIfNotHandled(): E? {
         return if (hasBeenHandled) null

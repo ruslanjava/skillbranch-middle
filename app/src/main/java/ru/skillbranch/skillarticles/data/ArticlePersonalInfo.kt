@@ -1,6 +1,6 @@
 package ru.skillbranch.skillarticles.data
 
 data class ArticlePersonalInfo(
-        val isLike: Boolean,
-        val isBookmark: Boolean
+        val isLike: Boolean = false,
+        val isBookmark: Boolean = false
 )

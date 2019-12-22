@@ -7,5 +7,6 @@ data class ArticleData(
         val title: String?,
         val category: String?,
         val categoryIcon: Any? = null,
-        val date: Date
+        val date: Date,
+        val author: String? = null
 )

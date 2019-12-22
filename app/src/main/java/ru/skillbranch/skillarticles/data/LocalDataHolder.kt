@@ -5,24 +5,31 @@ import android.content.SharedPreferences
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.skillbranch.skillarticles.App
+import ru.skillbranch.skillarticles.R
+import java.util.*
 
 object LocalDataHolder {
+
+    private var isDelay = true
 
     private val prefs: SharedPreferences by lazy {
         val ctx = App.applicationContext()
         ctx.getSharedPreferences("local_data", Context.MODE_PRIVATE)
     }
 
-    private val defaultValue: AppSettings by lazy {
+    private val defaultSettingsValue: AppSettings by lazy {
         AppSettings(
-                isDarkMode = prefs.getBoolean("is_dark_mode", false),
-                isBigText = prefs.getBoolean("is_big_text", false)
+                prefs.getBoolean("is_dark_mode", false),
+                prefs.getBoolean("is_big_text", false)
         )
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    val settings: MutableLiveData<AppSettings> = MutableLiveData(defaultValue)
+    val settings: MutableLiveData<AppSettings> = MutableLiveData(defaultSettingsValue)
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     val articleInfo: MutableLiveData<ArticlePersonalInfo> = MutableLiveData()
@@ -35,7 +42,7 @@ object LocalDataHolder {
     }
 
     fun updateAppSettings(appSettings: AppSettings) {
-        with (prefs.edit()) {
+        with(prefs.edit()) {
             putBoolean("is_dark_mode", appSettings.isDarkMode)
             putBoolean("is_big_text", appSettings.isBigText)
             apply()
@@ -44,15 +51,33 @@ object LocalDataHolder {
     }
 
     fun findArticle(articleId: String): LiveData<ArticleData?> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        GlobalScope.launch {
+            if (isDelay) delay(2000)
+            articleData.postValue(ArticleData(
+                    title = "CoordinatorLayout Basic",
+                    category = "Android",
+                    categoryIcon = R.drawable.logo,
+                    date = Date()
+            ))
+        }
+        return articleData
     }
 
     fun findArticlePersonalInfo(articleId: String): LiveData<ArticlePersonalInfo?> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        GlobalScope.launch {
+            if (isDelay) delay(1000)
+            articleInfo.postValue(ArticlePersonalInfo())
+        }
+        return articleInfo
     }
 
     fun updateArticlePersonalInfo(info: ArticlePersonalInfo) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        articleInfo.value = info
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    fun disableDelay() {
+        isDelay = false
     }
 
 }
