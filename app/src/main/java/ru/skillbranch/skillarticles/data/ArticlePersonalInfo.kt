@@ -1,5 +1,6 @@
 package ru.skillbranch.skillarticles.data
 
-class ArticlePersonalInfo constructor(val isLike: Boolean, val isBookmark: Boolean) {
-
-}
+data class ArticlePersonalInfo(
+        val isLike: Boolean,
+        val isBookmark: Boolean
+)
