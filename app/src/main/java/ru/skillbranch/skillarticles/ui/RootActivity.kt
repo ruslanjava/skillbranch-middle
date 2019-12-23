@@ -25,7 +25,7 @@ class RootActivity : AppCompatActivity() {
         setupBottombar()
         setupSubmenu()
 
-        val vmFactory = BaseViewModel.ViewModelFactory("0")
+        val vmFactory = ViewModelFactory("0")
         viewModel = ViewModelProviders.of(this, vmFactory).get(ArticleViewModel::class.java)
         viewModel.observeState(this) {
             renderUi(it)
