@@ -15,11 +15,10 @@ import ru.skillbranch.skillarticles.extensions.dpToPx
 import kotlin.math.hypot
 
 class ArticleSubmenu @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
-
     var isOpen = false
     private var centerX: Float = context.dpToPx(200)
     private var centerY: Float = context.dpToPx(96)
@@ -47,11 +46,11 @@ class ArticleSubmenu @JvmOverloads constructor(
     private fun animatedShow() {
         val endRadius = hypot(centerX, centerY).toInt()
         val anim = ViewAnimationUtils.createCircularReveal(
-            this,
-            centerX.toInt(),
-            centerY.toInt(),
-            0f,
-            endRadius.toFloat()
+                this,
+                centerX.toInt(),
+                centerY.toInt(),
+                0f,
+                endRadius.toFloat()
         )
         anim.doOnStart {
             visibility = View.VISIBLE
@@ -62,11 +61,11 @@ class ArticleSubmenu @JvmOverloads constructor(
     private fun animatedHide() {
         val endRadius = hypot(centerX, centerY).toInt()
         val anim = ViewAnimationUtils.createCircularReveal(
-            this,
-            centerX.toInt(),
-            centerY.toInt(),
-            endRadius.toFloat(),
-            0f
+                this,
+                centerX.toInt(),
+                centerY.toInt(),
+                endRadius.toFloat(),
+                0f
         )
         anim.doOnEnd {
             visibility = View.GONE

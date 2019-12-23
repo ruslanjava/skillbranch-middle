@@ -10,7 +10,7 @@ class CheckableImageView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0
-) : AppCompatImageView(context, attrs, defStyleAttr), Checkable, View.OnClickListener {
+) : AppCompatImageView(context, attrs, defStyleAttr), Checkable, View.OnClickListener{
     private var checked = false
 
     companion object {
