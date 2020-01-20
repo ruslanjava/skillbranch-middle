@@ -27,7 +27,12 @@ class BottomBarBehavior : CoordinatorLayout.Behavior<Bottombar>() {
             consumed: IntArray,
             type: Int) {
 
-        child.translationY = MathUtils.clamp(child.translationY + dy, 0.0f, child.height.toFloat())
+        if (dy < 0) {
+            child.translationY = Math.max(0.0f, child.translationY + dy)
+        } else {
+            child.translationY = Math.min(child.translationY + dy, child.height.toFloat())
+        }
+
         super.onNestedPreScroll(coordinatorLayout, child, target, dx, dy, consumed, type)
     }
 
