@@ -1,9 +1,16 @@
 package ru.skillbranch.skillarticles.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
+import android.text.TextUtils
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.widget.EditText
 import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.snackbar.Snackbar
@@ -12,11 +19,18 @@ import kotlinx.android.synthetic.main.layout_bottombar.*
 import kotlinx.android.synthetic.main.layout_submenu.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
-import ru.skillbranch.skillarticles.viewmodels.*
+import ru.skillbranch.skillarticles.viewmodels.ArticleState
+import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
+import ru.skillbranch.skillarticles.viewmodels.Notify
+import ru.skillbranch.skillarticles.viewmodels.ViewModelFactory
+
 
 class RootActivity : AppCompatActivity() {
 
     private lateinit var viewModel: ArticleViewModel
+    private lateinit var searchView: SearchView
+
+    private var query: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +48,37 @@ class RootActivity : AppCompatActivity() {
         viewModel.observeNotifications(this) {
             renderNotification(it)
         }
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        query = savedInstanceState.getString("SEARCH_QUERY")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
+        query = searchView.getQuery().toString();
+        outState.putString("SEARCH_QUERY", query);
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.root_menu, menu)
+
+        val searchItem: MenuItem = menu.findItem(R.id.action_search)
+        searchView = searchItem.actionView as SearchView
+        val searchEditText = searchView.findViewById<View>(androidx.appcompat.R.id.search_src_text) as EditText
+        searchEditText.setTextColor(resources.getColor(android.R.color.black))
+
+        if (!TextUtils.isEmpty(query)) {
+            searchItem.expandActionView()
+            searchView.setQuery(query, true)
+            searchView.clearFocus()
+        }
+
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return super.onOptionsItemSelected(item)
     }
 
     private fun renderNotification(notify: Notify) {
