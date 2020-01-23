@@ -1,8 +1,6 @@
 package ru.skillbranch.skillarticles.ui
 
 import android.os.Bundle
-import android.os.PersistableBundle
-import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -25,11 +23,10 @@ import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
 import ru.skillbranch.skillarticles.viewmodels.Notify
 import ru.skillbranch.skillarticles.viewmodels.ViewModelFactory
 
-
 class RootActivity : AppCompatActivity() {
 
     private lateinit var viewModel: ArticleViewModel
-    private lateinit var searchView: SearchView
+    private var searchView: SearchView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +40,6 @@ class RootActivity : AppCompatActivity() {
         viewModel.observeState(this) {
             renderUi(it)
         }
-
         viewModel.observeNotifications(this) {
             renderNotification(it)
         }
@@ -54,8 +50,7 @@ class RootActivity : AppCompatActivity() {
 
         val searchItem: MenuItem = menu.findItem(R.id.action_search)
         searchView = searchItem.actionView as SearchView
-        val searchEditText = searchView.findViewById<View>(androidx.appcompat.R.id.search_src_text) as EditText
-        searchEditText.setTextColor(ResourcesCompat.getColor(resources, android.R.color.black, theme))
+        updateSearchEditTextColor(viewModel.currentState.isDarkMode)
 
         // восстанавливаем состояние
         if (viewModel.currentState.isSearch) {
@@ -63,10 +58,10 @@ class RootActivity : AppCompatActivity() {
         } else {
             searchItem.collapseActionView()
         }
-        searchView.setQuery(viewModel.currentState.searchQuery, false)
+        searchView?.setQuery(viewModel.currentState.searchQuery, false)
 
         // добавляем слушателей
-        searchItem.setOnActionExpandListener(object: MenuItem.OnActionExpandListener {
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 viewModel.handleSearchMode(isSearch = true)
                 return true
@@ -76,9 +71,8 @@ class RootActivity : AppCompatActivity() {
                 viewModel.handleSearchMode(isSearch = false)
                 return true
             }
-
         })
-        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return true
             }
@@ -110,7 +104,7 @@ class RootActivity : AppCompatActivity() {
             }
 
             is Notify.ErrorMessage -> {
-                with (snackbar) {
+                with(snackbar) {
                     setBackgroundTint(getColor(R.color.design_default_color_error))
                     setTextColor(getColor(android.R.color.white))
                     setActionTextColor(getColor(android.R.color.white))
@@ -150,6 +144,9 @@ class RootActivity : AppCompatActivity() {
         switch_mode.isChecked = data.isDarkMode
         delegate.localNightMode = if (data.isDarkMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
 
+        // обновляем состояние текста
+        updateSearchEditTextColor(data.isDarkMode)
+
         if (data.isBigText) {
             tv_text_content.textSize = 18f
             btn_text_up.isChecked = true
@@ -167,6 +164,17 @@ class RootActivity : AppCompatActivity() {
         toolbar.title = data.title ?: "loading"
         toolbar.subtitle = data.category ?: "loading"
         if (data.categoryIcon != null) toolbar.logo = getDrawable(data.categoryIcon as Int)
+    }
+
+    private fun updateSearchEditTextColor(isDarkMode: Boolean) {
+        searchView?.let {
+            val searchEditText = it.findViewById<View>(androidx.appcompat.R.id.search_src_text) as EditText
+            if (isDarkMode) {
+                searchEditText.setTextColor(ResourcesCompat.getColor(resources, android.R.color.white, theme))
+            } else {
+                searchEditText.setTextColor(ResourcesCompat.getColor(resources, android.R.color.black, theme))
+            }
+        }
     }
 
     private fun setupToolbar() {
