@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
@@ -29,8 +30,6 @@ class RootActivity : AppCompatActivity() {
 
     private lateinit var viewModel: ArticleViewModel
     private lateinit var searchView: SearchView
-
-    private var query: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,35 +49,47 @@ class RootActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        query = savedInstanceState.getString("SEARCH_QUERY")
-    }
-
-    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
-        query = searchView.getQuery().toString();
-        outState.putString("SEARCH_QUERY", query);
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.root_menu, menu)
+        menuInflater.inflate(R.menu.menu, menu)
 
         val searchItem: MenuItem = menu.findItem(R.id.action_search)
         searchView = searchItem.actionView as SearchView
         val searchEditText = searchView.findViewById<View>(androidx.appcompat.R.id.search_src_text) as EditText
-        searchEditText.setTextColor(resources.getColor(android.R.color.black))
+        searchEditText.setTextColor(ResourcesCompat.getColor(resources, android.R.color.black, theme))
 
-        if (!TextUtils.isEmpty(query)) {
+        // восстанавливаем состояние
+        if (viewModel.currentState.isSearch) {
             searchItem.expandActionView()
-            searchView.setQuery(query, true)
-            searchView.clearFocus()
+        } else {
+            searchItem.collapseActionView()
         }
+        searchView.setQuery(viewModel.currentState.searchQuery, false)
+
+        // добавляем слушателей
+        searchItem.setOnActionExpandListener(object: MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                viewModel.handleSearchMode(isSearch = true)
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                viewModel.handleSearchMode(isSearch = false)
+                return true
+            }
+
+        })
+        searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return true
+            }
+
+            override fun onQueryTextChange(query: String?): Boolean {
+                viewModel.handleSearchQuery(query)
+                return true
+            }
+        })
 
         return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return super.onOptionsItemSelected(item)
     }
 
     private fun renderNotification(notify: Notify) {
