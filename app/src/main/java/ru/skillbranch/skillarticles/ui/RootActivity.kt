@@ -78,7 +78,7 @@ class RootActivity : AppCompatActivity() {
             }
 
             override fun onQueryTextChange(query: String?): Boolean {
-                viewModel.handleSearchQuery(query)
+                viewModel.handleSearch(query)
                 return true
             }
         })
