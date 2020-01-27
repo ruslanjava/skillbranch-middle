@@ -3,14 +3,10 @@ package ru.skillbranch.skillarticles.ui
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.EditText
 import android.widget.ImageView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
@@ -18,15 +14,19 @@ import kotlinx.android.synthetic.main.layout_bottombar.*
 import kotlinx.android.synthetic.main.layout_submenu.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
+import ru.skillbranch.skillarticles.ui.base.BaseActivity
 import ru.skillbranch.skillarticles.viewmodels.ArticleState
 import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
-import ru.skillbranch.skillarticles.viewmodels.Notify
-import ru.skillbranch.skillarticles.viewmodels.ViewModelFactory
+import ru.skillbranch.skillarticles.viewmodels.base.Notify
+import ru.skillbranch.skillarticles.viewmodels.base.ViewModelFactory
 
-class RootActivity : AppCompatActivity() {
+class RootActivity : BaseActivity() {
 
-    private lateinit var viewModel: ArticleViewModel
     private var searchView: SearchView? = null
+    private lateinit var viewModel: ArticleViewModel
+
+    private var searchQuery: String? = null
+    private var isSearching = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,23 +45,22 @@ class RootActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu, menu)
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_search, menu)
 
-        val searchItem: MenuItem = menu.findItem(R.id.action_search)
-        searchView = searchItem.actionView as SearchView
-        updateSearchEditTextColor(viewModel.currentState.isDarkMode)
+        val menuItem: MenuItem? = menu?.findItem(R.id.action_search)
+        searchView = menuItem?.actionView as? SearchView
+        searchView?.queryHint = getString(R.string.article_search_placeholder)
 
         // восстанавливаем состояние
-        if (viewModel.currentState.isSearch) {
-            searchItem.expandActionView()
-        } else {
-            searchItem.collapseActionView()
+        if (isSearching) {
+            menuItem?.expandActionView()
+            searchView?.setQuery(searchQuery, false)
+            searchView?.clearFocus()
         }
-        searchView?.setQuery(viewModel.currentState.searchQuery, false)
 
         // добавляем слушателей
-        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+        menuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 viewModel.handleSearchMode(isSearch = true)
                 return true
@@ -83,7 +82,7 @@ class RootActivity : AppCompatActivity() {
             }
         })
 
-        return true
+        return super.onCreateOptionsMenu(menu)
     }
 
     private fun renderNotification(notify: Notify) {
@@ -129,9 +128,30 @@ class RootActivity : AppCompatActivity() {
         btn_bookmark.setOnClickListener { viewModel.handleBookmark() }
         btn_share.setOnClickListener { viewModel.handleShare() }
         btn_settings.setOnClickListener { viewModel.handleToggleMenu() }
+
+        btn_result_up.setOnClickListener {
+            if (searchView?.hasFocus() == true) {
+                searchView?.clearFocus()
+            }
+            viewModel.handleUpResult()
+        }
+
+        btn_result_down.setOnClickListener {
+            if (searchView?.hasFocus() == true) {
+                searchView?.clearFocus()
+            }
+            viewModel.handleDownResult()
+        }
+
+        btn_search_close.setOnClickListener {
+            viewModel.handleSearchMode(false)
+            invalidateOptionsMenu()
+        }
     }
 
     private fun renderUi(data: ArticleState) {
+        bottombar.setSearchState(data.isSearch)
+
         // bind submenu state
         btn_settings.isChecked = data.isShowMenu
         if (data.isShowMenu) submenu.open() else submenu.close()
@@ -143,9 +163,6 @@ class RootActivity : AppCompatActivity() {
         // bind submenu views
         switch_mode.isChecked = data.isDarkMode
         delegate.localNightMode = if (data.isDarkMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-
-        // обновляем состояние текста
-        updateSearchEditTextColor(data.isDarkMode)
 
         if (data.isBigText) {
             tv_text_content.textSize = 18f
@@ -164,17 +181,6 @@ class RootActivity : AppCompatActivity() {
         toolbar.title = data.title ?: "loading"
         toolbar.subtitle = data.category ?: "loading"
         if (data.categoryIcon != null) toolbar.logo = getDrawable(data.categoryIcon as Int)
-    }
-
-    private fun updateSearchEditTextColor(isDarkMode: Boolean) {
-        searchView?.let {
-            val searchEditText = it.findViewById<View>(androidx.appcompat.R.id.search_src_text) as EditText
-            if (isDarkMode) {
-                searchEditText.setTextColor(ResourcesCompat.getColor(resources, android.R.color.white, theme))
-            } else {
-                searchEditText.setTextColor(ResourcesCompat.getColor(resources, android.R.color.black, theme))
-            }
-        }
     }
 
     private fun setupToolbar() {
