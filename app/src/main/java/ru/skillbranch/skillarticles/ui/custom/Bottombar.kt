@@ -16,8 +16,7 @@ import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.ui.custom.behaviors.BottomBarBehavior
 import kotlin.math.hypot
 
-class Bottombar
-@JvmOverloads constructor(
+class Bottombar @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0
@@ -43,6 +42,7 @@ class Bottombar
         return savedState
     }
 
+    // restore state
     override fun onRestoreInstanceState(state: Parcelable) {
         super.onRestoreInstanceState(state)
         if (state is SavedState) {
@@ -56,7 +56,7 @@ class Bottombar
         if (isSearchMode == search || !isAttachedToWindow) {
             return
         }
-        isSearchMode = search
+        this.isSearchMode = search
         if (isSearchMode) {
             animateShowSearchPanel()
         } else {
@@ -69,32 +69,17 @@ class Bottombar
             tv_search_result.text = "Not found"
             btn_result_up.isEnabled = false
             btn_result_down.isEnabled = false
-            return
+        } else {
+            tv_search_result.text = "${position.inc()} of ${searchCount}"
+            btn_result_up.isEnabled = true
+            btn_result_down.isEnabled = true
+
+            // lock button presses in min/max positions
+            when (position) {
+                0 -> btn_result_up.isEnabled = false
+                searchCount - 1 -> btn_result_down.isEnabled = false
+            }
         }
-
-        tv_search_result.text = "${position.inc()} of $searchCount"
-        btn_result_up.isEnabled = true
-        btn_result_down.isEnabled = true
-
-        // lock button presses in min/max positions
-        when (position) {
-            0 -> btn_result_up.isEnabled = false
-            searchCount - 1 -> btn_result_down.isEnabled = false
-        }
-    }
-
-    private fun animateHideSearchPanel() {
-        group_bottom.isVisible = true
-        val endRadius = hypot(width.toFloat(), height / 2.0f)
-        val va = ViewAnimationUtils.createCircularReveal(
-                reveal,
-                width,
-                height / 2,
-                endRadius,
-                0.0f
-        )
-        va.doOnEnd { reveal.isVisible = false }
-        va.start()
     }
 
     private fun animateShowSearchPanel() {
@@ -107,7 +92,25 @@ class Bottombar
                 endRadius,
                 0.0f
         )
-        va.doOnEnd { group_bottom.isVisible = false }
+        va.doOnEnd {
+            group_bottom.isVisible = false
+        }
+        va.start()
+    }
+
+    private fun animateHideSearchPanel() {
+        group_bottom.isVisible = true
+        val endRadius = hypot(width.toFloat(), height / 2.0f)
+        val va = ViewAnimationUtils.createCircularReveal(
+                reveal,
+                width,
+                height / 2,
+                0.0f,
+                endRadius
+        )
+        va.doOnEnd {
+            reveal.isVisible = false
+        }
         va.start()
     }
 

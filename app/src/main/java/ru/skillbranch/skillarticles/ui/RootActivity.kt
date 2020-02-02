@@ -3,10 +3,13 @@ package ru.skillbranch.skillarticles.ui
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
@@ -22,11 +25,8 @@ import ru.skillbranch.skillarticles.viewmodels.base.ViewModelFactory
 
 class RootActivity : BaseActivity() {
 
-    private var searchView: SearchView? = null
     private lateinit var viewModel: ArticleViewModel
-
-    private var searchQuery: String? = null
-    private var isSearching = false
+    private var searchView: SearchView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,22 +45,23 @@ class RootActivity : BaseActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_search, menu)
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu, menu)
 
-        val menuItem: MenuItem? = menu?.findItem(R.id.action_search)
-        searchView = menuItem?.actionView as? SearchView
-        searchView?.queryHint = getString(R.string.article_search_placeholder)
+        val searchItem: MenuItem = menu.findItem(R.id.action_search)
+        searchView = searchItem.actionView as SearchView
+        updateSearchEditTextColor(viewModel.currentState.isDarkMode)
 
         // восстанавливаем состояние
-        if (isSearching) {
-            menuItem?.expandActionView()
-            searchView?.setQuery(searchQuery, false)
-            searchView?.clearFocus()
+        if (viewModel.currentState.isSearch) {
+            searchItem.expandActionView()
+        } else {
+            searchItem.collapseActionView()
         }
+        searchView?.setQuery(viewModel.currentState.searchQuery, false)
 
         // добавляем слушателей
-        menuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 viewModel.handleSearchMode(isSearch = true)
                 return true
@@ -82,7 +83,7 @@ class RootActivity : BaseActivity() {
             }
         })
 
-        return super.onCreateOptionsMenu(menu)
+        return true
     }
 
     private fun renderNotification(notify: Notify) {
@@ -132,17 +133,15 @@ class RootActivity : BaseActivity() {
         btn_result_up.setOnClickListener {
             if (searchView?.hasFocus() == true) {
                 searchView?.clearFocus()
+                viewModel.handleUpResult()
             }
-            viewModel.handleUpResult()
         }
-
         btn_result_down.setOnClickListener {
             if (searchView?.hasFocus() == true) {
                 searchView?.clearFocus()
+                viewModel.handleDownResult()
             }
-            viewModel.handleDownResult()
         }
-
         btn_search_close.setOnClickListener {
             viewModel.handleSearchMode(false)
             invalidateOptionsMenu()
@@ -150,6 +149,7 @@ class RootActivity : BaseActivity() {
     }
 
     private fun renderUi(data: ArticleState) {
+
         bottombar.setSearchState(data.isSearch)
 
         // bind submenu state
@@ -163,6 +163,9 @@ class RootActivity : BaseActivity() {
         // bind submenu views
         switch_mode.isChecked = data.isDarkMode
         delegate.localNightMode = if (data.isDarkMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+
+        // обновляем состояние текста
+        updateSearchEditTextColor(data.isDarkMode)
 
         if (data.isBigText) {
             tv_text_content.textSize = 18f
@@ -181,6 +184,17 @@ class RootActivity : BaseActivity() {
         toolbar.title = data.title ?: "loading"
         toolbar.subtitle = data.category ?: "loading"
         if (data.categoryIcon != null) toolbar.logo = getDrawable(data.categoryIcon as Int)
+    }
+
+    private fun updateSearchEditTextColor(isDarkMode: Boolean) {
+        searchView?.let {
+            val searchEditText = it.findViewById<View>(androidx.appcompat.R.id.search_src_text) as EditText
+            if (isDarkMode) {
+                searchEditText.setTextColor(ResourcesCompat.getColor(resources, android.R.color.white, theme))
+            } else {
+                searchEditText.setTextColor(ResourcesCompat.getColor(resources, android.R.color.black, theme))
+            }
+        }
     }
 
     private fun setupToolbar() {

@@ -121,12 +121,12 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
         updateState { it.copy(searchQuery = searchQuery )}
     }
 
-    fun handleUpResult() {
-
+    override fun handleUpResult() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    fun handleDownResult() {
-
+    override fun handleDownResult() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
 }
