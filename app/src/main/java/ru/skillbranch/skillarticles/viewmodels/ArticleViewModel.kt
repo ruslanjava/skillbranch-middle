@@ -122,9 +122,8 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
 
     override fun handleSearch(searchQuery: String?) {
         searchQuery ?: return
-        val result = (currentState.content.firstOrNull() as? String)!!.indexesOf(searchQuery)
-        .map { it to it + searchQuery.length }
-        updateState { it.copy(searchQuery = searchQuery, searchResults = result )}
+        val result = (currentState.content.firstOrNull() as? String)?.indexesOf(searchQuery)?.map { it to it + searchQuery.length }
+        updateState { it.copy(searchQuery = searchQuery, searchResults = result ?: emptyList())}
     }
 
     override fun handleUpResult() {
