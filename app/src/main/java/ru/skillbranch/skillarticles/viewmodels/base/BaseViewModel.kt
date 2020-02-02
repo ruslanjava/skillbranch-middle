@@ -1,8 +1,9 @@
-package ru.skillbranch.skillarticles.viewmodels
+package ru.skillbranch.skillarticles.viewmodels.base
 
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
+import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
 
 abstract class BaseViewModel<T>(initState: T) : ViewModel() {
 
