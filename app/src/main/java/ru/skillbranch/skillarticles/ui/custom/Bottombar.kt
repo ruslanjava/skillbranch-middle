@@ -47,7 +47,7 @@ class Bottombar @JvmOverloads constructor(
         super.onRestoreInstanceState(state)
         if (state is SavedState) {
             isSearchMode = state.ssIsSearchMode
-            reveal.isVisible = !isSearchMode
+            reveal.isVisible = isSearchMode
             group_bottom.isVisible = !isSearchMode
         }
     }
@@ -70,14 +70,15 @@ class Bottombar @JvmOverloads constructor(
             btn_result_up.isEnabled = false
             btn_result_down.isEnabled = false
         } else {
-            tv_search_result.text = "${position.inc()} of ${searchCount}"
+            tv_search_result.text = "${position.inc()} of $searchCount"
             btn_result_up.isEnabled = true
             btn_result_down.isEnabled = true
 
             // lock button presses in min/max positions
-            when (position) {
-                0 -> btn_result_up.isEnabled = false
-                searchCount - 1 -> btn_result_down.isEnabled = false
+            if (position == 0) {
+                btn_result_up.isEnabled = false
+            } else if (position == searchCount - 1) {
+                btn_result_down.isEnabled = false
             }
         }
     }
