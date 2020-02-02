@@ -1,39 +1,42 @@
 package ru.skillbranch.skillarticles.ui
 
+import android.graphics.Color
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
 import kotlinx.android.synthetic.main.layout_bottombar.*
 import kotlinx.android.synthetic.main.layout_submenu.*
+import kotlinx.android.synthetic.main.search_view_layout.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
+import ru.skillbranch.skillarticles.extensions.setMarginOptionally
 import ru.skillbranch.skillarticles.ui.base.BaseActivity
+import ru.skillbranch.skillarticles.ui.custom.SearchSpan
 import ru.skillbranch.skillarticles.viewmodels.ArticleState
 import ru.skillbranch.skillarticles.viewmodels.ArticleViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
 import ru.skillbranch.skillarticles.viewmodels.base.ViewModelFactory
 
-class RootActivity : BaseActivity() {
+class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
 
-    private lateinit var viewModel: ArticleViewModel
-    private var searchView: SearchView? = null
+    override val layout: Int = R.layout.activity_root
+    override lateinit var viewModel: ArticleViewModel
+
+    private var searchQuery: String? = null
+    private var isSearching = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_root)
-        setupToolbar()
-        setupBottombar()
-        setupSubmenu()
 
         val vmFactory = ViewModelFactory("0")
         viewModel = ViewModelProviders.of(this, vmFactory).get(ArticleViewModel::class.java)
@@ -45,23 +48,59 @@ class RootActivity : BaseActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu, menu)
+    override fun setupViews() {
+        setupToolbar()
+        setupBottombar()
+        setupSubmenu()
+    }
 
-        val searchItem: MenuItem = menu.findItem(R.id.action_search)
-        searchView = searchItem.actionView as SearchView
-        updateSearchEditTextColor(viewModel.currentState.isDarkMode)
-
-        // восстанавливаем состояние
-        if (viewModel.currentState.isSearch) {
-            searchItem.expandActionView()
-        } else {
-            searchItem.collapseActionView()
+    override fun renderSearchResult(searchResult: List<Pair<Int, Int>>) {
+        val content = tv_text_content.text as Spannable
+        val bgColor = Color.RED
+        val fgColor = Color.WHITE
+        searchResult.forEach { (start, end) ->
+            content.setSpan(
+                    SearchSpan(bgColor, fgColor),
+                    start,
+                    end,
+                    SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
         }
-        searchView?.setQuery(viewModel.currentState.searchQuery, false)
+    }
 
-        // добавляем слушателей
-        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+    override fun renderSearchPosition(searchPosition: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun clearSearchResult() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun showSearchBar() {
+        bottombar.setSearchState(true)
+        scroll.setMarginOptionally(bottom = dpToIntPx(56))
+    }
+
+    override fun hideSearchBar() {
+        bottombar.setSearchState(false)
+        scroll.setMarginOptionally(bottom = dpToIntPx(0))
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_search, menu)
+
+        val menuItem: MenuItem? = menu.findItem(R.id.action_search)
+        val searchView = menuItem?.actionView as? SearchView
+        searchView?.queryHint = getString(R.string.article_search_placeholder)
+
+        // restore SearchView
+        if (isSearching) {
+            menuItem?.expandActionView()
+            searchView?.setQuery(searchQuery, false)
+            searchView?.clearFocus()
+        }
+
+        menuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 viewModel.handleSearchMode(isSearch = true)
                 return true
@@ -131,14 +170,14 @@ class RootActivity : BaseActivity() {
         btn_settings.setOnClickListener { viewModel.handleToggleMenu() }
 
         btn_result_up.setOnClickListener {
-            if (searchView?.hasFocus() == true) {
-                searchView?.clearFocus()
+            if (search_view?.hasFocus() == true) {
+                search_view?.clearFocus()
                 viewModel.handleUpResult()
             }
         }
         btn_result_down.setOnClickListener {
-            if (searchView?.hasFocus() == true) {
-                searchView?.clearFocus()
+            if (search_view?.hasFocus() == true) {
+                search_view?.clearFocus()
                 viewModel.handleDownResult()
             }
         }
@@ -150,7 +189,11 @@ class RootActivity : BaseActivity() {
 
     private fun renderUi(data: ArticleState) {
 
-        bottombar.setSearchState(data.isSearch)
+        if (data.isSearch) showSearchBar() else hideSearchBar()
+
+        if (data.searchResults.isNotEmpty()) {
+            renderSearchResult(data.searchResults)
+        }
 
         // bind submenu state
         btn_settings.isChecked = data.isShowMenu
@@ -164,9 +207,6 @@ class RootActivity : BaseActivity() {
         switch_mode.isChecked = data.isDarkMode
         delegate.localNightMode = if (data.isDarkMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
 
-        // обновляем состояние текста
-        updateSearchEditTextColor(data.isDarkMode)
-
         if (data.isBigText) {
             tv_text_content.textSize = 18f
             btn_text_up.isChecked = true
@@ -178,23 +218,17 @@ class RootActivity : BaseActivity() {
         }
 
         // bind content
-        tv_text_content.text = if (data.isLoadingContent) "loading" else data.content.first() as String
+        if (data.isLoadingContent) {
+            tv_text_content.text = "loading"
+        } else {
+            val content = data.content.first() as String
+            tv_text_content.setText(content, TextView.BufferType.SPANNABLE)
+        }
 
         // bind toolbar
         toolbar.title = data.title ?: "loading"
         toolbar.subtitle = data.category ?: "loading"
         if (data.categoryIcon != null) toolbar.logo = getDrawable(data.categoryIcon as Int)
-    }
-
-    private fun updateSearchEditTextColor(isDarkMode: Boolean) {
-        searchView?.let {
-            val searchEditText = it.findViewById<View>(androidx.appcompat.R.id.search_src_text) as EditText
-            if (isDarkMode) {
-                searchEditText.setTextColor(ResourcesCompat.getColor(resources, android.R.color.white, theme))
-            } else {
-                searchEditText.setTextColor(ResourcesCompat.getColor(resources, android.R.color.black, theme))
-            }
-        }
     }
 
     private fun setupToolbar() {

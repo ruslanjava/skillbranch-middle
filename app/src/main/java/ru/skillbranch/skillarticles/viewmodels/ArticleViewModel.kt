@@ -1,5 +1,6 @@
 package ru.skillbranch.skillarticles.viewmodels
 
+import android.os.Bundle
 import androidx.lifecycle.LiveData
 import ru.skillbranch.skillarticles.data.ArticleData
 import ru.skillbranch.skillarticles.data.ArticlePersonalInfo
@@ -7,7 +8,9 @@ import ru.skillbranch.skillarticles.data.repositories.ArticleRepository
 import ru.skillbranch.skillarticles.extensions.data.toAppSettings
 import ru.skillbranch.skillarticles.extensions.data.toArticlePersonalInfo
 import ru.skillbranch.skillarticles.extensions.format
+import ru.skillbranch.skillarticles.extensions.indexesOf
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
+import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
 
 class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleState>(ArticleState()), IArticleViewModel {
@@ -118,15 +121,18 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
     }
 
     override fun handleSearch(searchQuery: String?) {
-        updateState { it.copy(searchQuery = searchQuery )}
+        searchQuery ?: return
+        val result = (currentState.content.firstOrNull() as? String)!!.indexesOf(searchQuery)
+        .map { it to it + searchQuery.length }
+        updateState { it.copy(searchQuery = searchQuery, searchResults = result )}
     }
 
     override fun handleUpResult() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        updateState { it.copy(searchPosition = it.searchPosition.dec()) }
     }
 
     override fun handleDownResult() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        updateState { it.copy(searchPosition = it.searchPosition.inc()) }
     }
 
 }
@@ -153,5 +159,14 @@ data class ArticleState(
         val poster: String? = null, // обложка статьи
         val content: List<Any> = emptyList(), // контент
         val reviews: List<Any> = emptyList() // комментарии
-)
+) : IViewModelState {
+
+    override fun save(outState: Bundle) {
+    }
+
+    override fun restore(savedState: Bundle): IViewModelState {
+        return this
+    }
+
+}
 

@@ -4,7 +4,7 @@ import android.os.Bundle
 
 interface IViewModelState {
 
-    fun saveState(outState: Bundle)
-    fun restoreState(savedState: Bundle) : IViewModelState
+    fun save(outState: Bundle)
+    fun restore(savedState: Bundle) : IViewModelState
 
 }
