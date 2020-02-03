@@ -9,6 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
@@ -42,11 +43,16 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         ViewModelProviders.of(this, vmFactory).get(ArticleViewModel::class.java)
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     override val binding: ArticleBinding by lazy { ArticleBinding() }
 
     private var searchView: SearchView? = null
-    private val bgColor by AttrValue(R.attr.colorSecondary)
-    private val fgColor by AttrValue(R.attr.colorOnSecondary)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    val bgColor by AttrValue(R.attr.colorSecondary)
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    val fgColor by AttrValue(R.attr.colorOnSecondary)
 
     override fun setupViews() {
         setupToolbar()
@@ -259,6 +265,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
                 btn_text_down.isChecked = true
             }
         }
+
         private var isDarkMode : Boolean by RenderProp(false, false) {
             switch_mode.isChecked = it
             delegate.localNightMode = if (it) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
@@ -306,7 +313,9 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             isShowMenu = data.isShowMenu
 
             isBigText = data.isBigText
+
             isDarkMode = data.isDarkMode
+            delegate.localNightMode = if (isDarkMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
 
             if (data.title != null) title = data.title
             if (data.category != null) category = data.category
