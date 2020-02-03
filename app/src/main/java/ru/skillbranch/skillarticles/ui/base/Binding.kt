@@ -13,9 +13,9 @@ abstract class Binding {
 
     abstract fun bind(data: IViewModelState)
 
-    fun saveUi(outState: Bundle) {}
+    abstract fun saveUi(outState: Bundle)
 
-    fun restoreUi(savedState: Bundle) {}
+    abstract fun restoreUi(savedState: Bundle)
 
     @Suppress("UNCHECKED_CAST")
     fun <A, B, C, D> dependsOn(
