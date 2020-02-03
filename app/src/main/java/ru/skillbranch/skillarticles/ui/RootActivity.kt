@@ -67,9 +67,6 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
                     SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
-
-        // scroll to first position
-        renderSearchPosition(0)
     }
 
     override fun renderSearchPosition(searchPosition: Int) {
@@ -277,12 +274,15 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
                     ::isSearch,
                     ::searchResults,
                     ::searchPosition
-            ) { ilc, iss, sr, sp ->
-                if (!ilc && iss) {
-                    renderSearchResult(sr)
-                    renderSearchPosition(sp)
+            ) { isLoadingContent, isSearch, searchResults, searchPosition ->
+                if (!isLoadingContent && isSearch) {
+                    renderSearchResult(searchResults)
+                    renderSearchPosition(searchPosition)
                 }
-                bottombar.bindSearchInfo(sr.size, sp)
+                if (!isLoadingContent && !isSearch) {
+                    clearSearchResult()
+                }
+                bottombar.bindSearchInfo(searchResults.size, searchPosition)
             }
         }
 
