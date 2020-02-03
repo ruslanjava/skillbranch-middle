@@ -5,7 +5,6 @@ import android.text.style.BackgroundColorSpan
 import androidx.core.graphics.ColorUtils
 
 open class SearchSpan(bgColor: Int, private val fgColor: Int) : BackgroundColorSpan(bgColor) {
-
     private val alphaColor by lazy {
         ColorUtils.setAlphaComponent(backgroundColor, 160)
     }
@@ -14,5 +13,4 @@ open class SearchSpan(bgColor: Int, private val fgColor: Int) : BackgroundColorS
         textPaint.bgColor = alphaColor
         textPaint.color = fgColor
     }
-
 }
