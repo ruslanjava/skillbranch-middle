@@ -315,7 +315,6 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             isBigText = data.isBigText
 
             isDarkMode = data.isDarkMode
-            delegate.localNightMode = if (isDarkMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
 
             if (data.title != null) title = data.title
             if (data.category != null) category = data.category

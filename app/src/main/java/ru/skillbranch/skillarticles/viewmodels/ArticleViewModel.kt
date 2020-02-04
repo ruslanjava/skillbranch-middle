@@ -127,11 +127,11 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
         updateState { it.copy(searchQuery = searchQuery, searchResults = result ?: emptyList())}
     }
 
-    override fun handleUpResult() {
+    fun handleUpResult() {
         updateState { it.copy(searchPosition = it.searchPosition.dec()) }
     }
 
-    override fun handleDownResult() {
+    fun handleDownResult() {
         updateState { it.copy(searchPosition = it.searchPosition.inc()) }
     }
 
