@@ -12,4 +12,3 @@ class ViewModelFactory(private val params: Any) : ViewModelProvider.Factory {
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
-

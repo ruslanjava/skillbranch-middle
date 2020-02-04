@@ -13,16 +13,19 @@ import androidx.core.view.isVisible
 import com.google.android.material.shape.MaterialShapeDrawable
 import kotlinx.android.synthetic.main.layout_bottombar.view.*
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.ui.custom.behaviors.BottomBarBehavior
+import ru.skillbranch.skillarticles.ui.custom.behaviors.BottombarBehavior
 import kotlin.math.hypot
 
 class Bottombar @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr), CoordinatorLayout.AttachedBehavior {
-
     var isSearchMode = false
+
+    override fun getBehavior(): CoordinatorLayout.Behavior<Bottombar> {
+        return BottombarBehavior()
+    }
 
     init {
         View.inflate(context, R.layout.layout_bottombar, this)
@@ -31,18 +34,14 @@ class Bottombar @JvmOverloads constructor(
         background = materialBg
     }
 
-    override fun getBehavior(): CoordinatorLayout.Behavior<*> {
-        return BottomBarBehavior()
-    }
-
-    // save state
+    //save state
     override fun onSaveInstanceState(): Parcelable? {
         val savedState = SavedState(super.onSaveInstanceState())
         savedState.ssIsSearchMode = isSearchMode
         return savedState
     }
 
-    // restore state
+    //restore state
     override fun onRestoreInstanceState(state: Parcelable) {
         super.onRestoreInstanceState(state)
         if (state is SavedState) {
@@ -53,15 +52,38 @@ class Bottombar @JvmOverloads constructor(
     }
 
     fun setSearchState(search: Boolean) {
-        if (isSearchMode == search || !isAttachedToWindow) {
-            return
-        }
-        this.isSearchMode = search
-        if (isSearchMode) {
-            animateShowSearchPanel()
-        } else {
-            animateHideSearchPanel()
-        }
+        if (isSearchMode == search || !isAttachedToWindow) return
+        isSearchMode = search
+        if (isSearchMode) animateShowSearchPanel()
+        else animateHideSearchPanel()
+    }
+
+    private fun animateHideSearchPanel() {
+        group_bottom.isVisible = true
+        val endRadius = hypot(width.toFloat(), height / 2f)
+        val va = ViewAnimationUtils.createCircularReveal(
+            reveal,
+            width,
+            height / 2,
+            endRadius,
+            0f
+        )
+        va.doOnEnd { reveal.isVisible = false }
+        va.start()
+    }
+
+    private fun animateShowSearchPanel() {
+        reveal.isVisible = true
+        val endRadius = hypot(width.toFloat(), height / 2f)
+        val va = ViewAnimationUtils.createCircularReveal(
+            reveal,
+            width,
+            height / 2,
+            0f,
+            endRadius
+        )
+        va.doOnEnd { group_bottom.isVisible = false }
+        va.start()
     }
 
     fun bindSearchInfo(searchCount: Int = 0, position: Int = 0) {
@@ -69,54 +91,20 @@ class Bottombar @JvmOverloads constructor(
             tv_search_result.text = "Not found"
             btn_result_up.isEnabled = false
             btn_result_down.isEnabled = false
-        } else {
+        }else{
             tv_search_result.text = "${position.inc()} of $searchCount"
             btn_result_up.isEnabled = true
             btn_result_down.isEnabled = true
+        }
 
-            // lock button presses in min/max positions
-            if (position == 0) {
-                btn_result_up.isEnabled = false
-            } else if (position == searchCount - 1) {
-                btn_result_down.isEnabled = false
-            }
+        //lock button presses in min/max positions
+        when(position){
+            0 -> btn_result_up.isEnabled = false
+            searchCount -1 -> btn_result_down.isEnabled = false
         }
     }
 
-    private fun animateShowSearchPanel() {
-        reveal.isVisible = true
-        val endRadius = hypot(width.toFloat(), height / 2.0f)
-        val va = ViewAnimationUtils.createCircularReveal(
-                reveal,
-                width,
-                height / 2,
-                endRadius,
-                0.0f
-        )
-        va.doOnEnd {
-            group_bottom.isVisible = false
-        }
-        va.start()
-    }
-
-    private fun animateHideSearchPanel() {
-        group_bottom.isVisible = true
-        val endRadius = hypot(width.toFloat(), height / 2.0f)
-        val va = ViewAnimationUtils.createCircularReveal(
-                reveal,
-                width,
-                height / 2,
-                0.0f,
-                endRadius
-        )
-        va.doOnEnd {
-            reveal.isVisible = false
-        }
-        va.start()
-    }
-
-    private class SavedState: BaseSavedState, Parcelable {
-
+    private class SavedState : BaseSavedState, Parcelable {
         var ssIsSearchMode: Boolean = false
 
         constructor(superState: Parcelable?) : super(superState)
@@ -125,25 +113,16 @@ class Bottombar @JvmOverloads constructor(
             ssIsSearchMode = src.readInt() == 1
         }
 
-        override fun writeToParcel(out: Parcel, flags: Int) {
-            super.writeToParcel(out, flags)
-            out.writeInt(if (ssIsSearchMode) 1 else 0)
+        override fun writeToParcel(dst: Parcel, flags: Int) {
+            super.writeToParcel(dst, flags)
+            dst.writeInt(if (ssIsSearchMode) 1 else 0)
         }
 
-        override fun describeContents(): Int = 0
+        override fun describeContents() = 0
 
         companion object CREATOR : Parcelable.Creator<SavedState> {
-
-            override fun createFromParcel(source: Parcel): SavedState {
-                return SavedState(source)
-            }
-
-            override fun newArray(size: Int): Array<SavedState?> {
-                return arrayOfNulls(size)
-            }
-
+            override fun createFromParcel(parcel: Parcel) = SavedState(parcel)
+            override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
         }
-
     }
-
 }

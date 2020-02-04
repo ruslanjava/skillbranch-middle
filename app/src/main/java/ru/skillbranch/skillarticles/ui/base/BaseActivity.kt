@@ -1,37 +1,33 @@
 package ru.skillbranch.skillarticles.ui.base
 
 import android.os.Bundle
-import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
 
-abstract class BaseActivity<T: BaseViewModel<out IViewModelState>> : AppCompatActivity() {
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    abstract val binding: Binding
-
+abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatActivity() {
+    protected abstract val binding:Binding
     protected abstract val viewModel : T
-    protected abstract val layout: Int
+    protected abstract val layout:Int
 
-    // set listeners, tuning views
+    //set listeners, tuning views
     abstract fun setupViews()
-
     abstract fun renderNotification(notify: Notify)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(layout)
         setupViews()
-
         binding.onFinishInflate()
-        viewModel.observeState(this) {
-            binding.bind(it)
-        }
-        viewModel.observeNotifications(this) {
-            renderNotification(it)
-        }
+        viewModel.observeState(this){binding.bind(it)}
+        viewModel.observeNotifications(this){renderNotification(it)}
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        viewModel.saveState(outState)
+        binding.saveUi(outState)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -39,11 +35,4 @@ abstract class BaseActivity<T: BaseViewModel<out IViewModelState>> : AppCompatAc
         viewModel.restoreState(savedInstanceState)
         binding.restoreUi(savedInstanceState)
     }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        binding.saveUi(outState)
-        viewModel.saveState(outState)
-        super.onSaveInstanceState(outState)
-    }
-
 }

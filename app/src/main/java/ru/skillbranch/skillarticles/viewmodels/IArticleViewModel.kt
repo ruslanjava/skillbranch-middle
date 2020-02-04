@@ -79,10 +79,5 @@ interface IArticleViewModel {
      * обрабока поискового запроса, необходимо сохранить поисковый запрос и отображать его в
      * searchView при изменении конфигурации (пересоздании активити)
      */
-    fun handleSearch(searchQuery: String?)
-
-    fun handleUpResult()
-
-    fun handleDownResult()
-
+    fun handleSearch(query: String?)
 }
