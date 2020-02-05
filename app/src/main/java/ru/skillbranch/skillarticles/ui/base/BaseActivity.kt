@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
+import ru.skillbranch.skillarticles.viewmodels.base.ViewModelDelegate
 
 abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatActivity() {
 
@@ -18,6 +19,10 @@ abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatA
     //set listeners, tuning views
     abstract fun setupViews()
     abstract fun renderNotification(notify: Notify)
+
+    internal inline fun <reified T : BaseViewModel<out IViewModelState>> provideViewModel(arg : Any?) : ViewModelDelegate<T> {
+        return ViewModelDelegate(T::class.java, arg)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
