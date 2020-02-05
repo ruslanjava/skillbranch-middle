@@ -206,12 +206,14 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             if (searchView?.hasFocus() == true) {
                 searchView?.clearFocus()
             }
+            tv_text_content.requestFocus()
             viewModel.handleUpResult()
         }
         btn_result_down.setOnClickListener {
             if (searchView?.hasFocus() == true) {
                 searchView?.clearFocus()
             }
+            tv_text_content.requestFocus()
             viewModel.handleDownResult()
         }
         btn_search_close.setOnClickListener {
