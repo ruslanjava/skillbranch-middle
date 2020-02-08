@@ -8,8 +8,8 @@ import ru.skillbranch.gameofthrones.data.local.entities.CharacterItem
 import ru.skillbranch.gameofthrones.data.local.entities.House
 import ru.skillbranch.gameofthrones.data.remote.res.CharacterRes
 import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
-import ru.skillbranch.gameofthrones.database.HousesDatabase
-import ru.skillbranch.gameofthrones.http.IceAndFireClient
+import ru.skillbranch.gameofthrones.repositories.database.HousesDatabase
+import ru.skillbranch.gameofthrones.repositories.http.IceAndFireClient
 
 object RootRepository {
 
