@@ -20,7 +20,7 @@ abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatA
     abstract fun setupViews()
     abstract fun renderNotification(notify: Notify)
 
-    internal inline fun <reified T : BaseViewModel<out IViewModelState>> provideViewModel(arg : Any?) : ViewModelDelegate<T> {
+    internal inline fun <reified T : BaseViewModel<out IViewModelState>> provideViewModel(arg : Any) : ViewModelDelegate<T> {
         return ViewModelDelegate(T::class.java, arg)
     }
 
