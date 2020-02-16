@@ -1,5 +1,8 @@
 package ru.skillbranch.gameofthrones.http
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import org.hamcrest.Matchers.`is`
@@ -13,20 +16,24 @@ import ru.skillbranch.gameofthrones.repositories.http.IceAndFireServiceFactory
  */
 class IceAndFireApiServiceUnitTest {
 
+    private val scope = CoroutineScope(Dispatchers.IO)
+
     @Test
     fun testGetHousesFirstPage() {
-        val service = IceAndFireServiceFactory.newInstance()
-        val response = service.getHouses(1, 10).execute()
-        val houses = response.body() as List<HouseRes>
-        assertThat(houses.size, `is`(10))
+        scope.launch {
+            val service = IceAndFireServiceFactory.instance
+            val houses = service.houses(1, 10)
+            assertThat(houses.size, `is`(10))
+        }
     }
 
     @Test
     fun testGetHousesPreLastPage() {
-        val service = IceAndFireServiceFactory.newInstance()
-        val response = service.getHouses(50, 10).execute()
-        val houses = response.body() as List<HouseRes>
-        assertThat(houses.size, `is`(0))
+        scope.launch {
+            val service = IceAndFireServiceFactory.instance
+            val houses = service.houses(50, 10)
+            assertThat(houses.size, `is`(0))
+        }
     }
 
 }

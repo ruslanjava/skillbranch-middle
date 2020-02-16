@@ -25,7 +25,7 @@ abstract class HousesDatabase : RoomDatabase() {
 
         private var INSTANCE: HousesDatabase? = null
 
-        fun getInstance(context: Context): HousesDatabase? {
+        fun getInstance(context: Context): HousesDatabase {
             if (INSTANCE == null) {
                 synchronized(HousesDatabase::class) {
                     INSTANCE = Room.databaseBuilder(
@@ -33,7 +33,7 @@ abstract class HousesDatabase : RoomDatabase() {
                     ).build()
                 }
             }
-            return INSTANCE
+            return INSTANCE!!
         }
 
         fun destroyInstance() {

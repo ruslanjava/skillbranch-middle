@@ -5,14 +5,14 @@ ext {
     // build properties
     compileSdkVersion = 29
     targetSdkVersion = 29
-    minSdkVersion = 24
-    buildToolsVersion = "29.0.2"
+    minSdkVersion = 23
+    buildToolsVersion = "29.0.0"
 
     // common libraries
     roomVersion = '2.2.3'
     daggerVersion = '2.21'
     retrofitVersion = '2.6.2'
-    okVersion = '4.2.1'
+    okVersion = '4.2.2'
     rxJava = '2.2.6'
     rxAndroid = '2.1.1'
     rxBinding = '2.0.0'
@@ -30,9 +30,10 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.0-rc02'
+        classpath 'com.android.tools.build:gradle:3.6.0-rc03'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.2.0-rc02"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

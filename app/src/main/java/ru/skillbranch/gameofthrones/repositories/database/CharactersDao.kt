@@ -6,8 +6,11 @@ import ru.skillbranch.gameofthrones.data.local.entities.*
 @Dao
 interface CharactersDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(character: Character)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insert(character: Character): Long
+
+    @Update
+    fun update(character: Character)
 
     @Query("SELECT c.id as id, :houseName as house, c.name as name, c.titles as titles, c.aliases as aliases FROM character c WHERE c.house_id = :houseName")
     fun findCharactersByHouseName(houseName: String): List<CharacterItem>
@@ -30,7 +33,10 @@ interface CharactersDao {
     @Transaction
     fun insert(characters : List<Character>) {
         for (character in characters) {
-            insert(character)
+            val id: Long = insert(character)
+            if (id == -1L) {
+                update(character)
+            }
         }
     }
 

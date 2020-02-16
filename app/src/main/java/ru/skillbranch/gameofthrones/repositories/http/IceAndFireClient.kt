@@ -1,22 +1,20 @@
 package ru.skillbranch.gameofthrones.repositories.http
 
+import kotlinx.coroutines.*
 import ru.skillbranch.gameofthrones.data.remote.res.CharacterRes
 import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 
 object IceAndFireClient {
 
-    // значения получены эмпирическим путем
+    val service = IceAndFireServiceFactory.instance
+    val scope = CoroutineScope(Dispatchers.IO)
+
     private const val THREADS = 12
     private const val PAGE_SIZE = THREADS * 5
-    private const val THREAD_POOL_SIZE = 180
-
-    private val service = IceAndFireServiceFactory.newInstance()
 
     fun getAllHouses(): List<HouseRes> {
         val lock = Any()
@@ -27,15 +25,13 @@ object IceAndFireClient {
         val start = CountDownLatch(1)
         val finish = CountDownLatch(THREADS)
 
-        val executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE)
         for (offset in 0..THREADS) {
-            executorService.submit {
+            scope.async {
                 start.await()
                 try {
                     var page = offset
                     while (true) {
-                        val response = service.getHouses(page, PAGE_SIZE).execute()
-                        val pageHouses = response.body() as List<HouseRes>
+                        val pageHouses = service.houses(page, PAGE_SIZE)
                         if (pageHouses.isEmpty()) {
                             break
                         }
@@ -51,7 +47,6 @@ object IceAndFireClient {
         }
         start.countDown()
         finish.await(30, TimeUnit.SECONDS)
-        executorService.shutdown()
 
         // окончательный результат, который можно не спеша отфильтровать в одном потоке
         // без блокировки
@@ -89,16 +84,14 @@ object IceAndFireClient {
 
         val houses = getNeededHouses(houseNames)
 
-        val houseExecutorService = Executors.newFixedThreadPool(houseNames.size)
         val start = CountDownLatch(1)
         val finish = CountDownLatch(houseNames.size)
-
-        val executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE)
 
         houses.forEach {
             val house = it
             val houseMembers = house.swornMembers
-            houseExecutorService.submit {
+
+            scope.async {
                 start.await()
                 try {
                     val ids = mutableListOf<String>()
@@ -106,7 +99,7 @@ object IceAndFireClient {
                         val id = url.substringAfterLast("/")
                         ids.add(id)
                     }
-                    val characters = loadCharacters(executorService, ids)
+                    val characters = loadCharacters(ids)
                     synchronized(resultLock) {
                         result.add(house to characters)
                     }
@@ -117,15 +110,12 @@ object IceAndFireClient {
         }
 
         start.countDown()
-        finish.await(10, TimeUnit.SECONDS)
-        houseExecutorService.shutdown()
-
-        executorService.shutdown()
+        finish.await(30, TimeUnit.SECONDS)
 
         return result;
     }
 
-    private fun loadCharacters(executorService: ExecutorService, ids : List<String>) : List<CharacterRes> {
+    private fun loadCharacters(ids : List<String>) : List<CharacterRes> {
         val result = ArrayList<CharacterRes>()
 
         val start = CountDownLatch(1)
@@ -133,11 +123,10 @@ object IceAndFireClient {
 
         val lock = Any()
         ids.forEach {
-            executorService.submit {
+            scope.async {
                 start.await()
                 try {
-                    val response = service.getCharacter(it).execute()
-                    val character = response.body() as CharacterRes
+                    val character = service.character(it)
                     synchronized(lock) {
                         result.add(character)
                     }
@@ -148,7 +137,7 @@ object IceAndFireClient {
         }
 
         start.countDown()
-        finish.await(10, TimeUnit.SECONDS)
+        finish.await(30, TimeUnit.SECONDS)
 
         return result
     }

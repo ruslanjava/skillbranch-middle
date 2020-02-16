@@ -1,22 +1,28 @@
 package ru.skillbranch.gameofthrones.repositories.http
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
 import ru.skillbranch.gameofthrones.AppConfig
 import java.util.concurrent.TimeUnit
 
 internal object IceAndFireServiceFactory {
 
-    fun newInstance() : IceAndFireService {
-        val retrofit = retrofit2.Retrofit.Builder()
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .addConverterFactory(GsonConverterFactory.create())
-            .baseUrl(AppConfig.BASE_URL)
-            .client(provideOkhttpClient())
+    val instance: IceAndFireService by lazy {
+        val moshi = Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
             .build()
-        return retrofit.create(IceAndFireService::class.java)
+
+        val retrofit: Retrofit = Retrofit.Builder()
+            .client(provideOkhttpClient())
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .baseUrl(AppConfig.BASE_URL)
+            .build()
+
+        retrofit.create(IceAndFireService::class.java)
     }
 
     private fun provideOkhttpClient(): OkHttpClient {

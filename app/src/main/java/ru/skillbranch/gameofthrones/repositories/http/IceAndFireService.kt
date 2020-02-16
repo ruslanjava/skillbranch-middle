@@ -1,6 +1,5 @@
 package ru.skillbranch.gameofthrones.repositories.http
 
-import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -10,9 +9,12 @@ import ru.skillbranch.gameofthrones.data.remote.res.HouseRes
 interface IceAndFireService {
 
     @GET("houses")
-    fun getHouses(@Query("page") page : Int, @Query("pageSize") pageSize: Int): Call<List<HouseRes>>
+    suspend fun houses(@Query("page") page : Int, @Query("pageSize") pageSize: Int): List<HouseRes>
 
     @GET("characters/{id}")
-    fun getCharacter(@Path("id") id : String): Call<CharacterRes>
+    suspend fun character(@Path("id") id : String): CharacterRes
+
+    @GET("houses")
+    suspend fun houseByName(@Query("name") name: String) : List<HouseRes>
 
 }
