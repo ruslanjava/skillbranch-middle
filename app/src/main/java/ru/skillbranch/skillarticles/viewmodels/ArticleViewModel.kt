@@ -56,7 +56,7 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
         }
     }
 
-    override fun getArticleContent(): LiveData<List<Any>?> {
+    override fun getArticleContent(): LiveData<String?> {
         return repository.loadArticleContent(articleId)
     }
 
@@ -121,10 +121,10 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
         updateState { it.copy(isSearch = isSearch, isShowMenu = false, searchPosition = 0) }
     }
 
-    override fun handleSearch(searchQuery: String?) {
-        searchQuery ?: return
-        val result = (currentState.content.firstOrNull() as? String)?.indexesOf(searchQuery)?.map { it to it + searchQuery.length }
-        updateState { it.copy(searchQuery = searchQuery, searchResults = result ?: emptyList())}
+    override fun handleSearch(query: String?) {
+        query ?: return
+        val result = (currentState.content).indexesOf(query).map { it to it + query.length }
+        updateState { it.copy(searchQuery = query, searchResults = result ?: emptyList(), searchPosition = 0)}
     }
 
     fun handleUpResult() {
@@ -157,7 +157,7 @@ data class ArticleState(
         val date: String? = null, // дата публикации
         val author: Any? = null, // автор статьи
         val poster: String? = null, // обложка статьи
-        val content: List<Any> = emptyList(), // контент
+        val content: String? = null, // контент
         val reviews: List<Any> = emptyList() // комментарии
 ) : IViewModelState {
 

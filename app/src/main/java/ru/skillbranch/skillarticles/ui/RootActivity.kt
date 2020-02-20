@@ -203,6 +203,9 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             if (searchView?.hasFocus() == true) {
                 searchView?.clearFocus()
             }
+            if (!tv_text_content.hasFocus()) {
+                tv_text_content.requestFocus()
+            }
             tv_text_content.requestFocus()
             viewModel.handleUpResult()
         }
@@ -210,7 +213,9 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             if (searchView?.hasFocus() == true) {
                 searchView?.clearFocus()
             }
-            tv_text_content.requestFocus()
+            if (!tv_text_content.hasFocus()) {
+                tv_text_content.requestFocus()
+            }
             viewModel.handleDownResult()
         }
         btn_search_close.setOnClickListener {
@@ -318,7 +323,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             if (data.title != null) title = data.title
             if (data.category != null) category = data.category
             if (data.categoryIcon != null) categoryIcon = data.categoryIcon as Int
-            if (data.content.isNotEmpty()) content = data.content.first() as String
+            if (data.content != null) content = data.content
 
             isLoadingContent = data.isLoadingContent
             isSearch = data.isSearch
