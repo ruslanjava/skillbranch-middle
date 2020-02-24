@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.text.getSpans
-import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
 import kotlinx.android.synthetic.main.layout_bottombar.*
@@ -22,6 +21,7 @@ import kotlinx.android.synthetic.main.layout_submenu.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.setMarginOptionally
+import ru.skillbranch.skillarticles.markdown.MarkdownBuilder
 import ru.skillbranch.skillarticles.ui.base.BaseActivity
 import ru.skillbranch.skillarticles.ui.base.Binding
 import ru.skillbranch.skillarticles.ui.custom.SearchFocusSpan
@@ -168,7 +168,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
             is Notify.ActionMessage -> {
                 snackbar.setActionTextColor(getColor(R.color.color_accent_dark))
                 snackbar.setAction(notify.actionLabel) {
-                    notify.actionHandler?.invoke()
+                    notify.actionHandler.invoke()
                 }
             }
 
@@ -287,7 +287,8 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         private var searchPosition: Int by ObserveProp(0)
 
         private var content: String by ObserveProp("loading") {
-            tv_text_content.setText(it, TextView.BufferType.SPANNABLE)
+            val text = MarkdownBuilder(this@RootActivity).markdownToSpan(it)
+            tv_text_content.setText(text, TextView.BufferType.SPANNABLE)
             tv_text_content.movementMethod = ScrollingMovementMethod()
         }
 

@@ -277,4 +277,18 @@ sealed class Element() {
         override val elements: List<Element> = emptyList()
     ) : Element()
 
+    data class OrderedListItem(
+        val order: String,
+        override val text: CharSequence,
+        override val elements: List<Element> = emptyList()
+    ) : Element()
+
+    data class BlockCode(
+        val type: Type = Type.MIDDLE,
+        override val text: CharSequence,
+        override val elements: List<Element> = emptyList()
+    ) : Element() {
+        enum class Type { START, END, MIDDLE, SINGLE }
+    }
+
 }
