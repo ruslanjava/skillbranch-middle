@@ -1,5 +1,6 @@
 package ru.skillbranch.skillarticles.markdown
 
+import java.lang.StringBuilder
 import java.util.regex.Pattern
 
 object MarkdownParser {
@@ -38,7 +39,28 @@ object MarkdownParser {
      * clear markdown text to string without markdown characters
      */
     fun clear(string: String?): String? {
-        return null
+        if (string == null) {
+            return null
+        }
+
+        val elements = mutableListOf<Element>()
+        elements.addAll(findElements(string))
+
+        val builder = StringBuilder()
+        elements.forEach {
+            builder.addElements(it)
+        }
+        return builder.toString()
+    }
+
+    private fun StringBuilder.addElements(element: Element) {
+        if (element.elements.isEmpty()) {
+            append(element.text)
+        } else {
+            element.elements.forEach {
+                addElements(it)
+            }
+        }
     }
 
     /**

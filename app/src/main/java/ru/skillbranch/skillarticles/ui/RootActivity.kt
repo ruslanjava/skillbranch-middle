@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.text.Selection
 import android.text.Spannable
 import android.text.SpannableString
+import android.text.method.LinkMovementMethod
 import android.text.method.ScrollingMovementMethod
 import android.view.Menu
 import android.view.MenuItem
@@ -289,7 +290,7 @@ class RootActivity : BaseActivity<ArticleViewModel>(), IArticleView {
         private var content: String by ObserveProp("loading") {
             val text = MarkdownBuilder(this@RootActivity).markdownToSpan(it)
             tv_text_content.setText(text, TextView.BufferType.SPANNABLE)
-            tv_text_content.movementMethod = ScrollingMovementMethod()
+            tv_text_content.movementMethod = LinkMovementMethod()
         }
 
         override fun onFinishInflate() {
