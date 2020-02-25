@@ -55,7 +55,27 @@ class HeaderSpan constructor(
         lineHeight: Int,
         fm: Paint.FontMetricsInt?
     ) {
+        fm ?: return
 
+        text as Spanned
+        val spanStart = text.getSpanStart(this)
+        val spanEnd = text.getSpanEnd(this)
+
+        if (spanStart == start) {
+            originAscent = fm.ascent
+            fm.ascent = (fm.ascent - marginTop).toInt()
+        } else {
+            fm.ascent = originAscent
+        }
+
+        // end.dec: line break adds +1 character
+        if (spanEnd == end.dec()) {
+            val originHeight = fm.descent - originAscent
+            fm.descent = (originHeight * linePadding + marginBottom).toInt()
+        }
+
+        fm.top = fm.ascent
+        fm.bottom = fm.descent
     }
 
     override fun updateMeasureState(paint: TextPaint) {

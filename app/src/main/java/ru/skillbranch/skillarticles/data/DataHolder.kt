@@ -93,6 +93,7 @@ data class AppSettings(
 )
 
 val longText: String = """
+before header text
 # Header1 first line margin middle line without margin last line with margin
 ## Header2 Header2
 ### Header3 Header3 Header3
@@ -120,8 +121,8 @@ and combined emphasis together ~~two tildes for strike and __underscores for inn
 - Use minuses for list item and _underscores_ and *asterisks* for emphasis aka *italic*
 + Or use plus for list item and ~~double tildes~~ for strike
 
-1. First ordered list item
-2. Second item
+1. First ordered list item 
+2. Second item 
 3. Third item.
 
 > Blockquotes are very handy in ~~email~~ to emulate reply text.
@@ -130,11 +131,11 @@ and combined emphasis together ~~two tildes for strike and __underscores for inn
 Use ` for wrap `inline code` split `code with line break
 not` work `only inline`
 
-simple single line
+simple single line 
 
 Use ``` for wrap block code
 ```code block.code block.code block```
-also it work for multiline code block
+also it work for multiline code block 
 ```multiline code block
 multiline code block
 multiline code block
@@ -148,7 +149,7 @@ or three minus
 
 simple text and break line
 
-For inline link use `[for title]` and `(for link)`
+For inline link use `[for title]` and `(for link)` 
 example link: [I'm an inline-style link](https://www.google.com)
 simple text and break line
 

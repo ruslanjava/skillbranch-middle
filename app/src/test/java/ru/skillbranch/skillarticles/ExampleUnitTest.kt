@@ -217,5 +217,4 @@ class ExampleUnitTest {
             .filterIsInstance<T>() //filter only expected instance
             .map { it.text.toString() } //transform to element text
     }
-
 }

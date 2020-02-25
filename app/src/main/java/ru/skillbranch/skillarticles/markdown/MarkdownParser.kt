@@ -206,11 +206,11 @@ object MarkdownParser {
 
             }
 
-            if (lastStartIndex < string.length) {
-                val simpleText = string.subSequence(lastStartIndex, string.length)
-                parents.add(Element.Text(simpleText))
-            }
+        }
 
+        if (lastStartIndex < string.length) {
+            val simpleText = string.subSequence(lastStartIndex, string.length)
+            parents.add(Element.Text(simpleText))
         }
 
         return parents
