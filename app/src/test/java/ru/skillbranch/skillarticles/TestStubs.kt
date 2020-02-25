@@ -141,7 +141,6 @@ val expectedLink: Map<String, List<String>> = mapOf(
     )
 )
 
-
 val markdownString = """
 before header text
 # Header1 first line margin middle line without margin last line with margin
@@ -255,11 +254,11 @@ multiline code block
 multiline code block
 multiline code block```
 Use three underscore character _ in new line for horizontal divider
- 
+
 or three asterisks
- 
+
 or three minus
- 
+
 
 simple text and break line
 

@@ -180,6 +180,34 @@ class ExampleUnitTest {
         printElements(result.elements)
     }
 
+    @Test
+    fun test_clear_simple() {
+        val clearSimpleText = """
+            before header text
+            # Header1
+            ---
+            before `text
+            after` text **bold**
+        """.trimIndent()
+
+        val expected = """
+            before header text
+            Header1
+
+            before `text
+            after` text bold
+        """.trimIndent()
+
+        val result = MarkdownParser.clear(clearSimpleText)
+        assertEquals(result, expected)
+    }
+
+    @Test
+    fun test_clear() {
+        val result = MarkdownParser.clear(markdownString)
+        assertEquals(result, markdownClearString)
+    }
+
     private fun printResults(list:List<String>) {
         val iterator = list.iterator()
         while (iterator.hasNext()){
