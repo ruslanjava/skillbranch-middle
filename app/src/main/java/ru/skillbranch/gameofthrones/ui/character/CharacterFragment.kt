@@ -2,6 +2,7 @@ package ru.skillbranch.gameofthrones.ui.character
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
@@ -46,6 +47,8 @@ class CharacterFragment : Fragment() {
         rootActivity.setSupportActionBar(toolbar)
         rootActivity.supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
+            setHomeButtonEnabled(true)
+            setDisplayShowHomeEnabled(true)
             title = args.title
         }
 
@@ -60,7 +63,7 @@ class CharacterFragment : Fragment() {
             collapsing_layout.requestLayout()
         }
 
-        mViewModel.getCharacter().observe(this, Observer<CharacterFull> { character ->
+        mViewModel.getCharacter().observe(viewLifecycleOwner, Observer<CharacterFull> { character ->
             if (character == null) {
                 return@Observer
             }
@@ -74,12 +77,14 @@ class CharacterFragment : Fragment() {
 
             tv_words.text = character.words
             tv_born.text = character.born
+
             tv_titles.text = character.titles
                 .filter { it.isNotEmpty() }
-                .joinToString { "\n" }
+                .joinToString("\n")
+
             tv_aliases.text = character.aliases
                 .filter { it.isNotEmpty() }
-                .joinToString { "\n" }
+                .joinToString("\n")
 
             character.father?.let {
                 group_father.visibility = View.VISIBLE

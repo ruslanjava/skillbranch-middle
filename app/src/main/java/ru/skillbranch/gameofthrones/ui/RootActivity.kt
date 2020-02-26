@@ -2,6 +2,7 @@ package ru.skillbranch.gameofthrones.ui
 
 import android.app.Application
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
 import ru.skillbranch.gameofthrones.R
@@ -32,6 +34,16 @@ class RootActivity : AppCompatActivity() {
             this,
             R.id.nav_host_fragment
         )
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) : Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                navController.popBackStack()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun prepareData() {

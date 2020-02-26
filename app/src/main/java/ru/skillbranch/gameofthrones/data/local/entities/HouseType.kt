@@ -38,7 +38,7 @@ enum class HouseType(
         fun fromString(title: String) : HouseType {
             return when (title) {
                 "Stark" -> STARK
-                "Lannnister" -> LANNISTER
+                "Lannister" -> LANNISTER
                 "Targaryen" -> TARGARYEN
                 "Baratheon" -> BARATHEON
                 "Greyjoy" -> GREYJOY

@@ -21,7 +21,7 @@ class HouseViewModel(private val houseName: String) : ViewModel() {
     }
 
     fun handleSearchQuery(str: String) {
-        queryStr.value = str
+        queryStr.postValue(str)
     }
 
 }

@@ -30,20 +30,12 @@ class HouseFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        val houseName = arguments?.getString(HOUSE_NAME) ?: HouseType.STARK.title
 
         charactersAdapter = CharactersAdapter {
             val houseType = HouseType.fromString(it.house)
             val action = HousesFragmentDirections.actionNavHousesToNavCharacter(it.id, houseType.title, it.name)
             findNavController().navigate(action)
         }
-
-        val vmFactory = HouseViewModelFactory(houseName)
-        viewModel = ViewModelProviders.of(this, vmFactory).get(HouseViewModel::class.java)
-        viewModel.getCharacters().observe(this, Observer<List<CharacterItem>> { items ->
-            charactersAdapter.updateItems(items)
-        })
-        viewModel.handleSearchQuery("")
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
@@ -65,15 +57,31 @@ class HouseFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_house, container, false)
+    ): View {
+        val view = inflater.inflate(R.layout.fragment_house, container, false)
+
+        val houseName = arguments?.getString(HOUSE_NAME) ?: HouseType.STARK.title
+
+        val vmFactory = HouseViewModelFactory(houseName)
+        viewModel = ViewModelProviders.of(this, vmFactory).get(HouseViewModel::class.java)
+        viewModel.getCharacters().observe(viewLifecycleOwner, Observer<List<CharacterItem>> { items ->
+            charactersAdapter.updateItems(items)
+        })
+        return view
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         with(rv_characters_list) {
             layoutManager = LinearLayoutManager(context)
-            addItemDecoration(ItemDivider())
+            addItemDecoration(ItemDivider(context.resources.getDimension(R.dimen.item_divider_margin)))
             adapter = charactersAdapter
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.handleSearchQuery("")
     }
 
     companion object {

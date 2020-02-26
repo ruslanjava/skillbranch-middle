@@ -3,6 +3,7 @@ package ru.skillbranch.gameofthrones.repositories
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import ru.skillbranch.gameofthrones.HouseName
 import ru.skillbranch.gameofthrones.App
@@ -171,9 +172,11 @@ object RootRepository {
      * @param result - колбек содержащий в себе полную информацию о персонаже
      */
     fun findCharacterFullById(id : String, result: (charter : CharacterFull) -> Unit) {
-        val character = charactersDao.findCharacterFullById(id)
-        if (character != null) {
-            result.invoke(character)
+        scope.launch {
+            val character = charactersDao.findCharacterFullById(id)
+            if (character != null) {
+                result.invoke(character)
+            }
         }
     }
 
@@ -233,8 +236,13 @@ object RootRepository {
     fun findCharacters(houseName: String): LiveData<List<CharacterItem>> {
         var result = characters[houseName]
         if (result == null) {
-            result = MutableLiveData()
-            characters[houseName] = result
+            val newResult = MutableLiveData<List<CharacterItem>>()
+            characters[houseName] = newResult
+            result = newResult
+            scope.launch {
+                val items : List<CharacterItem> = charactersDao.findCharactersByHouseName(houseName)
+                newResult.postValue(items)
+            }
         }
         return result
     }

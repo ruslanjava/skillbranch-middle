@@ -16,7 +16,7 @@ class CharacterViewModel (private val characterId: String) : ViewModel() {
     fun getCharacter(): LiveData<CharacterFull> {
         val characters: MutableLiveData<CharacterFull> = mutableLiveData(null)
         repository.findCharacterFullById(characterId) { character ->
-            characters.value = character
+            characters.postValue(character)
         }
         return characters
     }
