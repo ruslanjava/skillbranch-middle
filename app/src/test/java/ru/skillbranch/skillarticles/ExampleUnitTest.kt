@@ -150,6 +150,27 @@ class ExampleUnitTest {
     }
 
     @Test
+    fun parse_ordered_list() {
+        val unparsed = """
+            1. text
+            2. text
+            3. text
+             1. text
+            A text
+            1  
+        """.trimIndent()
+        val result = MarkdownParser.parse(unparsed)
+
+        val orders: List<String> = result.elements.spread()
+            .filterIsInstance<Element.OrderedListItem>()
+            .map { it.order }
+        assertEquals(3, orders.size)
+        assertEquals("1.", orders[0])
+        assertEquals("2.", orders[1])
+        assertEquals("3.", orders[2])
+    }
+
+    @Test
     fun parse_all() {
         val result = MarkdownParser.parse(markdownString)
         val actualUnorderedList = prepare<Element.UnorderedListItem>(result.elements)
@@ -234,8 +255,8 @@ class ExampleUnitTest {
 
     private fun List<Element>.spread() : List<Element> {
         val elements = mutableListOf<Element>()
-        if (this.isNotEmpty()) elements.addAll(
-            this.fold(mutableListOf()){acc, el -> acc.also { it.addAll(el.spread()) }}
+        if (isNotEmpty()) elements.addAll(
+            fold(mutableListOf()) {acc, el -> acc.also { it.addAll(el.spread()) }}
         )
         return elements
     }
