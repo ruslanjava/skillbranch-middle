@@ -18,11 +18,12 @@ object MarkdownParser {
     private const val INLINE_GROUP = "((?<!`)`[^`\\s].*?[^`\\s]?`(?!`))"
     private const val LINK_GROUP = "(\\[[^\\[\\]]*?]\\(.+?\\)|^\\[*?]\\(.*?\\))"
     private const val ORDERED_LIST_ITEM_GROUP = "(^[1-9]{1}[0-9]*[.]\\s.+$)"
+    private const val BLOCK_CODE_GROUP = "(^```[\\n\\s\\S]*?```(?=\\n))"
 
     //result regex
     private const val MARKDOWN_GROUPS = "$UNORDERED_LIST_ITEM_GROUP|$HEADER_GROUP|$QUOTE_GROUP|" +
             "$ITALIC_GROUP|$BOLD_GROUP|$STRIKE_GROUP|$RULE_GROUP|$INLINE_GROUP|$LINK_GROUP|" +
-            "$ORDERED_LIST_ITEM_GROUP"
+            "$ORDERED_LIST_ITEM_GROUP|$BLOCK_CODE_GROUP"
 
     private val elementsPattern by lazy {
         Pattern.compile(MARKDOWN_GROUPS, Pattern.MULTILINE)
@@ -87,7 +88,7 @@ object MarkdownParser {
             var text : CharSequence
 
             // groups range for iterate by groups
-            val groups = 1..10
+            val groups = 1..11
             var group = -1
 
             for (gr in groups) {
@@ -235,6 +236,40 @@ object MarkdownParser {
 
                     // next find start from position endIndex
                     lastStartIndex = endIndex
+                }
+
+                // Block code
+                11 -> {
+                    val text = string.subSequence(startIndex.plus(3), endIndex.minus(3))
+
+                    val lines = text.split('\n')
+
+                    if (lines.size == 1) {
+                        val entireLine = lines[0] + '\n'
+                        val subs = findElements(entireLine)
+                        val element = Element.BlockCode(Element.BlockCode.Type.SINGLE, entireLine, subs)
+                        parents.add(element)
+                        // next find start from position "endIndex" (last regex character)
+                        lastStartIndex = endIndex
+
+                    } else {
+
+                        lines.forEachIndexed { index, line ->
+                            val entireLine = line + '\n'
+                            val subs = findElements(entireLine)
+
+                            val type = when (index) {
+                                0 -> Element.BlockCode.Type.START
+                                (lines.size - 1) -> Element.BlockCode.Type.END
+                                else -> Element.BlockCode.Type.MIDDLE
+                            }
+
+                            val element = Element.BlockCode(type, entireLine, subs)
+                            parents.add(element)
+                        }
+                        lastStartIndex = endIndex
+
+                    }
                 }
 
             }

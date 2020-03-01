@@ -171,6 +171,33 @@ class ExampleUnitTest {
     }
 
     @Test
+    fun parse_block_code_text() {
+        val unparsed = """
+            ```code block
+            code block
+            code block```
+            
+            before ```code block
+            code block
+            code block```
+            
+            ```code block
+            code block
+            code block``` after
+        """.trimIndent()
+
+        val result = MarkdownParser.parse(unparsed)
+
+        val types: List<Element.BlockCode.Type> = result.elements.spread()
+            .filterIsInstance<Element.BlockCode>()
+            .map { it.type }
+        assertEquals(3, types.size)
+        assertEquals(Element.BlockCode.Type.START, types[0])
+        assertEquals(Element.BlockCode.Type.MIDDLE, types[1])
+        assertEquals(Element.BlockCode.Type.END, types[2])
+    }
+
+    @Test
     fun parse_all() {
         val result = MarkdownParser.parse(markdownString)
         val actualUnorderedList = prepare<Element.UnorderedListItem>(result.elements)

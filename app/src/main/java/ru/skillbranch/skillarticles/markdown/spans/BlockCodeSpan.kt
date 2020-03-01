@@ -77,6 +77,26 @@ class BlockCodeSpan(
                     canvas.drawPath(path, paint)
                 }
             }
+
+            Element.BlockCode.Type.MIDDLE -> {
+                paint.forBackground {
+                    path.reset()
+                    path.addRoundRect(
+                        RectF(
+                            0f, top.toFloat(), canvas.width.toFloat(), bottom.toFloat()
+                        ),
+                        floatArrayOf(
+                            0f, 0f,
+                            0f, 0f,
+                            0f, 0f,
+                            0f, 0f
+                        ),
+                        Path.Direction.CW
+                    )
+                    canvas.drawPath(path, paint)
+                }
+            }
+
             Element.BlockCode.Type.END -> {
                 paint.forBackground {
                     path.reset()
