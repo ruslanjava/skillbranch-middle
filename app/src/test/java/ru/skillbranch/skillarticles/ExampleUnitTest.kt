@@ -256,7 +256,7 @@ class ExampleUnitTest {
     @Test
     fun test_clear() {
         val result = MarkdownParser.clear(markdownString)
-        assertEquals(result, markdownClearString)
+        assertEquals(result, markdownOptionallyClearString)
     }
 
     private fun printResults(list:List<String>) {

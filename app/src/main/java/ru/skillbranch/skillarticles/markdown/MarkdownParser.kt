@@ -18,7 +18,7 @@ object MarkdownParser {
     private const val INLINE_GROUP = "((?<!`)`[^`\\s].*?[^`\\s]?`(?!`))"
     private const val LINK_GROUP = "(\\[[^\\[\\]]*?]\\(.+?\\)|^\\[*?]\\(.*?\\))"
     private const val ORDERED_LIST_ITEM_GROUP = "(^[1-9]{1}[0-9]*[.]\\s.+$)"
-    private const val BLOCK_CODE_GROUP = "(^```[\\n\\s\\S]*?```(?=\\n))"
+    private const val BLOCK_CODE_GROUP = "(^`{3}[\\s\\S]*?`{3}$)"
 
     //result regex
     private const val MARKDOWN_GROUPS = "$UNORDERED_LIST_ITEM_GROUP|$HEADER_GROUP|$QUOTE_GROUP|" +
@@ -245,31 +245,36 @@ object MarkdownParser {
                     val lines = text.split('\n')
 
                     if (lines.size == 1) {
-                        val entireLine = lines[0] + '\n'
+                        val entireLine = lines[0]
                         val subs = findElements(entireLine)
                         val element = Element.BlockCode(Element.BlockCode.Type.SINGLE, entireLine, subs)
                         parents.add(element)
-                        // next find start from position "endIndex" (last regex character)
-                        lastStartIndex = endIndex
-
                     } else {
-
                         lines.forEachIndexed { index, line ->
-                            val entireLine = line + '\n'
-                            val subs = findElements(entireLine)
-
-                            val type = when (index) {
-                                0 -> Element.BlockCode.Type.START
-                                (lines.size - 1) -> Element.BlockCode.Type.END
-                                else -> Element.BlockCode.Type.MIDDLE
+                            val type: Element.BlockCode.Type
+                            val entireLine: CharSequence
+                            when (index) {
+                                0 -> {
+                                    type = Element.BlockCode.Type.START
+                                    entireLine = line + '\n'
+                                }
+                                (lines.size - 1) -> {
+                                    type = Element.BlockCode.Type.END
+                                    entireLine = line
+                                }
+                                else -> {
+                                    type = Element.BlockCode.Type.MIDDLE
+                                    entireLine = line + '\n'
+                                }
                             }
 
+                            val subs = findElements(entireLine)
                             val element = Element.BlockCode(type, entireLine, subs)
                             parents.add(element)
                         }
-                        lastStartIndex = endIndex
-
                     }
+
+                    lastStartIndex = endIndex
                 }
 
             }
