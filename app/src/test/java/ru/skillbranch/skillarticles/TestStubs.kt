@@ -7,7 +7,6 @@ before simple text
 + Or pluses
 after simple text
 """.trimIndent()
-
 val expectedUnorderedList: List<String> = listOf(
     "Unordered list can use asterisks list",
     "Or minuses",
@@ -24,7 +23,6 @@ before simple text
 ###### Header6 Header6 Header6 Header6 Header6 Header6
 after simple text
 """
-
 val expectedHeader: List<String> = listOf(
     "Header1",
     "Header2 Header2",
@@ -40,7 +38,6 @@ before simple text
 > This line is part of the same quote.
 after simple text
 """.trimIndent()
-
 val expectedQuote: List<String> = listOf(
     "Blockquotes are very handy in email to emulate reply text.",
     "This line is part of the same quote."
@@ -140,6 +137,7 @@ val expectedLink: Map<String, List<String>> = mapOf(
         "https://www.google.com"
     )
 )
+
 
 val markdownString = """
 before header text
@@ -254,11 +252,11 @@ multiline code block
 multiline code block
 multiline code block```
 Use three underscore character _ in new line for horizontal divider
-
+ 
 or three asterisks
-
+ 
 or three minus
-
+ 
 
 simple text and break line
 

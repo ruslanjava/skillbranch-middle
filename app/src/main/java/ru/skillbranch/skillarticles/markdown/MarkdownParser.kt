@@ -54,12 +54,12 @@ object MarkdownParser {
     }
 
     private fun StringBuilder.addElements(element: Element) {
-        if (element.elements.isEmpty()) {
-            append(element.text)
-        } else {
+        if (element.elements.isNotEmpty()) {
             element.elements.forEach {
                 addElements(it)
             }
+        } else {
+            append(element.text)
         }
     }
 
@@ -186,12 +186,8 @@ object MarkdownParser {
 
                 // RULE
                 7 -> {
-                    // text without "___{}"
-                    text = string.subSequence(startIndex.plus(3), endIndex)
-                    // find inner elements
-                    val subs = findElements(text)
-
-                    val element = Element.Rule(text, subs)
+                    // text without "***" insert empty character
+                    val element = Element.Rule(" ")
                     parents.add(element)
 
                     // next find start from position "endIndex" (last regex character)

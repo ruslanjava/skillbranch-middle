@@ -193,12 +193,15 @@ class ExampleUnitTest {
         val expected = """
             before header text
             Header1
-
+ 
             before `text
             after` text bold
         """.trimIndent()
 
         val result = MarkdownParser.clear(clearSimpleText)
+        var formattedResult = result?.replace("\n", "\\n")
+        print(formattedResult)
+
         assertEquals(result, expected)
     }
 
