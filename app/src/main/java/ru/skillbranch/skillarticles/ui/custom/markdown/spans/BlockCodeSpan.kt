@@ -1,11 +1,11 @@
-package ru.skillbranch.skillarticles.markdown.spans
+package ru.skillbranch.skillarticles.ui.custom.markdown.spans
 
 import android.graphics.*
 import android.text.style.ReplacementSpan
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import androidx.annotation.VisibleForTesting
-import ru.skillbranch.skillarticles.markdown.Element
+import ru.skillbranch.skillarticles.ui.custom.markdown.Element
 
 class BlockCodeSpan(
 
@@ -30,9 +30,6 @@ class BlockCodeSpan(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var path = Path()
-
-    private var defaultAscent: Float = 0.0f
-    private var defaultDescent: Float = 0.0f
 
     override fun draw(
             canvas: Canvas,
@@ -132,26 +129,23 @@ class BlockCodeSpan(
             fm: Paint.FontMetricsInt?
     ): Int {
 
-        defaultAscent = paint.ascent() / 0.85f
-        defaultDescent = paint.descent() / 0.85f
-
         if (fm != null) {
             when (type) {
                 Element.BlockCode.Type.SINGLE -> {
-                    fm.ascent = (defaultAscent * 0.85f - 2 * padding).toInt()
-                    fm.descent = (defaultDescent * 0.85f + 2 * padding).toInt()
+                    fm.ascent = (paint.ascent() - 2 * padding).toInt()
+                    fm.descent = (paint.descent() + 2 * padding).toInt()
                 }
                 Element.BlockCode.Type.START -> {
-                    fm.ascent = (defaultAscent * 0.85f - 2 * padding).toInt()
-                    fm.descent = (defaultDescent * 0.85f).toInt()
+                    fm.ascent = (paint.ascent() - 2 * padding).toInt()
+                    fm.descent = (paint.descent()).toInt()
                 }
                 Element.BlockCode.Type.MIDDLE -> {
-                    fm.ascent = (defaultAscent * 0.85f).toInt()
-                    fm.descent = (defaultDescent * 0.85f).toInt()
+                    fm.ascent = (paint.ascent()).toInt()
+                    fm.descent = (paint.descent()).toInt()
                 }
                 Element.BlockCode.Type.END -> {
-                    fm.ascent = (defaultAscent * 0.85f).toInt()
-                    fm.descent = (defaultDescent * 0.85f + 2 * padding).toInt()
+                    fm.ascent = (paint.ascent()).toInt()
+                    fm.descent = (paint.descent() + 2 * padding).toInt()
                 }
             }
         }

@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.markdown.spans
+package ru.skillbranch.skillarticles.ui.custom.markdown.spans
 
 import android.graphics.*
 import android.graphics.drawable.Drawable
@@ -10,9 +10,6 @@ import androidx.annotation.VisibleForTesting
 class IconLinkSpan(
 
         private val linkDrawable: Drawable,
-
-        @ColorInt
-        private val iconColor: Int,
 
         @Px
         private val padding: Float,
@@ -45,7 +42,6 @@ class IconLinkSpan(
         if (fm != null) {
             iconSize = fm.descent - fm.ascent // font size
             linkDrawable.setBounds(0, 0, iconSize, iconSize)
-            linkDrawable.setTint(iconColor)
         }
         textWidth = paint.measureText(text.toString(), start, end)
         return (iconSize + padding + textWidth).toInt()

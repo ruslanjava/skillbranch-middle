@@ -1,4 +1,4 @@
-package ru.skillbranch.skillarticles.markdown.spans
+package ru.skillbranch.skillarticles.ui.custom.markdown.spans
 
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -7,21 +7,20 @@ import android.text.style.LeadingMarginSpan
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
 
-class BlockquotesSpan(
+class OrderedListSpan(
 
-    @Px
-    private val gapWidth: Float,
+        @Px
+        private val gapWidth: Float,
 
-    @Px
-    private val quoteWidth: Float,
+        private val order: String,
 
-    @ColorInt
-    private val lineColor: Int
+        @ColorInt
+        private val orderColor: Int
 
-): LeadingMarginSpan {
+) : LeadingMarginSpan {
 
     override fun getLeadingMargin(first: Boolean): Int {
-        return (quoteWidth + gapWidth).toInt()
+        return (order.length.inc() * gapWidth).toInt()
     }
 
     override fun drawLeadingMargin(canvas: Canvas, paint: Paint,
@@ -36,26 +35,30 @@ class BlockquotesSpan(
                                    isFirstLine: Boolean,
                                    layout: Layout?
     ) {
-        paint.withCustomColor {
-            canvas.drawLine(
-                quoteWidth / 2f, lineTop.toFloat(), quoteWidth / 2f, lineBottom.toFloat(), paint
-            )
+        // only for first line draw bullet
+        if (isFirstLine) {
+            paint.withCustomColor {
+                canvas.drawText(
+                        order,
+                        currentMarginLocation + gapWidth,
+                        lineBaseline.toFloat(),
+                        paint
+                )
+            }
         }
     }
 
     private inline fun Paint.withCustomColor(block: () -> Unit) {
         val oldColor = color
         val oldStyle = style
-        val oldWidth = strokeWidth
 
-        color = lineColor
-        style = Paint.Style.STROKE
-        strokeWidth = quoteWidth
+        color = orderColor
+        style = Paint.Style.FILL
 
         block()
+
         color = oldColor
         style = oldStyle
-        strokeWidth = oldWidth
     }
 
 }
