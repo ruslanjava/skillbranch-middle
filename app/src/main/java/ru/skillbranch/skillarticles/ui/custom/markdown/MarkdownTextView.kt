@@ -7,10 +7,12 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.graphics.withTranslation
 
-class MarkdownTextView @JvmOverloads constructor(
+class MarkdownTextView
+@JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0) : AppCompatTextView(context, attrs, defStyleAttr) {
+    defStyleAttr: Int = 0
+) : AppCompatTextView(context, attrs, defStyleAttr) {
 
     private val searchBgHelper = SearchBgHelper(context) {
         // TODO implement men
