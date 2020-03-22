@@ -10,7 +10,9 @@ import ru.skillbranch.skillarticles.extensions.data.toAppSettings
 import ru.skillbranch.skillarticles.extensions.data.toArticlePersonalInfo
 import ru.skillbranch.skillarticles.extensions.format
 import ru.skillbranch.skillarticles.extensions.indexesOf
+import ru.skillbranch.skillarticles.ui.custom.markdown.MarkdownElement
 import ru.skillbranch.skillarticles.ui.custom.markdown.MarkdownParser
+import ru.skillbranch.skillarticles.ui.custom.markdown.clearContent
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
@@ -58,7 +60,7 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
         }
     }
 
-    override fun getArticleContent(): LiveData<String?> {
+    override fun getArticleContent(): LiveData<List<MarkdownElement>?> {
         return repository.loadArticleContent(articleId)
     }
 
@@ -125,9 +127,9 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
 
     override fun handleSearch(query: String?) {
         query ?: return
-        if (clearContent == null) {
-            clearContent = MarkdownParser.clear(currentState.content)
-        }
+        if (clearContent == null && currentState.content.isNotEmpty())
+            clearContent = currentState.content.clearContent()
+
 
         val result = (clearContent).indexesOf(query).map { it to it + query.length }
         updateState { it.copy(searchQuery = query, searchResults = result ?: emptyList(), searchPosition = 0)}
@@ -144,27 +146,27 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
 }
 
 data class ArticleState(
-        val isAuth: Boolean = false, // пользователь авторизован
-        val isLoadingContent: Boolean = true, // контент загружается
-        val isLoadingReviews: Boolean = true, // отзывы загружаются
-        val isLike: Boolean = false, // отмечено как Like
-        val isBookmark: Boolean = false, // в закладках
-        val isShowMenu: Boolean = false, // отображается меню
-        val isBigText: Boolean = false, // шрифт увеличен
-        val isDarkMode: Boolean = false, // темный режим
-        val isSearch: Boolean = false, // режим поиска
-        val searchQuery: String? = null, // поисковый запрос
-        val searchResults: List<Pair<Int, Int>> = emptyList(), // результаты поиска (стартовая и конечная позиции)
-        val searchPosition: Int = 0, // текущая позиция найденного результата
-        val shareLink: String? = null, // ссылка Share
-        val title: String? = null, // заголовок статьи
-        val category: String? = null, // категория
-        val categoryIcon: Any? = null, // иконка категории
-        val date: String? = null, // дата публикации
-        val author: Any? = null, // автор статьи
-        val poster: String? = null, // обложка статьи
-        val content: String? = null, // контент
-        val reviews: List<Any> = emptyList() // комментарии
+    val isAuth: Boolean = false, // пользователь авторизован
+    val isLoadingContent: Boolean = true, // контент загружается
+    val isLoadingReviews: Boolean = true, // отзывы загружаются
+    val isLike: Boolean = false, // отмечено как Like
+    val isBookmark: Boolean = false, // в закладках
+    val isShowMenu: Boolean = false, // отображается меню
+    val isBigText: Boolean = false, // шрифт увеличен
+    val isDarkMode: Boolean = false, // темный режим
+    val isSearch: Boolean = false, // режим поиска
+    val searchQuery: String? = null, // поисковый запрос
+    val searchResults: List<Pair<Int, Int>> = emptyList(), // результаты поиска (стартовая и конечная позиции)
+    val searchPosition: Int = 0, // текущая позиция найденного результата
+    val shareLink: String? = null, // ссылка Share
+    val title: String? = null, // заголовок статьи
+    val category: String? = null, // категория
+    val categoryIcon: Any? = null, // иконка категории
+    val date: String? = null, // дата публикации
+    val author: Any? = null, // автор статьи
+    val poster: String? = null, // обложка статьи
+    val content: List<MarkdownElement> = emptyList(), // контент
+    val reviews: List<Any> = emptyList() // комментарии
 ) : IViewModelState {
 
     override fun save(outState: Bundle) {

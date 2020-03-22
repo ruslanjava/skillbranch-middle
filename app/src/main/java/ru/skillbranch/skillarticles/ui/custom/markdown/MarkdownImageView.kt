@@ -12,11 +12,16 @@ import androidx.annotation.Px
 import androidx.core.animation.doOnEnd
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.attrValue
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.dpToPx
 import ru.skillbranch.skillarticles.extensions.setPaddingOptionally
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 
 @SuppressLint("ViewConstructor")
 class MarkdownImageView private constructor(
@@ -80,34 +85,36 @@ class MarkdownImageView private constructor(
                 }
             }
             clipToOutline = true
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         }
 
         addView(iv_image)
 
-        tv_title = MarkdownTextView(context).apply {
+        tv_title = MarkdownTextView(context, fontSize * 0.75f).apply {
             setText("title", TextView.BufferType.SPANNABLE)
             setTextColor(colorOnBackground)
             gravity = Gravity.CENTER
             typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL)
             setPaddingOptionally(left = titlePadding, right = titlePadding)
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         }
 
         addView(tv_title)
     }
 
-    constructor(context: Context,
-                fontSize: Float,
-                url: String,
-                title: String,
-                alt: String?
+    constructor(
+        context: Context,
+        fontSize: Float,
+        url: String,
+        title: CharSequence,
+        alt: String?
     ): this(context, fontSize) {
         imageUrl = url
         imageTitle = title
         tv_title.setText(title, TextView.BufferType.SPANNABLE)
 
-        // todo add glide for load image by URL
+        Glide.with(context)
+            .load(url)
+            .transform(AspectRatioResizeTransform())
+            .into(iv_image)
 
         if (alt != null) {
             tv_alt = TextView(context).apply {
@@ -129,13 +136,15 @@ class MarkdownImageView private constructor(
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         var usedHeight = 0
-
         val width = View.getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
-        measureChild(iv_image, widthMeasureSpec, heightMeasureSpec)
-        measureChild(tv_title, widthMeasureSpec, heightMeasureSpec)
-        if (tv_alt != null) {
-            measureChild(tv_alt, widthMeasureSpec, heightMeasureSpec)
-        }
+
+        // create measureSpec for children EXA
+        // all children width == parent width (constraint parent width)
+        val ms = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
+
+        iv_image.measure(ms, heightMeasureSpec)
+        tv_title.measure(ms, heightMeasureSpec)
+        tv_alt?.measure(ms, heightMeasureSpec)
 
         usedHeight += iv_image.measuredHeight
         usedHeight += titleTopMargin
@@ -220,5 +229,39 @@ class MarkdownImageView private constructor(
         }
         va.start()
     }
+
+}
+
+class AspectRatioResizeTransform: BitmapTransformation() {
+
+    private val ID = "ru.skillbranch.skillarticles.ui.custom.markdown.AspectRatioResizeTransform"
+    private val ID_BYTES = ID.toByteArray(StandardCharsets.UTF_8)
+
+    override fun updateDiskCacheKey(messageDigest: MessageDigest) {
+        messageDigest.update(ID_BYTES)
+    }
+
+    override fun transform(
+        pool: BitmapPool,
+        toTransform: Bitmap,
+        outWidth: Int,
+        outHeight: Int
+    ): Bitmap {
+        val originWidth = toTransform.width
+        val originHeight = toTransform.height
+        val aspectRatio = originWidth.toFloat() / originHeight
+
+        return Bitmap.createScaledBitmap(
+            toTransform,
+            outWidth,
+            (outWidth / aspectRatio).toInt(),
+            true
+        )
+
+    }
+
+    override fun equals(other: Any?): Boolean = other is AspectRatioResizeTransform
+
+    override fun hashCode(): Int = ID.hashCode()
 
 }
