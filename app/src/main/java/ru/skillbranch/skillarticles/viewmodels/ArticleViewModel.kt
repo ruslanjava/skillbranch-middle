@@ -127,12 +127,13 @@ class ArticleViewModel(private val articleId: String) : BaseViewModel<ArticleSta
 
     override fun handleSearch(query: String?) {
         query ?: return
-        if (clearContent == null && currentState.content.isNotEmpty())
+        if (clearContent == null && currentState.content.isNotEmpty()) {
             clearContent = currentState.content.clearContent()
-
-
-        val result = (clearContent).indexesOf(query).map { it to it + query.length }
-        updateState { it.copy(searchQuery = query, searchResults = result ?: emptyList(), searchPosition = 0)}
+        }
+        val result = clearContent
+            .indexesOf(query)
+            .map { it to it + query.length }
+        updateState { it.copy(searchQuery = query, searchResults = result, searchPosition = 0)}
     }
 
     fun handleUpResult() {

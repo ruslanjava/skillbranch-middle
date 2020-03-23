@@ -35,7 +35,7 @@
         <ru.skillbranch.skillarticles.ui.custom.markdown.MarkdownContentView
             android:id="@+id/tv_text_content"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:padding="16dp"
             android:focusable="true"
             android:focusableInTouchMode="true"

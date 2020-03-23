@@ -17,14 +17,14 @@ object MarkdownParser {
     private const val RULE_GROUP = "(^[-_*]{3}$)"
     private const val INLINE_GROUP = "((?<!`)`[^`\\s].*?[^`\\s]?`(?!`))"
     private const val LINK_GROUP = "(\\[[^\\[\\]]*?]\\(.+?\\)|^\\[*?]\\(.*?\\))"
-    private const val BLOCK_CODE_GROUP = "(^```[\\s\\S]*?```$)"
-    private const val ORDERED_LIST_ITEM_GROUP = "(^[1-9]{1}[0-9]*[.]\\s.+$)"
-    private const val IMAGE_GROUP = "(!^\\[[^\\[\\]]*?\\]\\(.*?\\)\$)" // group 12
+    private const val BLOCK_CODE_GROUP = "(^```[\\s\\S]*?```$)" // group 10
+    private const val ORDERED_LIST_ITEM_GROUP = "(^\\d{1,2}\\.\\s.+?$)" // group 11
+    private const val IMAGE_GROUP = "(!^\\[[^\\[\\]]*?\\]\\(.*?\\)$)" // group 12
 
     //result regex
     private const val MARKDOWN_GROUPS = "$UNORDERED_LIST_ITEM_GROUP|$HEADER_GROUP|$QUOTE_GROUP|" +
             "$ITALIC_GROUP|$BOLD_GROUP|$STRIKE_GROUP|$RULE_GROUP|$INLINE_GROUP|$LINK_GROUP|" +
-            "$ORDERED_LIST_ITEM_GROUP|$BLOCK_CODE_GROUP|$IMAGE_GROUP"
+            "$BLOCK_CODE_GROUP|$ORDERED_LIST_ITEM_GROUP|$IMAGE_GROUP"
 
     private val elementsPattern by lazy {
         Pattern.compile(MARKDOWN_GROUPS, Pattern.MULTILINE)
@@ -252,24 +252,26 @@ object MarkdownParser {
                     lastStartIndex = endIndex
                 }
 
-                // Ordered List
+                // Block code
                 10 -> {
-                    text = string.subSequence(startIndex, endIndex)
-
-                    val (order: String, subText: String) = "^(\\S*)\\s(.*)".toRegex().find(text)!!.destructured
-
-                    val element = Element.OrderedListItem(order, subText)
-                    parents.add(element)
-
-                    // next find start from position endIndex
+                    text = string.subSequence(startIndex.plus(3), endIndex.minus(3))
+                    parents.add(Element.BlockCode(text))
                     lastStartIndex = endIndex
                 }
 
-                // Block code
+                // Numeric list
                 11 -> {
-                    text = string.subSequence(startIndex.plus(3), endIndex.minus(3))
+                    val reg = "(^\\d{1,2}.)".toRegex().find(string.substring(startIndex, endIndex))
+                    val order = reg!!.value
+                    text = string.subSequence(startIndex.plus(order.length.inc()), endIndex).toString()
+
                     val subs = findElements(text)
-                    parents.add(Element.BlockCode(text, subs))
+                    val element = Element.OrderedListItem(
+                        order, text.toString(), subs
+                    )
+                    parents.add(element)
+
+                    // next find start from position endIndex
                     lastStartIndex = endIndex
                 }
 
@@ -420,7 +422,7 @@ private fun Element.spread() : List<Element> {
 
 private fun List<Element>.spread(): List<Element> {
     val elements = mutableListOf<Element>()
-    forEach { elements.addAll(it.spread()) }
+    this.forEach { elements.addAll(it.spread()) }
     return elements
 }
 

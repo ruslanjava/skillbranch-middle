@@ -71,7 +71,7 @@ class MarkdownContentView @JvmOverloads constructor(
 
     fun setContent(content: List<MarkdownElement>) {
         elements = content
-        content.forEach {
+        elements.forEach {
             when (it) {
                 is MarkdownElement.Text -> {
                     val tv = MarkdownTextView(context, textSize).apply {
@@ -86,6 +86,7 @@ class MarkdownContentView @JvmOverloads constructor(
                         }
 
                     addView(tv)
+                    children.add(tv)
                 }
 
                 is MarkdownElement.Image -> {
@@ -97,6 +98,7 @@ class MarkdownContentView @JvmOverloads constructor(
                         it.image.alt
                     )
                     addView(iv)
+                    children.add(iv)
                 }
 
                 is MarkdownElement.Scroll -> {
