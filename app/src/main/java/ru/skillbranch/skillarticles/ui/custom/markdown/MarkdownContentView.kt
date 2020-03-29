@@ -29,6 +29,7 @@ class MarkdownContentView @JvmOverloads constructor(
     }
 
     var isLoading: Boolean = true
+    val padding = context.dpToIntPx(8)
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         var usedHeight = paddingTop
@@ -75,11 +76,12 @@ class MarkdownContentView @JvmOverloads constructor(
             when (it) {
                 is MarkdownElement.Text -> {
                     val tv = MarkdownTextView(context, textSize).apply {
+                        val padding = context.dpToIntPx(8)
                         setPaddingOptionally(
                             left = context.dpToIntPx(8),
                             right = context.dpToIntPx(8)
                         )
-                        // setLineSpacing(fontSize * 0.5f, 1f)
+                        setLineSpacing(fontSize * 0.5f, 1f)
                     }
 
                     MarkdownBuilder(context)
@@ -103,7 +105,12 @@ class MarkdownContentView @JvmOverloads constructor(
                 }
 
                 is MarkdownElement.Scroll -> {
-                    // todo implement me
+                    val sv = MarkdownCodeView(
+                        context,
+                        textSize,
+                        it.blockCode.text
+                    )
+                    addView(sv)
                 }
             }
         }
