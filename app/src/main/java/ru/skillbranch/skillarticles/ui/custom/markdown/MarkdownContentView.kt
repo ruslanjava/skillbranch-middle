@@ -75,8 +75,11 @@ class MarkdownContentView @JvmOverloads constructor(
             when (it) {
                 is MarkdownElement.Text -> {
                     val tv = MarkdownTextView(context, textSize).apply {
-                        setPaddingOptionally(left = context.dpToIntPx(8), right = context.dpToIntPx(8))
-                        setLineSpacing(fontSize * 0.5f, 1f)
+                        setPaddingOptionally(
+                            left = context.dpToIntPx(8),
+                            right = context.dpToIntPx(8)
+                        )
+                        // setLineSpacing(fontSize * 0.5f, 1f)
                     }
 
                     MarkdownBuilder(context)
@@ -86,7 +89,6 @@ class MarkdownContentView @JvmOverloads constructor(
                         }
 
                     addView(tv)
-                    children.add(tv)
                 }
 
                 is MarkdownElement.Image -> {
@@ -98,7 +100,6 @@ class MarkdownContentView @JvmOverloads constructor(
                         it.image.alt
                     )
                     addView(iv)
-                    children.add(iv)
                 }
 
                 is MarkdownElement.Scroll -> {
@@ -109,7 +110,71 @@ class MarkdownContentView @JvmOverloads constructor(
     }
 
     fun renderSearchResult(searchResult: List<Pair<Int, Int>>) {
-        // todo implement me
+        children.forEach { view ->
+            view as IMarkdownView
+            view.clearSearchResult()
+        }
+
+        if (searchResult.isEmpty()) return
+
+        val bounds = elements.map { it.bounds }
+        val result = searchResult.groupByBounds(bounds)
+
+        children.forEachIndexed { index, view ->
+            view as IMarkdownView
+            // search for child with markdown element offset
+            view.renderSearchResult(result[index], elements[index].offset)
+        }
+    }
+
+    fun renderSearchPosition(
+        searchPosition: Pair<Int, Int>?
+    ) {
+        searchPosition ?: return
+        val bounds = elements.map { it.bounds }
+
+        val index = bounds.indexOfFirst { (start, end) ->
+            val boundRange = start..end
+            val (startPos, endPos) = searchPosition
+            startPos in boundRange && endPos in boundRange
+        }
+
+        if (index == -1) return
+        val view = getChildAt(index)
+        view as IMarkdownView
+        view.renderSearchPosition(searchPosition, elements[index].offset)
+    }
+
+    fun clearSearchResult() {
+        children.forEach { view ->
+            view as IMarkdownView
+            view.clearSearchResult()
+        }
+    }
+
+    override fun addView(view: View) {
+        super.addView(view)
+        children.add(view)
     }
 
 }
+
+private fun List<Pair<Int, Int>>.groupByBounds(bounds: List<Pair<Int, Int>>): List<MutableList<Pair<Int, Int>>> {
+    val result = mutableListOf<MutableList<Pair<Int, Int>>>()
+    var index = 0
+    bounds.forEach {
+        val subList = mutableListOf<Pair<Int, Int>>()
+        while (index < size) {
+            val searchPair = get(index)
+            if (searchPair.first >= it.first && searchPair.second <= it.second) {
+                subList.add(searchPair)
+                index++
+            } else {
+                break
+            }
+        }
+        result.add(subList)
+    }
+    return result
+}
+

@@ -2,10 +2,10 @@ package ru.skillbranch.skillarticles.ui.custom.markdown
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.text.Spannable
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
-import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.graphics.withTranslation
 import ru.skillbranch.skillarticles.R
@@ -33,6 +33,7 @@ class MarkdownTextView
     }
 
     init {
+        // setBackgroundColor(Color.GREEN)
         setTextColor(color)
         textSize = fontSize
         movementMethod = LinkMovementMethod.getInstance()
@@ -40,7 +41,7 @@ class MarkdownTextView
 
     override fun onDraw(canvas: Canvas) {
         if (text is Spanned && layout != null) {
-            canvas.withTranslation(totalPaddingLeft.toFloat(), totalPaddingRight.toFloat()) {
+            canvas.withTranslation(totalPaddingLeft.toFloat(), totalPaddingTop.toFloat()) {
                 searchBgHelper.draw(canvas, text as Spanned, layout)
             }
         }
