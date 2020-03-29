@@ -159,6 +159,13 @@ class MarkdownContentView @JvmOverloads constructor(
         }
     }
 
+    fun setCopyListener(listener: (String) -> Unit) {
+        children.filterIsInstance<MarkdownCodeView>()
+            .forEach {
+                it.copyListener = listener
+            }
+    }
+
     override fun addView(view: View) {
         super.addView(view)
         children.add(view)
