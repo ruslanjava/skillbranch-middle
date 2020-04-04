@@ -23,13 +23,13 @@
         <item name="colorOnError">#FFFFFF</item>
         <item name="colorSurface">@color/color_surface</item>
         <item name="colorOnSurface">@color/color_on_surface</item>
-
+        <item name="colorOnBackground">@color/color_gray</item>
         <item name="snackbarStyle">@style/CustomSnackbar</item>
 
-        <item name="darkSurfaceColor">#272727</item>
-        <item name="lightSurfaceColor">#F6F6F6</item>
-        <item name="darkOnSurfaceColor">#F6F6F6</item>
-        <item name="lightOnSurfaceColor">#202020</item>
+        <item name="darkSurfaceColor"  >#272727</item>
+        <item name="lightSurfaceColor"  >#F6F6F6</item>
+        <item name="darkOnSurfaceColor" >#F6F6F6</item>
+        <item name="lightOnSurfaceColor" >#202020</item>
 
     </style>
 
