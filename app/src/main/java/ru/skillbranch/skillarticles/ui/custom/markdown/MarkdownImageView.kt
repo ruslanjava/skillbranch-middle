@@ -97,7 +97,6 @@ open class MarkdownImageView private constructor(
             }
             clipToOutline = true
         }
-        iv_image.id = ViewCompat.generateViewId()
         addView(iv_image)
 
         tv_title = MarkdownTextView(context, fontSize * 0.75f).apply {
@@ -107,7 +106,6 @@ open class MarkdownImageView private constructor(
             typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL)
             setPaddingOptionally(left = titlePadding, right = titlePadding)
         }
-        tv_title.id = ViewCompat.generateViewId()
         addView(tv_title)
     }
 
@@ -118,6 +116,7 @@ open class MarkdownImageView private constructor(
         title: CharSequence,
         alt: String?
     ) : this(context, fontSize) {
+        id = ViewCompat.generateViewId()
         imageUrl = url
         imageTitle = title
         tv_title.setText(title, TextView.BufferType.SPANNABLE)
@@ -241,16 +240,16 @@ open class MarkdownImageView private constructor(
     }
 
     override fun onSaveInstanceState(): Parcelable {
-        val superState: Parcelable = super.onSaveInstanceState()!!
-        val myState = SavedState(superState)
+        val myState = SavedState(super.onSaveInstanceState())
         myState.altVisible = tv_alt!!.isVisible
         return myState
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
-        val savedState = state as SavedState
-        super.onRestoreInstanceState(savedState.superState)
-        if (savedState.altVisible) animateShowAlt() else animateHideAlt()
+        super.onRestoreInstanceState(state)
+        if (state is SavedState) {
+            if (state.altVisible) animateShowAlt() else animateHideAlt()
+        }
     }
 
     class SavedState: BaseSavedState, Parcelable {

@@ -16,6 +16,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
+import androidx.core.view.ViewCompat
 import androidx.core.view.setPadding
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.attrValue
@@ -138,6 +139,7 @@ open class MarkdownCodeView constructor(
         fontSize: Float,
         code: CharSequence
     ): this(context, fontSize) {
+        id = ViewCompat.generateViewId()
         codeString = code
         isSingleLine = code.lines().size == 1
         tv_codeView.setText(codeString, TextView.BufferType.SPANNABLE)
@@ -226,24 +228,20 @@ open class MarkdownCodeView constructor(
     }
 
     override fun onSaveInstanceState(): Parcelable {
-        val superState: Parcelable = super.onSaveInstanceState()!!
-
-        val myState = SavedState(superState)
+        val myState = SavedState(super.onSaveInstanceState())
         myState.isManual = isManual
         myState.isDark = isDark
-
         return myState
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
-        val savedState = state as SavedState
-        super.onRestoreInstanceState(savedState.superState)
-
-        isManual = savedState.isManual
-        isDark = savedState.isDark
-        applyColors()
-
-        invalidate()
+        super.onRestoreInstanceState(state)
+        if (state is SavedState) {
+            isManual = state.isManual
+            isDark = state.isDark
+            applyColors()
+            invalidate()
+        }
     }
 
     class SavedState: BaseSavedState, Parcelable {

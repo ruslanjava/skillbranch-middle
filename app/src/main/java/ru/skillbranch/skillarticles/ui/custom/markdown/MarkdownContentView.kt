@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.view.ViewCompat
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.groupByBounds
@@ -93,8 +92,6 @@ class MarkdownContentView @JvmOverloads constructor(
                         .run {
                             tv.setText(this, TextView.BufferType.SPANNABLE)
                         }
-
-                    tv.id = ViewCompat.generateViewId()
                     addView(tv)
                 }
 
@@ -106,7 +103,6 @@ class MarkdownContentView @JvmOverloads constructor(
                         it.image.text,
                         it.image.alt
                     )
-                    iv.id = ViewCompat.generateViewId()
                     addView(iv)
                 }
 
@@ -116,7 +112,6 @@ class MarkdownContentView @JvmOverloads constructor(
                         textSize,
                         it.blockCode.text
                     )
-                    sv.id = ViewCompat.generateViewId()
                     addView(sv)
                 }
             }
