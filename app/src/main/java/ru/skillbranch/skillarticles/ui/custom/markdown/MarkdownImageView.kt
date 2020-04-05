@@ -250,8 +250,7 @@ open class MarkdownImageView private constructor(
     override fun onRestoreInstanceState(state: Parcelable) {
         val savedState = state as SavedState
         super.onRestoreInstanceState(savedState.superState)
-        tv_alt!!.isVisible = savedState.altVisible
-        invalidate()
+        if (savedState.altVisible) animateShowAlt() else animateHideAlt()
     }
 
     class SavedState: BaseSavedState, Parcelable {
