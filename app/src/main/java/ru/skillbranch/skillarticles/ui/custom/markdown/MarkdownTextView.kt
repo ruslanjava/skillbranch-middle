@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
+import android.os.Parcel
+import android.os.Parcelable
 import android.text.Spannable
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
@@ -13,6 +15,7 @@ import androidx.core.graphics.withTranslation
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.attrValue
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
+import ru.skillbranch.skillarticles.ui.custom.Bottombar
 
 @SuppressLint("ViewConstructor")
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -40,6 +43,7 @@ constructor(
     private val searchBgHelper: SearchBgHelper
 
     init {
+        isSaveEnabled = true
         searchBgHelper = mockHelper ?: SearchBgHelper(context) { top, bottom ->
             focusRect.set(0, top - context.dpToIntPx(56), width, bottom + context.dpToIntPx(56))
             //show rect with animation on view

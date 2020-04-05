@@ -3,6 +3,8 @@ package ru.skillbranch.skillarticles.ui.custom.markdown
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
+import android.os.Parcel
+import android.os.Parcelable
 import android.text.Spannable
 import android.view.*
 import android.widget.ImageView
@@ -12,6 +14,7 @@ import androidx.annotation.Px
 import androidx.annotation.VisibleForTesting
 import androidx.core.animation.doOnEnd
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool
@@ -78,7 +81,7 @@ open class MarkdownImageView private constructor(
     }
 
     init {
-        // setBackgroundColor(Color.RED)
+        isSaveEnabled = true
 
         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         iv_image = ImageView(context).apply {
@@ -94,7 +97,7 @@ open class MarkdownImageView private constructor(
             }
             clipToOutline = true
         }
-
+        iv_image.id = ViewCompat.generateViewId()
         addView(iv_image)
 
         tv_title = MarkdownTextView(context, fontSize * 0.75f).apply {
@@ -104,7 +107,7 @@ open class MarkdownImageView private constructor(
             typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL)
             setPaddingOptionally(left = titlePadding, right = titlePadding)
         }
-
+        tv_title.id = ViewCompat.generateViewId()
         addView(tv_title)
     }
 
@@ -212,6 +215,7 @@ open class MarkdownImageView private constructor(
 
     private fun animateShowAlt() {
         tv_alt?.isVisible = true
+
         val endRadius = hypot(tv_alt?.width?.toFloat() ?: 0f, tv_alt?.height?.toFloat() ?: 0f)
         val va = ViewAnimationUtils.createCircularReveal(
             tv_alt,
@@ -235,6 +239,45 @@ open class MarkdownImageView private constructor(
         va.doOnEnd { tv_alt?.isVisible = false }
         va.start()
     }
+
+    override fun onSaveInstanceState(): Parcelable {
+        val superState: Parcelable = super.onSaveInstanceState()!!
+        val myState = SavedState(superState)
+        myState.altVisible = tv_alt!!.isVisible
+        return myState
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable) {
+        val savedState = state as SavedState
+        super.onRestoreInstanceState(savedState.superState)
+        tv_alt!!.isVisible = savedState.altVisible
+        invalidate()
+    }
+
+    class SavedState: BaseSavedState, Parcelable {
+
+        var altVisible: Boolean = false
+
+        constructor(superState: Parcelable?) : super(superState)
+
+        constructor(src: Parcel) : super(src) {
+            altVisible = src.readInt() == 1
+        }
+
+        override fun writeToParcel(dst: Parcel, flags: Int) {
+            super.writeToParcel(dst, flags)
+            dst.writeInt(if (altVisible) 1 else 0)
+        }
+
+        override fun describeContents() = 0
+
+        companion object CREATOR : Parcelable.Creator<SavedState> {
+            override fun createFromParcel(parcel: Parcel) = SavedState(parcel)
+            override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
+        }
+
+    }
+
 }
 
 class AspectRatioResizeTransform: BitmapTransformation() {
