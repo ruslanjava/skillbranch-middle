@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
+import ru.skillbranch.skillarticles.extensions.groupByBounds
 import ru.skillbranch.skillarticles.extensions.setPaddingOptionally
 import kotlin.properties.Delegates
 
@@ -15,10 +16,11 @@ class MarkdownContentView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : ViewGroup(context, attrs, defStyleAttr) {
-    lateinit var elements: List<MarkdownElement>
+    private lateinit var elements: List<MarkdownElement>
+
     private val children: MutableList<View> = mutableListOf()
 
-    // for restore
+    //for restore
     private var ids = arrayListOf<Int>()
 
     var textSize by Delegates.observable(14f) { _, old, value ->
@@ -173,23 +175,3 @@ class MarkdownContentView @JvmOverloads constructor(
     }
 
 }
-
-private fun List<Pair<Int, Int>>.groupByBounds(bounds: List<Pair<Int, Int>>): List<MutableList<Pair<Int, Int>>> {
-    val result = mutableListOf<MutableList<Pair<Int, Int>>>()
-    var index = 0
-    bounds.forEach {
-        val subList = mutableListOf<Pair<Int, Int>>()
-        while (index < size) {
-            val searchPair = get(index)
-            if (searchPair.first >= it.first && searchPair.second <= it.second) {
-                subList.add(searchPair)
-                index++
-            } else {
-                break
-            }
-        }
-        result.add(subList)
-    }
-    return result
-}
-

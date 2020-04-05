@@ -7,16 +7,24 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.text.Layout
 import android.text.Spanned
+import androidx.annotation.VisibleForTesting
 import androidx.core.text.getSpans
 import ru.skillbranch.skillarticles.extensions.*
 import ru.skillbranch.skillarticles.ui.custom.spans.HeaderSpan
 import ru.skillbranch.skillarticles.ui.custom.spans.SearchFocusSpan
 import ru.skillbranch.skillarticles.ui.custom.spans.SearchSpan
 
-class SearchBgHelper(
+open class SearchBgHelper(
     context: Context,
-    private val focusListener: (Int, Int) -> Unit
+    private val focusListener: ((Int, Int) -> Unit)? = null,
+    protected var mockDrawable: Drawable? = null //for mock drawable
 ) {
+
+    constructor(context: Context, focusListener: ((Int, Int) -> Unit)) : this(
+        context,
+        focusListener,
+        null
+    )
 
     private val padding: Int = context.dpToIntPx(4)
     private val borderWidth: Int = context.dpToIntPx(1)
@@ -74,8 +82,9 @@ class SearchBgHelper(
 
     private lateinit var render: SearchBgRender
     private val singleLineRender: SingleLineRender by lazy {
-        SingleLineRender(padding, drawable)
+        SingleLineRender(padding, if (mockDrawable != null) mockDrawable!! else drawable)
     }
+
     private val multiLineRender: MultiLineRender by lazy {
         MultiLineRender(
             padding,
@@ -109,7 +118,7 @@ class SearchBgHelper(
 
             if (it is SearchFocusSpan) {
                 // if search focus invoke
-                focusListener.invoke(layout.getLineTop(startLine), layout.getLineBottom(startLine))
+                focusListener?.invoke(layout.getLineTop(startLine), layout.getLineBottom(startLine))
             }
 
             val headerSpans = text.getSpans(spanStart, spanEnd, HeaderSpan::class.java)
@@ -198,6 +207,7 @@ class SingleLineRender(
         drawable.setBounds(startOffset - padding, lineTop, endOffset + padding, lineBottom)
         drawable.draw(canvas)
     }
+
 }
 
 class MultiLineRender(
@@ -271,4 +281,3 @@ class MultiLineRender(
     }
 
 }
-

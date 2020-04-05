@@ -1,23 +1,29 @@
 package ru.skillbranch.skillarticles.ui.custom.markdown
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Rect
 import android.text.Spannable
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.graphics.withTranslation
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.attrValue
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 
+@SuppressLint("ViewConstructor")
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 class MarkdownTextView
-@JvmOverloads constructor(
+constructor(
     context: Context,
-    fontSize: Float
+    fontSize: Float,
+    var mockHelper: SearchBgHelper? = null // for mock
 ) : AppCompatTextView(context, null, 0), IMarkdownView {
+
+    constructor(context: Context, fontSize: Float) : this(context, fontSize, null)
 
     override var fontSize: Float = fontSize
         set(value) {
@@ -26,7 +32,7 @@ class MarkdownTextView
         }
 
     override val spannableContent: Spannable
-    get() = text as Spannable
+        get() = text as Spannable
 
     private val color = context.attrValue(R.attr.colorOnBackground)
     private val focusRect = Rect()
@@ -51,6 +57,7 @@ class MarkdownTextView
         if (text is Spanned && layout != null) {
             canvas.withTranslation(totalPaddingLeft.toFloat(), totalPaddingTop.toFloat()) {
                 searchBgHelper.draw(canvas, text as Spanned, layout)
+                mockHelper?.draw(canvas, text as Spanned, layout)
             }
         }
         super.onDraw(canvas)

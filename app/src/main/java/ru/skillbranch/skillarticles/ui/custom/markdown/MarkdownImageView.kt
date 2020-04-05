@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
+import androidx.annotation.VisibleForTesting
 import androidx.core.animation.doOnEnd
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
@@ -22,19 +23,20 @@ import ru.skillbranch.skillarticles.extensions.dpToPx
 import ru.skillbranch.skillarticles.extensions.setPaddingOptionally
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import kotlin.math.hypot
 
 @SuppressLint("ViewConstructor")
-class MarkdownImageView private constructor(
+open class MarkdownImageView private constructor(
     context: Context,
     fontSize: Float
 ) : ViewGroup(context, null, 0), IMarkdownView {
 
     override var fontSize: Float = fontSize
-    set(value) {
-        tv_title.textSize = value * 0.75f
-        tv_alt?.textSize = value
-        field = value
-    }
+        set(value) {
+            tv_title.textSize = value * 0.75f
+            tv_alt?.textSize = value
+            field = value
+        }
     override val spannableContent: Spannable
         get() = tv_title.text as Spannable
 
@@ -42,9 +44,14 @@ class MarkdownImageView private constructor(
     lateinit var imageUrl: String
     lateinit var imageTitle: CharSequence
 
-    private val iv_image: ImageView
-    private val tv_title: MarkdownTextView
-    private var tv_alt: TextView? = null
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    val iv_image: ImageView
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    val tv_title: MarkdownTextView
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    var tv_alt: TextView? = null
 
     @Px
     private val titleTopMargin: Int = context.dpToIntPx(8)
@@ -71,7 +78,6 @@ class MarkdownImageView private constructor(
     }
 
     init {
-
         // setBackgroundColor(Color.RED)
 
         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
@@ -108,7 +114,7 @@ class MarkdownImageView private constructor(
         url: String,
         title: CharSequence,
         alt: String?
-    ): this(context, fontSize) {
+    ) : this(context, fontSize) {
         imageUrl = url
         imageTitle = title
         tv_title.setText(title, TextView.BufferType.SPANNABLE)
@@ -136,7 +142,7 @@ class MarkdownImageView private constructor(
         }
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+    public override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         var usedHeight = 0
         val width = View.getDefaultSize(suggestedMinimumWidth, widthMeasureSpec)
 
@@ -156,7 +162,7 @@ class MarkdownImageView private constructor(
         setMeasuredDimension(width, usedHeight)
     }
 
-    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+    public override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         var usedHeight = 0
         val bodyWidth = r - l - paddingLeft - paddingRight
         val left = paddingLeft
@@ -186,7 +192,7 @@ class MarkdownImageView private constructor(
         )
     }
 
-    override fun dispatchDraw(canvas: Canvas) {
+    public override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas)
         canvas.drawLine(
             0f,
@@ -206,7 +212,7 @@ class MarkdownImageView private constructor(
 
     private fun animateShowAlt() {
         tv_alt?.isVisible = true
-        val endRadius = kotlin.math.hypot(tv_alt?.width?.toFloat() ?: 0f, tv_alt?.height?.toFloat() ?: 0f)
+        val endRadius = hypot(tv_alt?.width?.toFloat() ?: 0f, tv_alt?.height?.toFloat() ?: 0f)
         val va = ViewAnimationUtils.createCircularReveal(
             tv_alt,
             tv_alt?.width ?: 0,
@@ -218,7 +224,7 @@ class MarkdownImageView private constructor(
     }
 
     private fun animateHideAlt() {
-        val endRadius = kotlin.math.hypot(tv_alt?.width?.toFloat() ?: 0f, tv_alt?.height?.toFloat() ?: 0f)
+        val endRadius = hypot(tv_alt?.width?.toFloat() ?: 0f, tv_alt?.height?.toFloat() ?: 0f)
         val va = ViewAnimationUtils.createCircularReveal(
             tv_alt,
             tv_alt?.width ?: 0,
@@ -226,12 +232,9 @@ class MarkdownImageView private constructor(
             endRadius,
             0f
         )
-        va.doOnEnd {
-            tv_alt?.isVisible = false
-        }
+        va.doOnEnd { tv_alt?.isVisible = false }
         va.start()
     }
-
 }
 
 class AspectRatioResizeTransform: BitmapTransformation() {
@@ -259,7 +262,6 @@ class AspectRatioResizeTransform: BitmapTransformation() {
             (outWidth / aspectRatio).toInt(),
             true
         )
-
     }
 
     override fun equals(other: Any?): Boolean = other is AspectRatioResizeTransform
