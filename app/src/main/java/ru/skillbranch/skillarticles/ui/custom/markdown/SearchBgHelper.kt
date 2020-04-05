@@ -34,7 +34,7 @@ open class SearchBgHelper(
     private val alphaColor: Int = androidx.core.graphics.ColorUtils.setAlphaComponent(secondaryColor, 160)
 
     val drawable: Drawable by lazy {
-        GradientDrawable().apply {
+        mockDrawable ?: GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadii = FloatArray(8).apply {
                 fill(radius, 0, size)
@@ -45,7 +45,7 @@ open class SearchBgHelper(
     }
 
     val drawableLeft: Drawable by lazy {
-        GradientDrawable().apply {
+        mockDrawable ?: GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadii = floatArrayOf(
                 radius, radius, // top left radius in px
@@ -59,7 +59,7 @@ open class SearchBgHelper(
     }
 
     val drawableMiddle: Drawable by lazy {
-        GradientDrawable().apply {
+        mockDrawable ?: GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             color = ColorStateList.valueOf(alphaColor)
             setStroke(borderWidth, secondaryColor)
@@ -67,7 +67,7 @@ open class SearchBgHelper(
     }
 
     val drawableRight: Drawable by lazy {
-        GradientDrawable().apply {
+        mockDrawable ?: GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             cornerRadii = floatArrayOf(
                 0f, 0f,         // top left radius in px
@@ -127,7 +127,6 @@ open class SearchBgHelper(
             bottomExtraPadding = 0
 
             if (headerSpans.isNotEmpty()) {
-                // TODO
                 topExtraPadding = if (
                     spanStart in headerSpans[0].firstLineBounds ||
                     spanEnd in headerSpans[0].firstLineBounds
@@ -201,7 +200,6 @@ class SingleLineRender(
         topExtraPadding: Int,
         bottomExtraPadding: Int
     ) {
-        // TODO implement extra padding
         lineTop = getLineTop(layout, startLine) + topExtraPadding
         lineBottom = getLineBottom(layout, startLine) - bottomExtraPadding
         drawable.setBounds(startOffset - padding, lineTop, endOffset + padding, lineBottom)

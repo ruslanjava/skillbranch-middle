@@ -37,16 +37,14 @@ constructor(
     private val color = context.attrValue(R.attr.colorOnBackground)
     private val focusRect = Rect()
 
-    private val searchBgHelper = SearchBgHelper(context) { top, bottom ->
-        focusRect.set(
-            0, top - context.dpToIntPx(56),
-            width, bottom + context.dpToIntPx(56)
-        )
-        // show rect on view with animation
-        requestRectangleOnScreen(focusRect, false)
-    }
+    private val searchBgHelper: SearchBgHelper
 
     init {
+        searchBgHelper = mockHelper ?: SearchBgHelper(context) { top, bottom ->
+            focusRect.set(0, top - context.dpToIntPx(56), width, bottom + context.dpToIntPx(56))
+            //show rect with animation on view
+            requestRectangleOnScreen(focusRect, false)
+        }
         // setBackgroundColor(Color.GREEN)
         setTextColor(color)
         textSize = fontSize
@@ -57,7 +55,6 @@ constructor(
         if (text is Spanned && layout != null) {
             canvas.withTranslation(totalPaddingLeft.toFloat(), totalPaddingTop.toFloat()) {
                 searchBgHelper.draw(canvas, text as Spanned, layout)
-                mockHelper?.draw(canvas, text as Spanned, layout)
             }
         }
         super.onDraw(canvas)
