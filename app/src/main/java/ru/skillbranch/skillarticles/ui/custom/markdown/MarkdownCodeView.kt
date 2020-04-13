@@ -240,7 +240,6 @@ open class MarkdownCodeView constructor(
             isManual = state.isManual
             isDark = state.isDark
             applyColors()
-            invalidate()
         }
     }
 

@@ -1,10 +1,15 @@
 package ru.skillbranch.skillarticles.ui.custom.markdown
 
 import android.content.Context
+import android.os.Parcel
+import android.os.Parcelable
 import android.util.AttributeSet
+import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.util.isEmpty
+import androidx.core.view.ViewCompat
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.groupByBounds
@@ -16,7 +21,9 @@ class MarkdownContentView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : ViewGroup(context, attrs, defStyleAttr) {
+
     private lateinit var elements: List<MarkdownElement>
+    private var layoutManager: LayoutManager = LayoutManager()
 
     private val children: MutableList<View> = mutableListOf()
 
@@ -171,6 +178,94 @@ class MarkdownContentView @JvmOverloads constructor(
     override fun addView(view: View) {
         super.addView(view)
         children.add(view)
+    }
+
+    override fun onSaveInstanceState(): Parcelable? {
+        val state = SavedState(super.onSaveInstanceState())
+        state.layout = layoutManager
+        return state
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        super.onRestoreInstanceState(state)
+        if (state is SavedState) {
+            layoutManager = state.layout
+        }
+
+        // temp solution, remove this in fragment
+        children
+            .filter { it !is MarkdownTextView }
+            .forEachIndexed { index, view ->
+                layoutManager.attachToParent(view, index)
+            }
+    }
+
+    override fun dispatchSaveInstanceState(container: SparseArray<Parcelable>?) {
+        // temp solution, remove this in fragment
+        // save children manually
+        children.filter { it !is MarkdownTextView }
+            .forEach { it.saveHierarchyState(layoutManager.container)}
+        // save only markdown
+        super.dispatchSaveInstanceState(container)
+        dispatchFreezeSelfOnly(container)
+    }
+
+    private class LayoutManager(): Parcelable {
+
+        var ids: MutableList<Int> = mutableListOf()
+        var container: SparseArray<Parcelable> = SparseArray()
+
+        constructor(parcel: Parcel): this() {
+            ids = parcel.readArrayList(Int::class.java.classLoader) as ArrayList<Int>
+            container = parcel.readSparseArray<Parcelable>(this::class.java.classLoader) as SparseArray<Parcelable>
+        }
+
+        override fun writeToParcel(parcel: Parcel, flags: Int) {
+            parcel.writeIntArray(ids.toIntArray())
+            parcel.writeSparseArray(container)
+        }
+
+        fun attachToParent(view: View, index: Int) {
+            if (container.isEmpty()) {
+                view.id = ViewCompat.generateViewId()
+                ids.add(view.id)
+            } else {
+                view.id = ids[index]
+                view.restoreHierarchyState(container)
+            }
+        }
+
+        override fun describeContents(): Int = 0
+
+        companion object CREATOR : Parcelable.Creator<LayoutManager> {
+            override fun createFromParcel(parcel: Parcel): LayoutManager = LayoutManager(parcel)
+            override fun newArray(size: Int): Array<LayoutManager?> = arrayOfNulls(size)
+        }
+
+    }
+
+    private class SavedState : BaseSavedState, Parcelable {
+
+        lateinit var layout: LayoutManager
+
+        constructor(superState: Parcelable?) : super(superState)
+
+        constructor(src: Parcel) : super(src) {
+            layout = src.readParcelable(LayoutManager::class.java.classLoader)!!
+        }
+
+        override fun writeToParcel(dst: Parcel, flags: Int) {
+            super.writeToParcel(dst, flags)
+            dst.writeParcelable(layout, flags)
+        }
+
+        override fun describeContents() = 0
+
+        companion object CREATOR : Parcelable.Creator<SavedState> {
+            override fun createFromParcel(parcel: Parcel) = SavedState(parcel)
+            override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
+        }
+
     }
 
 }

@@ -6,6 +6,7 @@ import android.graphics.*
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.Spannable
+import android.util.SparseArray
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
@@ -14,6 +15,7 @@ import androidx.annotation.Px
 import androidx.annotation.VisibleForTesting
 import androidx.core.animation.doOnEnd
 import androidx.core.graphics.ColorUtils
+import androidx.core.util.isEmpty
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
@@ -55,6 +57,9 @@ open class MarkdownImageView private constructor(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var tv_alt: TextView? = null
+
+    private var isOpen: Boolean = false
+    private var aspectRatio : Float = 0f
 
     @Px
     private val titleTopMargin: Int = context.dpToIntPx(8)
@@ -135,12 +140,19 @@ open class MarkdownImageView private constructor(
                 textSize = fontSize
                 setPadding(titleTopMargin, titleTopMargin, titleTopMargin, titleTopMargin)
                 isVisible = false
+                isOpen = false
             }
         }
         addView(tv_alt)
 
         iv_image.setOnClickListener {
-            if (tv_alt?.isVisible == true) animateHideAlt() else animateShowAlt()
+            if (tv_alt?.isVisible == true) {
+                isOpen = false
+                animateHideAlt()
+            } else {
+                isOpen = true
+                animateShowAlt()
+            }
         }
     }
 
@@ -240,31 +252,37 @@ open class MarkdownImageView private constructor(
     }
 
     override fun onSaveInstanceState(): Parcelable {
-        val myState = SavedState(super.onSaveInstanceState())
-        myState.altVisible = tv_alt!!.isVisible
-        return myState
+        val savedState = SavedState(super.onSaveInstanceState())
+        savedState.isOpen = isOpen
+        savedState.aspectRatio = (iv_image.width.toFloat() / iv_image.height)
+        return savedState
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {
         super.onRestoreInstanceState(state)
         if (state is SavedState) {
-            if (state.altVisible) animateShowAlt() else animateHideAlt()
+            isOpen = state.isOpen
+            aspectRatio = state.aspectRatio
+            tv_alt?.isVisible = isOpen
         }
     }
 
     class SavedState: BaseSavedState, Parcelable {
 
-        var altVisible: Boolean = false
+        var isOpen: Boolean = false
+        var aspectRatio: Float = 0f
 
         constructor(superState: Parcelable?) : super(superState)
 
         constructor(src: Parcel) : super(src) {
-            altVisible = src.readInt() == 1
+            isOpen = src.readInt() == 1
+            aspectRatio = src.readFloat()
         }
 
         override fun writeToParcel(dst: Parcel, flags: Int) {
             super.writeToParcel(dst, flags)
-            dst.writeInt(if (altVisible) 1 else 0)
+            dst.writeInt(if (isOpen) 1 else 0)
+            dst.writeFloat(aspectRatio)
         }
 
         override fun describeContents() = 0
