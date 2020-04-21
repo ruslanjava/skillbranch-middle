@@ -6,12 +6,9 @@ import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
-import kotlinx.android.synthetic.main.article_fragment.*
-import kotlinx.android.synthetic.main.layout_bottombar.*
-import kotlinx.android.synthetic.main.layout_submenu.*
+import kotlinx.android.synthetic.main.fragment_article.*
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
@@ -30,7 +27,7 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
         )
     }
 
-    override val layout: Int = ru.skillbranch.skillarticles.R.layout.article_fragment
+    override val layout: Int = ru.skillbranch.skillarticles.R.layout.fragment_article
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     override val binding: ArticleBinding by lazy { ArticleBinding() }
