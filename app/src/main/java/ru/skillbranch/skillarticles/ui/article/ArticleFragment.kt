@@ -8,8 +8,15 @@ import android.view.Menu
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions.circleCropTransform
 import kotlinx.android.synthetic.main.fragment_article.*
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
+import ru.skillbranch.skillarticles.extensions.dpToIntPx
+import ru.skillbranch.skillarticles.extensions.format
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
 import ru.skillbranch.skillarticles.ui.delegates.RenderProp
@@ -20,10 +27,12 @@ import ru.skillbranch.skillarticles.viewmodels.base.ViewModelFactory
 
 class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
 
+    private val args: ArticleFragmentArgs by navArgs()
+
     override val viewModel: ArticleViewModel by viewModels {
         ViewModelFactory(
             owner = this,
-            params = "0"
+            params = args.articleId
         )
     }
 
@@ -37,6 +46,27 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
     override fun setupViews() {
         setupBottombar()
         setupBottombar()
+
+        // init views
+        val avatarSize = root.dpToIntPx(40)
+        val cornerRadius = root.dpToIntPx(8)
+
+        Glide.with(root)
+            .load(args.authorAvatar)
+            .apply(circleCropTransform())
+            .override(avatarSize)
+            .into(iv_author_avatar)
+
+        Glide.with(root)
+            .load(args.poster)
+            .apply(circleCropTransform())
+            .transform(CenterCrop(), RoundedCorners(cornerRadius))
+            .override(avatarSize)
+            .into(iv_poster)
+
+        tv_title.text = args.title
+        tv_author.text = args.author
+        tv_date.text = args.date.format()
     }
 
     override fun showSearchBar() {

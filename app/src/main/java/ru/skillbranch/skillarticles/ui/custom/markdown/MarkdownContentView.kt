@@ -29,6 +29,7 @@ class MarkdownContentView @JvmOverloads constructor(
 
     //for restore
     private var ids = arrayListOf<Int>()
+    private var index = 0
 
     var textSize by Delegates.observable(14f) { _, old, value ->
         if (value == old) return@observable
@@ -111,6 +112,8 @@ class MarkdownContentView @JvmOverloads constructor(
                         it.image.alt
                     )
                     addView(iv)
+                    layoutManager.attachToParent(iv, index)
+                    index++
                 }
 
                 is MarkdownElement.Scroll -> {
@@ -120,6 +123,8 @@ class MarkdownContentView @JvmOverloads constructor(
                         it.blockCode.text
                     )
                     addView(sv)
+                    layoutManager.attachToParent(sv, index)
+                    index++
                 }
             }
         }
@@ -191,22 +196,13 @@ class MarkdownContentView @JvmOverloads constructor(
         if (state is SavedState) {
             layoutManager = state.layout
         }
-
-        // temp solution, remove this in fragment
-        children
-            .filter { it !is MarkdownTextView }
-            .forEachIndexed { index, view ->
-                layoutManager.attachToParent(view, index)
-            }
     }
 
     override fun dispatchSaveInstanceState(container: SparseArray<Parcelable>?) {
-        // temp solution, remove this in fragment
-        // save children manually
+        // save children manually without markdown text view
         children.filter { it !is MarkdownTextView }
             .forEach { it.saveHierarchyState(layoutManager.container)}
         // save only markdown
-        super.dispatchSaveInstanceState(container)
         dispatchFreezeSelfOnly(container)
     }
 
