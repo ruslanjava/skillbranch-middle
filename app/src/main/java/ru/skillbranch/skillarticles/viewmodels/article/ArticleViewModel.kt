@@ -18,10 +18,7 @@ import ru.skillbranch.skillarticles.viewmodels.base.Notify
 class ArticleViewModel(
     handle: SavedStateHandle,
     private val articleId: String
-) : BaseViewModel<ArticleState>(handle,
-    ArticleState()
-),
-    IArticleViewModel {
+) : BaseViewModel<ArticleState>(handle, ArticleState()), IArticleViewModel {
 
     private val repository = ArticleRepository
     private var clearContent: String? = null
@@ -140,16 +137,20 @@ class ArticleViewModel(
         updateState { it.copy(searchQuery = query, searchResults = result, searchPosition = 0)}
     }
 
-    fun handleUpResult() {
+    override fun handleUpResult() {
         updateState { it.copy(searchPosition = it.searchPosition.dec()) }
     }
 
-    fun handleDownResult() {
+    override fun handleDownResult() {
         updateState { it.copy(searchPosition = it.searchPosition.inc()) }
     }
 
-    fun handleCopyCode() {
+    override fun handleCopyCode() {
         notify(Notify.TextMessage("Code copy to clipboard"))
+    }
+
+    override fun handleSendComment() {
+        TODO("Not yet implemented")
     }
 
 }

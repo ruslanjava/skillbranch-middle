@@ -37,8 +37,8 @@ class RootActivity : BaseActivity<RootViewModel>() {
     }
 
     override fun renderNotification(notify: Notify) {
-        val snackbar = Snackbar.make(coordinator_container, notify.message, Snackbar.LENGTH_LONG)
-                // .setAnchorView(bottombar)
+        val snackbar = Snackbar.make(container, notify.message, Snackbar.LENGTH_LONG)
+                .setAnchorView(nav_view)
 
         when (notify) {
             is Notify.TextMessage -> {
