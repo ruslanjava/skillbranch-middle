@@ -1,6 +1,5 @@
 package ru.skillbranch.skillarticles.viewmodels.base
 
-import android.os.Bundle
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
@@ -14,7 +13,7 @@ abstract class BaseViewModel<T : IViewModelState>(
     val notifications = MutableLiveData<Event<Notify>>()
 
     /***
-     * Инициализация начального состояния аргументом конструктоа, и объявления состояния как
+     * Инициализация начального состояния аргументом конструктора, и объявления состояния как
      * MediatorLiveData - медиатор исспользуется для того чтобы учитывать изменяемые данные модели
      * и обновлять состояние ViewModel исходя из полученных данных
      */
@@ -88,7 +87,7 @@ abstract class BaseViewModel<T : IViewModelState>(
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun restoreState(){
+    fun restoreState() {
         state.value = currentState.restore(handleState) as T
     }
 
