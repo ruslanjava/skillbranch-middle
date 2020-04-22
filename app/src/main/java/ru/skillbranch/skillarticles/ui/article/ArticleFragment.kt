@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
@@ -90,6 +91,9 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
     }
 
     override fun setupViews() {
+        // window resize options
+        root.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+
         setupSubmenu()
         setupBottombar()
 
@@ -117,11 +121,14 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
 
         et_comment.setOnEditorActionListener { view, _, _ ->
             root.hideKeyboard(view)
-            // viewModel.handleSendComment()
-            val action = AuthFragmentDirections.startLogin()
-            findNavController().navigate(action)
+            viewModel.handleSendComment()
             true
         }
+    }
+
+    override fun onDestroyView() {
+        root.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
+        super.onDestroyView()
     }
 
     override fun showSearchBar() {

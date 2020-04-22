@@ -13,6 +13,7 @@ import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import ru.skillbranch.skillarticles.data.repositories.clearContent
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
+import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
 
 class ArticleViewModel(
@@ -58,6 +59,10 @@ class ArticleViewModel(
                     isDarkMode = settings.isDarkMode,
                     isBigText = settings.isBigText
             )
+        }
+
+        subscribeOnDataSource(repository.isAuth()) { auth, state ->
+            state.copy(isAuth = auth)
         }
     }
 
@@ -150,7 +155,8 @@ class ArticleViewModel(
     }
 
     override fun handleSendComment() {
-        TODO("Not yet implemented")
+        if (currentState.isAuth) navigate(NavigationCommand.StartLogin())
+        // todo send comment
     }
 
 }
