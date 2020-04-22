@@ -14,11 +14,14 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions.circleCropTransform
 import kotlinx.android.synthetic.main.fragment_article.*
+import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.format
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
+import ru.skillbranch.skillarticles.ui.base.BottombarBuilder
+import ru.skillbranch.skillarticles.ui.base.ToolbarBuilder
 import ru.skillbranch.skillarticles.ui.delegates.RenderProp
 import ru.skillbranch.skillarticles.viewmodels.article.ArticleState
 import ru.skillbranch.skillarticles.viewmodels.article.ArticleViewModel
@@ -36,12 +39,37 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
         )
     }
 
-    override val layout: Int = ru.skillbranch.skillarticles.R.layout.fragment_article
+    override val layout: Int = R.layout.fragment_article
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     override val binding: ArticleBinding by lazy { ArticleBinding() }
 
+    override val prepareToolbar: (ToolbarBuilder.() -> Unit)? = {
+        this.setTitle(args.title)
+                .setSubtitle(args.category)
+                .setLogo(args.categoryIcon)
+                .addMenuItem(
+                        ru.skillbranch.skillarticles.ui.base.MenuItemHolder(
+                                "search",
+                                R.id.action_search,
+                                R.drawable.ic_search_black_24dp,
+                                R.layout.search_view_layout
+                        )
+                )
+    }
+
+    override val prepareBottombar: (BottombarBuilder.() -> Unit)? = {
+        this.addView(R.layout.layout_submenu)
+                .addView(R.layout.layout_bottombar)
+                .setVisibility(false)
+    }
+
     private var searchView: SearchView? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun setupViews() {
         setupBottombar()
@@ -49,13 +77,14 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
 
         // init views
         val avatarSize = root.dpToIntPx(40)
-        val cornerRadius = root.dpToIntPx(8)
 
         Glide.with(root)
             .load(args.authorAvatar)
             .apply(circleCropTransform())
             .override(avatarSize)
             .into(iv_author_avatar)
+
+        val cornerRadius = root.dpToIntPx(8)
 
         Glide.with(root)
             .load(args.poster)
@@ -282,3 +311,4 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
     }
 
 }
+
