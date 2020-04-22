@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.isVisible
@@ -15,6 +16,7 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import kotlinx.android.synthetic.main.activity_root.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
@@ -175,6 +177,9 @@ class BottombarBuilder() {
 
     fun build(context: FragmentActivity) {
 
+        // show appbar if hidden due to scroll behavior
+        context.appbar.setExpanded(true, true)
+
         // remove temp vies
         if (tempViews.isNotEmpty()) {
             tempViews.forEach {
@@ -196,7 +201,11 @@ class BottombarBuilder() {
 
         with(context.nav_view) {
             isVisible = visible
+                    // show bottombar if hidden due to scroll behavior
+            ((layoutParams as CoordinatorLayout.LayoutParams).behavior as HideBottomViewOnScrollBehavior)
+                    .slideUp(this)
         }
+
     }
 
 }
