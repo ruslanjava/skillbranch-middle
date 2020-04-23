@@ -14,6 +14,7 @@ import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -21,6 +22,7 @@ import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import kotlinx.android.synthetic.main.activity_root.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.extensions.dpToIntPx
+import ru.skillbranch.skillarticles.ui.auth.AuthFragmentArgs
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
@@ -71,15 +73,17 @@ abstract class BaseActivity<T : BaseViewModel<out IViewModelState>> : AppCompatA
             is NavigationCommand.To -> {
                 navController.navigate(command.destination, command.args, command.options, command.extras)
             }
+            is NavigationCommand.StartLogin -> {
+                val destinationId = command.privateDestination ?: -1
+                val args = AuthFragmentArgs(destinationId)
+                navController.navigate(R.id.auth, args.toBundle())
+            }
             is NavigationCommand.FinishLogin -> {
                 navController.navigate(R.id.finish_login)
-                if (command.privateDestination != null) {
-                    navController.navigate(command.privateDestination)
+                val destinationId = command.privateDestination ?: -1
+                if (destinationId != -1) {
+                    navController.navigate(destinationId)
                 }
-            }
-            is NavigationCommand.StartLogin -> {
-                navController.navigate(R.id.start_login)
-                bundleOf("private destination" to (command.privateDestination ?: -1))
             }
         }
     }

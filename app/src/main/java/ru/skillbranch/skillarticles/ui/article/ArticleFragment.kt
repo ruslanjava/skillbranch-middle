@@ -11,14 +11,12 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions.circleCropTransform
 import com.google.android.material.appbar.AppBarLayout
-import kotlinx.android.synthetic.main.activity_root.*
 import kotlinx.android.synthetic.main.fragment_article.*
 import kotlinx.android.synthetic.main.layout_bottombar.*
 import kotlinx.android.synthetic.main.layout_bottombar.view.*
@@ -30,7 +28,6 @@ import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.extensions.format
 import ru.skillbranch.skillarticles.extensions.hideKeyboard
 import ru.skillbranch.skillarticles.extensions.setMarginOptionally
-import ru.skillbranch.skillarticles.ui.auth.AuthFragmentDirections
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
 import ru.skillbranch.skillarticles.ui.base.BottombarBuilder
@@ -145,18 +142,18 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
         super.onPrepareOptionsMenu(menu)
 
         val menuItem = menu.findItem(R.id.action_search)
-        val searchView = menuItem?.actionView as SearchView
-        searchView.queryHint = getString(R.string.article_search_placeholder)
+        val searchView = menuItem?.actionView as? SearchView
+        searchView?.queryHint = getString(R.string.article_search_placeholder)
 
         if (binding.isSearch) {
             menuItem.expandActionView()
-            searchView.setQuery(binding.searchQuery, false)
+            searchView?.setQuery(binding.searchQuery, false)
 
-            if (binding.isFocusedSearch) { searchView.requestFocus() }
-            else { searchView.clearFocus() }
+            if (binding.isFocusedSearch) { searchView?.requestFocus() }
+            else { searchView?.clearFocus() }
         }
 
-        menuItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+        menuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 viewModel.handleSearchMode(isSearch = true)
                 return true
@@ -167,7 +164,7 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
                 return true
             }
         })
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return true
             }

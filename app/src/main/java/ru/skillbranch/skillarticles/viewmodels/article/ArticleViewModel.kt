@@ -2,6 +2,7 @@ package ru.skillbranch.skillarticles.viewmodels.article
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.SavedStateHandle
+import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.data.ArticleData
 import ru.skillbranch.skillarticles.data.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.repositories.ArticleRepository
@@ -155,8 +156,9 @@ class ArticleViewModel(
     }
 
     override fun handleSendComment() {
-        if (currentState.isAuth) navigate(NavigationCommand.StartLogin())
-        // todo send comment
+        if (!currentState.isAuth) {
+            navigate(NavigationCommand.StartLogin())
+        }
     }
 
 }

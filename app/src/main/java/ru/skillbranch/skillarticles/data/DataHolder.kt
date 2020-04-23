@@ -103,8 +103,9 @@ object LocalDataHolder {
     fun isAuth(): MutableLiveData<Boolean> = isAuth
 
     fun setAuth(auth: Boolean) {
-        isAuth.value = auth
+        isAuth.postValue(auth)
     }
+
 }
 
 object NetworkDataHolder {

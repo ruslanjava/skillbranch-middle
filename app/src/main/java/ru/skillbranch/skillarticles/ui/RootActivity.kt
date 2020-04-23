@@ -5,7 +5,6 @@ import androidx.activity.viewModels
 import androidx.navigation.NavDestination
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
@@ -89,8 +88,18 @@ class RootActivity : BaseActivity<RootViewModel>() {
         // Do something with state
     }
 
+    private fun BottomNavigationView.selectDestination(destination: NavDestination?) {
+        if (destination != null) {
+            val activeItem = menu.findItem(destination.id)
+            if (activeItem != null) {
+                for (i in 0 until menu.size()) {
+                    val item = menu.getItem(i)
+                    item.isChecked = false
+                }
+                activeItem.isChecked = true
+            }
+        }
+    }
+
 }
 
-private fun BottomNavigationView.selectDestination(destination: NavDestination) {
-    // TODO
-}

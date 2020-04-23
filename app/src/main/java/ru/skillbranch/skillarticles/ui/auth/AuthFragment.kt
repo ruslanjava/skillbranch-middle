@@ -29,7 +29,7 @@ class AuthFragment : BaseFragment<AuthViewModel>() {
             viewModel.handleLogin(
                     et_login.text.toString(),
                     et_password.text.toString(),
-                    if (args.privateDestination == -1) null else args.privateDestination
+                    if (args.privateDestination != -1) args.privateDestination else null
             )
         }
 
