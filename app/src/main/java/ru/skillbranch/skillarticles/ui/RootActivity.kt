@@ -8,8 +8,8 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_root.*
-import kotlinx.android.synthetic.main.layout_bottombar.*
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.data.repositories.RootRepository
 import ru.skillbranch.skillarticles.ui.base.BaseActivity
 import ru.skillbranch.skillarticles.viewmodels.RootViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
@@ -45,17 +45,24 @@ class RootActivity : BaseActivity<RootViewModel>() {
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             // if destination change set bottom navigation item
             nav_view.selectDestination(destination)
+
+            if (destination.id == R.id.nav_auth) {
+                nav_view.selectedItemId == arguments?.get("private_destination") as Int?
+            }
+
+            if (viewModel.currentState.isAuth && destination.id == R.id.nav_auth) {
+                controller.popBackStack()
+                val private = arguments?.get("private_destination") as Int?
+                if (private != null) {
+                    controller.navigate(private)
+                }
+            }
         }
     }
 
     override fun renderNotification(notify: Notify) {
         val snackbar = Snackbar.make(container, notify.message, Snackbar.LENGTH_LONG)
-
-        if (bottombar != null) {
-            snackbar.anchorView = bottombar
-        } else {
-            snackbar.anchorView = nav_view
-        }
+        snackbar.anchorView = findViewById(R.id.bottombar) ?: nav_view
 
         when (notify) {
             is Notify.TextMessage -> {
