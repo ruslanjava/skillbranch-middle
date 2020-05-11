@@ -14,9 +14,20 @@ object ArticlesRepository {
         return ArticlesDataFactory(ArticleStrategy.AllArticles(::findArticlesByRange))
     }
 
+    fun searchArticles(searchQuery: String): DataSource.Factory<Int, ArticleItemData> {
+        return ArticlesDataFactory(ArticleStrategy.SearchArticle(::searchArticlesByTitle, searchQuery))
+    }
+
     private fun findArticlesByRange(start: Int, size: Int) = local.localArticleItems
             .drop(start)
             .take(size)
+
+    private fun searchArticlesByTitle(start: Int, size: Int, queryTitle: String) = local.localArticleItems
+            .asSequence()
+            .filter { it.title.contains(queryTitle,  true) }
+            .drop(start)
+            .take(size)
+            .toList()
 
 }
 

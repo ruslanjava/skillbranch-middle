@@ -1,10 +1,6 @@
 package ru.skillbranch.skillarticles.viewmodels.articles
 
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.*
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
@@ -24,7 +20,12 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
                 .setInitialLoadSizeHint(50)
                 .build()
     }
-    private val listData = buildPagedList(repository.allArticles())
+    private val listData = Transformations.switchMap(state) {
+        when {
+            it.isSearch && !it.searchQuery.isNullOrBlank() -> buildPagedList(repository.searchArticles(it.searchQuery))
+            else -> buildPagedList(repository.allArticles())
+        }
+    }
 
     fun observeList(
             owner: LifecycleOwner,
@@ -44,6 +45,15 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
         return builder
                 .setFetchExecutor(Executors.newSingleThreadExecutor())
                 .build()
+    }
+
+    fun handleSearchMode(isSearch: Boolean) {
+        updateState { it.copy(isSearch = isSearch) }
+    }
+
+    fun handleSearch(query: String?) {
+        query ?: return
+        updateState { it.copy(searchQuery = query) }
     }
 
 }
