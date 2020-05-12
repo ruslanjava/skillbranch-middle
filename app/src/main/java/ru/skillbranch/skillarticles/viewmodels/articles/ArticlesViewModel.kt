@@ -1,5 +1,6 @@
 package ru.skillbranch.skillarticles.viewmodels.articles
 
+import android.util.Log
 import androidx.lifecycle.*
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
@@ -61,19 +62,8 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
                 .build()
     }
 
-    private fun zeroLoadingHandle() {
-        notify(Notify.TextMessage("Storage is empty"))
-        viewModelScope.launch(Dispatchers.IO) {
-            val items = repository.loadArticlesFromNetwork(start = 0, size = listConfig.initialLoadSizeHint)
-            if (items.isNotEmpty()) {
-                repository.insertArticlesToDb(items)
-                // invalidate data in data source -> create new LiveData<PagedList>
-                listData.value?.dataSource?.invalidate()
-            }
-        }
-    }
-
     private fun itemAtEndHandle(lastLoadArticle: ArticleItemData) {
+        Log.e("ArticlesViewModel", "itemAtEndHandle: ")
         viewModelScope.launch(Dispatchers.IO) {
             val items = repository.loadArticlesFromNetwork(
                     start = lastLoadArticle.id.toInt().inc(),
@@ -90,6 +80,19 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
                         "Load from network articles from ${items.firstOrNull()?.id} " +
                                 "to ${items.lastOrNull()?.id}"
                 ))
+            }
+        }
+    }
+
+    private fun zeroLoadingHandle() {
+        Log.e("ArticlesViewModel", "zeroLoadingHandle: ")
+        notify(Notify.TextMessage("Storage is empty"))
+        viewModelScope.launch(Dispatchers.IO) {
+            val items = repository.loadArticlesFromNetwork(start = 0, size = listConfig.initialLoadSizeHint)
+            if (items.isNotEmpty()) {
+                repository.insertArticlesToDb(items)
+                // invalidate data in data source -> create new LiveData<PagedList>
+                listData.value?.dataSource?.invalidate()
             }
         }
     }
