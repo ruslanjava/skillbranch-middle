@@ -11,6 +11,7 @@ import ru.skillbranch.skillarticles.data.models.AppSettings
 import ru.skillbranch.skillarticles.data.models.ArticleData
 import ru.skillbranch.skillarticles.data.models.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.models.CommentItemData
+import java.lang.Thread.sleep
 import kotlin.math.abs
 
 object ArticleRepository {
@@ -51,6 +52,7 @@ object ArticleRepository {
         }
         return when {
             slug == null -> data.take(size)
+
             size > 0 -> data.dropWhile { it.slug != slug }
                     .drop(1)
                     .take(size)
@@ -61,6 +63,8 @@ object ArticleRepository {
                     .takeLast(abs(size))
 
             else -> emptyList()
+        }.apply {
+            sleep(500)
         }
     }
 

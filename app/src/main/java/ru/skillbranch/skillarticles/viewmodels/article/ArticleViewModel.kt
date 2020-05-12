@@ -182,7 +182,7 @@ class ArticleViewModel(
         listData.observe(owner, Observer { onChanged(it) })
     }
 
-    fun buildPagedList(
+    private fun buildPagedList(
             dataFactory: CommentsDataFactory
     ): LiveData<PagedList<CommentItemData>> {
         return LivePagedListBuilder<String, CommentItemData>(
