@@ -1,12 +1,11 @@
 package ru.skillbranch.skillarticles.viewmodels.article
 
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.*
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.skillbranch.skillarticles.data.models.ArticleData
 import ru.skillbranch.skillarticles.data.models.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.models.CommentItemData
@@ -169,9 +168,13 @@ class ArticleViewModel(
         notify(Notify.TextMessage("Code copy to clipboard"))
     }
 
-    override fun handleSendComment() {
-        if (!currentState.isAuth) {
-            navigate(NavigationCommand.StartLogin())
+    override fun handleSendComment(comment: String) {
+        if (!currentState.isAuth) navigate(NavigationCommand.StartLogin())
+        viewModelScope.launch {
+            repository.sendComment(articleId, comment, currentState.answerToSlug)
+            withContext(Dispatchers.Main) {
+                updateState { it.copy(answerTo = null, answerToSlug = null) }
+            }
         }
     }
 
@@ -191,6 +194,18 @@ class ArticleViewModel(
         )
                 .setFetchExecutor(Executors.newSingleThreadExecutor())
                 .build()
+    }
+
+    fun handleCommentFocus(hasFocus: Boolean) {
+        updateState { it.copy(showBottomBar = !hasFocus) }
+    }
+
+    fun handleClearComment() {
+        updateState { it.copy(answerTo = null, answerToSlug = null) }
+    }
+
+    fun handleReplyTo(slug: String, name: String) {
+        updateState { it.copy(answerToSlug = slug, answerTo = "Reply to $name") }
     }
 
 }
@@ -217,7 +232,7 @@ data class ArticleState(
     val poster: String? = null, // обложка статьи
     val content: List<MarkdownElement> = emptyList(), // контент
     val commentCount: Int = 0,
-    val answerTo: String = "Comment",
+    val answerTo: String? = null,
     val answerToSlug: String? = null,
     val showBottomBar: Boolean = true
 ) : IViewModelState {

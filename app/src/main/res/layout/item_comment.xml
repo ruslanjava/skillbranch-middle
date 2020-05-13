@@ -41,7 +41,7 @@
         tools:text="Вчера в 20:30" />
 
     <TextView
-        android:id="@+id/tv_description"
+        android:id="@+id/tv_comment_body"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"

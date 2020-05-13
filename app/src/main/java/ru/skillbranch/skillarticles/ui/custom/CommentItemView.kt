@@ -18,6 +18,7 @@ import ru.skillbranch.skillarticles.extensions.*
 import kotlin.math.min
 
 class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
+
     private val defaultVSpace = context.dpToIntPx(8)
     private val defaultHSpace = context.dpToIntPx(16)
     private val avatarSize = context.dpToIntPx(40)
@@ -27,7 +28,7 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
     private val tv_date: TextView
     private val iv_avatar: ImageView
     private val tv_author: TextView
-    // private val tv_body: TextView
+    private val tv_body: TextView
     private val iv_answer_icon: ImageView
     private val tv_answer_to: TextView
 
@@ -58,15 +59,12 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
         }
         addView(tv_author)
 
-        /*
         tv_body = TextView(context).apply {
             id=R.id.tv_comment_body
             setTextColor(grayColor)
             textSize = 14f
         }
         addView(tv_body)
-
-         */
 
         tv_answer_to = TextView(context).apply {
             setTextColor(grayColor)
@@ -98,10 +96,10 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
         measureChild(tv_author, widthMeasureSpec, heightMeasureSpec)
 
         usedHeight += avatarSize + defaultVSpace
-        // tv_body.width = width - paddingLeft - paddingRight
-        // measureChild(tv_body, widthMeasureSpec, heightMeasureSpec)
+        tv_body.width = width - paddingLeft - paddingRight
+        measureChild(tv_body, widthMeasureSpec, heightMeasureSpec)
 
-        // usedHeight += tv_body.measuredHeight + defaultVSpace
+        usedHeight += tv_body.measuredHeight + defaultVSpace
         setMeasuredDimension(width, usedHeight)
     }
 
@@ -155,14 +153,12 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
 
         usedHeight += avatarSize + defaultVSpace
 
-        /*
         tv_body.layout(
             left,
             usedHeight,
             left + tv_body.measuredWidth,
             usedHeight + tv_body.measuredHeight
         )
-         */
     }
 
     override fun dispatchDraw(canvas: Canvas) {
@@ -195,7 +191,7 @@ class CommentItemView(context: Context) : ViewGroup(context, null, 0) {
 
             tv_author.text = item.user.name
             tv_date.text = item.date.humanizeDiff()
-            // tv_body.text = item.body
+            tv_body.text = item.body
             tv_answer_to.text = item.answerTo
             tv_answer_to.isVisible = item.answerTo != null
             iv_answer_icon.isVisible = item.answerTo != null

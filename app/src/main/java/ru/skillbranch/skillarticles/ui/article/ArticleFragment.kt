@@ -26,10 +26,7 @@ import kotlinx.android.synthetic.main.layout_submenu.*
 import kotlinx.android.synthetic.main.layout_submenu.view.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
-import ru.skillbranch.skillarticles.extensions.dpToIntPx
-import ru.skillbranch.skillarticles.extensions.format
-import ru.skillbranch.skillarticles.extensions.hideKeyboard
-import ru.skillbranch.skillarticles.extensions.setMarginOptionally
+import ru.skillbranch.skillarticles.extensions.*
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
 import ru.skillbranch.skillarticles.ui.base.BottombarBuilder
@@ -57,6 +54,10 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
     private val commentsAdapter by lazy {
         CommentsAdapter {
             Log.e("ArticleFragment", "click on comment: ${it.id} ${it.slug}")
+            viewModel.handleReplyTo(it.slug, it.user.name)
+            et_comment.requestFocus()
+            scroll.smoothScrollTo(0, wrap_comments.top)
+            et_comment.context.showKeyboard(et_comment)
         }
     }
 
@@ -129,8 +130,19 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
 
         et_comment.setOnEditorActionListener { view, _, _ ->
             root.hideKeyboard(view)
-            viewModel.handleSendComment()
+            viewModel.handleSendComment(view.text.toString())
+            view.text = null
+            view.clearFocus()
             true
+        }
+
+        et_comment.setOnFocusChangeListener { _, hasFocus -> viewModel.handleCommentFocus(hasFocus) }
+
+        wrap_comments.setEndIconOnClickListener { view->
+            view.context.hideKeyboard(view)
+            viewModel.handleClearComment()
+            et_comment.text = null
+            et_comment.clearFocus()
         }
 
         with(rv_comments) {

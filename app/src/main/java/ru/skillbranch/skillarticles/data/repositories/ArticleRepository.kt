@@ -7,10 +7,7 @@ import androidx.lifecycle.Transformations
 import androidx.paging.DataSource
 import androidx.paging.ItemKeyedDataSource
 import ru.skillbranch.skillarticles.data.*
-import ru.skillbranch.skillarticles.data.models.AppSettings
-import ru.skillbranch.skillarticles.data.models.ArticleData
-import ru.skillbranch.skillarticles.data.models.ArticlePersonalInfo
-import ru.skillbranch.skillarticles.data.models.CommentItemData
+import ru.skillbranch.skillarticles.data.models.*
 import java.lang.Thread.sleep
 import kotlin.math.abs
 
@@ -66,6 +63,13 @@ object ArticleRepository {
         }.apply {
             sleep(500)
         }
+    }
+
+    fun sendComment(articleId: String, comment: String, answerToSlug: String?) {
+        network.sendMessage(articleId, comment, answerToSlug,
+                User("777", "John Doe", "https://skill-branch.ru/img/mail/bot/android-category.png")
+        )
+        local.incrementCommentsCount(articleId)
     }
 
 }
