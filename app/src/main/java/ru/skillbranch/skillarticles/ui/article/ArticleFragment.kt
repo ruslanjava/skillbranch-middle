@@ -250,6 +250,7 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
     inner class ArticleBinding : Binding() {
 
         var isFocusedSearch: Boolean = false
+
         private var isLoadingContent by RenderProp(true)
 
         private var isLike : Boolean by RenderProp(false) { bottombar.btn_like.isChecked = it }
@@ -357,10 +358,12 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
 
         override fun saveUi(outState: Bundle) {
             outState.putBoolean(::isFocusedSearch.name, isFocusedSearch)
+            outState.putString("comment", et_comment.text.toString())
         }
 
         override fun restoreUi(savedState: Bundle?) {
             isFocusedSearch = savedState?.getBoolean(::isFocusedSearch.name) ?: false
+            et_comment.setText(savedState?.getString("comment") ?: "")
         }
 
     }

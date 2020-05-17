@@ -2,7 +2,6 @@ package ru.skillbranch.skillarticles.viewmodels.articles
 
 import android.util.Log
 import androidx.lifecycle.*
-import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import kotlinx.coroutines.Dispatchers
@@ -104,6 +103,10 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
     fun handleSearch(query: String?) {
         query ?: return
         updateState { it.copy(searchQuery = query) }
+    }
+
+    fun handleToggleBookmark(id: String, bookmark: Boolean) {
+        repository.updateBookmark(id, bookmark)
     }
 
 }

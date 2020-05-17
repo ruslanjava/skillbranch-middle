@@ -12,11 +12,9 @@ import ru.skillbranch.skillarticles.data.models.*
 import java.util.*
 
 object LocalDataHolder {
-
     private val articleInfo = MutableLiveData<ArticlePersonalInfo?>(null)
     private val settings = MutableLiveData(AppSettings())
     private val isAuth = MutableLiveData(false)
-
     val localArticleItems: MutableList<ArticleItemData> = mutableListOf()
     val localArticles: MutableMap<String, MutableLiveData<ArticleData>> = mutableMapOf()
 
@@ -57,6 +55,16 @@ object LocalDataHolder {
             localArticles[articleId]?.value ?: error("Local article with id: $articleId not found")
         localArticles[articleId]!!.postValue(old.copy(commentCount = old.commentCount.inc()))
     }
+
+    fun updateBookmark(articleId: String, bookmark: Boolean) {
+        var article = localArticleItems.find { it.id == articleId }
+        if (article != null) {
+            val index = localArticleItems.indexOf(article)
+            article = article.copy(isBookmark = bookmark)
+            localArticleItems.set(index, article)
+        }
+    }
+
 }
 
 object NetworkDataHolder {

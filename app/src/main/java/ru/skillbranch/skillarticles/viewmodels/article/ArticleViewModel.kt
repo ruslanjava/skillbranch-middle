@@ -169,11 +169,14 @@ class ArticleViewModel(
     }
 
     override fun handleSendComment(comment: String) {
-        if (!currentState.isAuth) navigate(NavigationCommand.StartLogin())
-        viewModelScope.launch {
-            repository.sendComment(articleId, comment, currentState.answerToSlug)
-            withContext(Dispatchers.Main) {
-                updateState { it.copy(answerTo = null, answerToSlug = null) }
+        if (!currentState.isAuth) {
+            navigate(NavigationCommand.StartLogin())
+        } else {
+            viewModelScope.launch {
+                repository.sendComment(articleId, comment, currentState.answerToSlug)
+                withContext(Dispatchers.Main) {
+                    updateState { it.copy(answerTo = null, answerToSlug = null) }
+                }
             }
         }
     }
@@ -238,7 +241,6 @@ data class ArticleState(
 ) : IViewModelState {
 
     override fun save(outState: SavedStateHandle) {
-        // todo save state
         outState.set("isSearch", isSearch)
         outState.set("searchQuery", searchQuery)
         outState.set("searchResults", searchResults)
