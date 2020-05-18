@@ -17,7 +17,6 @@ import kotlin.math.abs
 object ArticleRepository {
 
     private val articleInfo = MutableLiveData<ArticlePersonalInfo?>(null)
-    var comment: String? = null
 
     private val local = LocalDataHolder
     private val network = NetworkDataHolder

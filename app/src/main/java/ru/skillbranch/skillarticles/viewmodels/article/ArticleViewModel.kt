@@ -171,10 +171,10 @@ class ArticleViewModel(
 
     override fun handleSendComment(comment: String) {
         if (!currentState.isAuth) {
-            ArticleRepository.comment = comment
+            updateState { it.copy(comment = comment) }
+            saveState()
             navigate(NavigationCommand.StartLogin())
         } else {
-            ArticleRepository.comment = ""
             viewModelScope.launch {
                 repository.sendComment(articleId, comment, currentState.answerToSlug)
                 withContext(Dispatchers.Main) {
@@ -249,21 +249,19 @@ data class ArticleState(
         outState.set("searchQuery", searchQuery)
         outState.set("searchResults", searchResults)
         outState.set("searchPosition", searchPosition)
-        ArticleRepository.comment = comment
+        outState.set("comment", comment)
     }
 
     @Suppress("UNCHECKED_CAST")
     override fun restore(savedState: SavedStateHandle): IViewModelState {
         // restore state
-        var state = copy(
-                isSearch = savedState["isSearch"] ?: false,
-                searchQuery = savedState["searchQuery"] ,
-                searchResults = savedState["searchResults"] ?: emptyList(),
-                searchPosition =  savedState["searchPosition"] ?: 0
+        return copy(
+            isSearch = savedState["isSearch"] ?: false,
+            searchQuery = savedState["searchQuery"] ,
+            searchResults = savedState["searchResults"] ?: emptyList(),
+            searchPosition =  savedState["searchPosition"] ?: 0,
+            comment = savedState["comment"] ?: ""
         )
-        val loadedComment = ArticleRepository.comment ?: ""
-        state = state.copy(comment = loadedComment)
-        return state
     }
 
 }
