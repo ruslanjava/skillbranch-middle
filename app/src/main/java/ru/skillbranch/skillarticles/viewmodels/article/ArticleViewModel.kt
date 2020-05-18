@@ -109,7 +109,9 @@ class ArticleViewModel(
 
     override fun handleBookmark() {
         val info = currentState.toArticlePersonalInfo()
-        repository.updateArticlePersonalInfo(info.copy(isBookmark = !info.isBookmark))
+        val newBookmark = !info.isBookmark
+        repository.updateArticlePersonalInfo(info.copy(isBookmark = newBookmark))
+        repository.updateBookmark(articleId, newBookmark)
 
         val msg = if (currentState.isBookmark) Notify.TextMessage("Add to bookmarks") else Notify.TextMessage("Remove from bookmarks")
 

@@ -72,6 +72,10 @@ object ArticleRepository {
         local.incrementCommentsCount(articleId)
     }
 
+    fun updateBookmark(id: String, bookmark: Boolean) {
+        local.updateBookmark(id, bookmark)
+    }
+
 }
 
 class CommentsDataFactory(

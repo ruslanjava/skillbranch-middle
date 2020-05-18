@@ -29,8 +29,8 @@ object LocalDataHolder {
 
     fun findArticlePersonalInfo(articleId: String): LiveData<ArticlePersonalInfo?> {
         GlobalScope.launch {
-            delay(500)
-            articleInfo.postValue(ArticlePersonalInfo(isBookmark = true))
+            val article = localArticleItems.find { it.id == articleId }!!
+            articleInfo.postValue(ArticlePersonalInfo(isBookmark = article.isBookmark))
         }
         return articleInfo
     }
