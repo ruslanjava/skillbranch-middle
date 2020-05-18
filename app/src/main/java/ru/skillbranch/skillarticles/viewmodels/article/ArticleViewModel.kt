@@ -110,10 +110,9 @@ class ArticleViewModel(
     override fun handleBookmark() {
         val info = currentState.toArticlePersonalInfo()
         val isChecked = !info.isBookmark
-        repository.updateArticlePersonalInfo(info.copy(isBookmark = isChecked))
         repository.updateBookmark(articleId, isChecked)
 
-        val msg = if (currentState.isBookmark) Notify.TextMessage("Add to bookmarks") else Notify.TextMessage("Remove from bookmarks")
+        val msg = if (isChecked) Notify.TextMessage("Add to bookmarks") else Notify.TextMessage("Remove from bookmarks")
 
         notify(msg)
     }
@@ -172,12 +171,14 @@ class ArticleViewModel(
 
     override fun handleSendComment(comment: String) {
         if (!currentState.isAuth) {
+            ArticleRepository.comment = comment
             navigate(NavigationCommand.StartLogin())
         } else {
+            ArticleRepository.comment = ""
             viewModelScope.launch {
                 repository.sendComment(articleId, comment, currentState.answerToSlug)
                 withContext(Dispatchers.Main) {
-                    updateState { it.copy(answerTo = null, answerToSlug = null) }
+                    updateState { it.copy(answerTo = null, answerToSlug = null, comment = "") }
                 }
             }
         }
@@ -239,7 +240,8 @@ data class ArticleState(
     val commentCount: Int = 0,
     val answerTo: String? = null,
     val answerToSlug: String? = null,
-    val showBottomBar: Boolean = true
+    val showBottomBar: Boolean = true,
+    val comment: String = ""
 ) : IViewModelState {
 
     override fun save(outState: SavedStateHandle) {
@@ -247,17 +249,21 @@ data class ArticleState(
         outState.set("searchQuery", searchQuery)
         outState.set("searchResults", searchResults)
         outState.set("searchPosition", searchPosition)
+        ArticleRepository.comment = comment
     }
 
     @Suppress("UNCHECKED_CAST")
     override fun restore(savedState: SavedStateHandle): IViewModelState {
         // restore state
-        return copy(
+        var state = copy(
                 isSearch = savedState["isSearch"] ?: false,
                 searchQuery = savedState["searchQuery"] ,
                 searchResults = savedState["searchResults"] ?: emptyList(),
                 searchPosition =  savedState["searchPosition"] ?: 0
         )
+        val loadedComment = ArticleRepository.comment ?: ""
+        state = state.copy(comment = loadedComment)
+        return state
     }
 
 }

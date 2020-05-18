@@ -29,8 +29,8 @@ object LocalDataHolder {
 
     fun findArticlePersonalInfo(articleId: String): LiveData<ArticlePersonalInfo?> {
         GlobalScope.launch {
-            val article = localArticleItems.find { it.id == articleId }!!
-            articleInfo.postValue(ArticlePersonalInfo(isBookmark = article.isBookmark))
+            delay(500)
+            articleInfo.postValue(ArticlePersonalInfo(isBookmark = true))
         }
         return articleInfo
     }
@@ -55,16 +55,6 @@ object LocalDataHolder {
             localArticles[articleId]?.value ?: error("Local article with id: $articleId not found")
         localArticles[articleId]!!.postValue(old.copy(commentCount = old.commentCount.inc()))
     }
-
-    fun updateBookmark(articleId: String, bookmark: Boolean) {
-        var article = localArticleItems.find { it.id == articleId }
-        if (article != null) {
-            val index = localArticleItems.indexOf(article)
-            article = article.copy(isBookmark = bookmark)
-            localArticleItems.set(index, article)
-        }
-    }
-
 }
 
 object NetworkDataHolder {

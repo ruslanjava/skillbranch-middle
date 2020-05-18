@@ -6,12 +6,19 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.paging.DataSource
 import androidx.paging.ItemKeyedDataSource
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.skillbranch.skillarticles.data.*
 import ru.skillbranch.skillarticles.data.models.*
 import java.lang.Thread.sleep
 import kotlin.math.abs
 
 object ArticleRepository {
+
+    private val articleInfo = MutableLiveData<ArticlePersonalInfo?>(null)
+    var comment: String? = null
+
     private val local = LocalDataHolder
     private val network = NetworkDataHolder
 
@@ -26,7 +33,14 @@ object ArticleRepository {
     }
 
     fun loadArticlePersonalInfo(articleId: String): LiveData<ArticlePersonalInfo?> {
-        return local.findArticlePersonalInfo(articleId) //1s delay from db
+        GlobalScope.launch {
+            val article = local.localArticleItems.asSequence()
+                .filter { it.id == articleId }
+                .toList()
+                .first()
+            articleInfo.postValue(ArticlePersonalInfo(isBookmark = article.isBookmark))
+        }
+        return articleInfo
     }
 
     fun getAppSettings(): LiveData<AppSettings> = local.getAppSettings() //from preferences
@@ -35,7 +49,7 @@ object ArticleRepository {
     }
 
     fun updateArticlePersonalInfo(info: ArticlePersonalInfo) {
-        local.updateArticlePersonalInfo(info)
+        articleInfo.value = info
     }
 
     fun isAuth(): MutableLiveData<Boolean> = local.isAuth()
@@ -73,7 +87,13 @@ object ArticleRepository {
     }
 
     fun updateBookmark(id: String, isChecked: Boolean) {
-        local.updateBookmark(id, isChecked)
+        articleInfo.postValue(ArticlePersonalInfo(isBookmark = isChecked))
+        val article = local.localArticleItems.asSequence()
+            .filter { it.id == id }
+            .toList()
+            .first()
+        val index = local.localArticleItems.indexOf(article)
+        local.localArticleItems[index] = article.copy(isBookmark = isChecked)
     }
 
 }

@@ -353,16 +353,17 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             searchResults = data.searchResults
             answerTo = data.answerTo ?: "Comment"
             isShowBottombar = data.showBottomBar
+
+            val comment = data.comment
+            et_comment.setText(comment)
         }
 
         override fun saveUi(outState: Bundle) {
             outState.putBoolean(::isFocusedSearch.name, isFocusedSearch)
-            outState.putString("comment", et_comment.text.toString())
         }
 
         override fun restoreUi(savedState: Bundle?) {
             isFocusedSearch = savedState?.getBoolean(::isFocusedSearch.name) ?: false
-            et_comment.setText(savedState?.getString("comment") ?: "")
         }
 
     }
