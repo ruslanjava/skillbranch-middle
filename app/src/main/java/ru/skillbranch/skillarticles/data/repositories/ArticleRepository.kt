@@ -72,8 +72,8 @@ object ArticleRepository {
         local.incrementCommentsCount(articleId)
     }
 
-    fun updateBookmark(id: String, bookmark: Boolean) {
-        local.updateBookmark(id, bookmark)
+    fun updateBookmark(id: String, isChecked: Boolean) {
+        local.updateBookmark(id, isChecked)
     }
 
 }

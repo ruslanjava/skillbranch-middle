@@ -109,8 +109,8 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
             addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.VERTICAL))
         }
 
-        articlesAdapter.bookmarkListener = { id, bookmark ->
-            viewModel.handleToggleBookmark(id, bookmark)
+        articlesAdapter.bookmarkListener = { id, isChecked ->
+            viewModel.handleToggleBookmark(id, isChecked)
         }
 
         viewModel.observeList(viewLifecycleOwner) {
