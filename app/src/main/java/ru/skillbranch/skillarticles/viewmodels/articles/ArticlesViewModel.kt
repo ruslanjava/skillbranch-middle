@@ -27,16 +27,24 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
                 .build()
     }
     private val listData = Transformations.switchMap(state) {
+        val searchFn = if (!it.isBookmark) repository::searchArticles
+        else repository::searchBookmarkedArticles
+
+        val defaultFn = if (!it.isBookmark) repository::allArticles
+        else repository::allBookmarked
+
         when {
-            it.isSearch && !it.searchQuery.isNullOrBlank() -> buildPagedList(repository.searchArticles(it.searchQuery))
-            else -> buildPagedList(repository.allArticles())
+            it.isSearch && !it.searchQuery.isNullOrBlank() -> buildPagedList(searchFn(it.searchQuery))
+            else -> buildPagedList(defaultFn())
         }
     }
 
     fun observeList(
             owner: LifecycleOwner,
+            isBookmark: Boolean,
             onChange: (list: PagedList<ArticleItemData>) -> Unit
     ) {
+        updateState { it.copy(isBookmark = isBookmark) }
         listData.observe(owner, Observer { onChange(it) })
     }
 
@@ -114,7 +122,8 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
 data class ArticlesState(
         val isSearch: Boolean = false,
         val searchQuery: String? = null,
-        val isLoading: Boolean = true
+        val isLoading: Boolean = true,
+        val isBookmark: Boolean = false
 ): IViewModelState
 
 class ArticlesBoundaryCallback(
