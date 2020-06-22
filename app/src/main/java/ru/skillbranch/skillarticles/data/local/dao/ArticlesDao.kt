@@ -1,6 +1,7 @@
 package ru.skillbranch.skillarticles.data.local.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Transaction
 import ru.skillbranch.skillarticles.data.local.entities.Article
@@ -32,5 +33,8 @@ interface ArticlesDao : BaseDao<Article> {
         SELECT * FROM ArticleItem
     """)
     fun findArticleItems(): List<ArticleItem>
+
+    @Delete
+    fun delete(article: Article)
 
 }
