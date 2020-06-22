@@ -7,7 +7,7 @@ import androidx.paging.PagedList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.skillbranch.skillarticles.data.models.ArticleItemData
+import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
 import ru.skillbranch.skillarticles.data.repositories.ArticleStrategy
 import ru.skillbranch.skillarticles.data.repositories.ArticlesDataFactory
 import ru.skillbranch.skillarticles.data.repositories.ArticlesRepository
@@ -42,7 +42,7 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
     fun observeList(
             owner: LifecycleOwner,
             isBookmark: Boolean,
-            onChange: (list: PagedList<ArticleItemData>) -> Unit
+            onChange: (list: PagedList<ArticleItem>) -> Unit
     ) {
         updateState { it.copy(isBookmark = isBookmark) }
         listData.observe(owner, Observer { onChange(it) })
@@ -50,8 +50,8 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
 
     private fun buildPagedList(
             dataFactory: ArticlesDataFactory
-    ): LiveData<PagedList<ArticleItemData>> {
-        val builder = LivePagedListBuilder<Int, ArticleItemData>(
+    ): LiveData<PagedList<ArticleItem>> {
+        val builder = LivePagedListBuilder<Int, ArticleItem>(
                 dataFactory,
                 listConfig
         )
@@ -69,7 +69,7 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
                 .build()
     }
 
-    private fun itemAtEndHandle(lastLoadArticle: ArticleItemData) {
+    private fun itemAtEndHandle(lastLoadArticle: ArticleItem) {
         Log.e("ArticlesViewModel", "itemAtEndHandle: ")
         viewModelScope.launch(Dispatchers.IO) {
             val items = repository.loadArticlesFromNetwork(
@@ -128,15 +128,15 @@ data class ArticlesState(
 
 class ArticlesBoundaryCallback(
         private val zeroLoadingHandle:() -> Unit,
-        private val itemAtEndHandle: (ArticleItemData) -> Unit
-): PagedList.BoundaryCallback<ArticleItemData>() {
+        private val itemAtEndHandle: (ArticleItem) -> Unit
+): PagedList.BoundaryCallback<ArticleItem>() {
 
     override fun onZeroItemsLoaded() {
         // storage is empty
         zeroLoadingHandle()
     }
 
-    override fun onItemAtEndLoaded(itemAtEnd: ArticleItemData) {
+    override fun onItemAtEndLoaded(itemAtEnd: ArticleItem) {
         // need load more items user scroll d
         itemAtEndHandle(itemAtEnd)
     }

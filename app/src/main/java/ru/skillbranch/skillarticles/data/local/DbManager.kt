@@ -3,25 +3,30 @@ package ru.skillbranch.skillarticles.data.local
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.BuildConfig
+import ru.skillbranch.skillarticles.data.local.dao.ArticleCountsDao
 import ru.skillbranch.skillarticles.data.local.dao.ArticlesDao
 import ru.skillbranch.skillarticles.data.local.entities.Article
+import ru.skillbranch.skillarticles.data.local.entities.ArticleCounts
+import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
 
 object DbManager {
     val db = Room.databaseBuilder(
         App.applicationContext(),
         AppDb::class.java,
         AppDb.DATABASE_NAME
-    )
+    ).build()
 }
 
 @Database(
-    entities = [ Article::class ],
+    entities = [ Article::class, ArticleCounts::class ],
     version = AppDb.DATABASE_VERSION,
     exportSchema = false,
-    views = []
+    views = [ ArticleItem::class ]
 )
+@TypeConverters(DateConverter::class)
 abstract class AppDb: RoomDatabase() {
 
     companion object {
@@ -30,5 +35,6 @@ abstract class AppDb: RoomDatabase() {
     }
 
     abstract fun articlesDao(): ArticlesDao
+    abstract fun articleCountsDao(): ArticleCountsDao
 
 }

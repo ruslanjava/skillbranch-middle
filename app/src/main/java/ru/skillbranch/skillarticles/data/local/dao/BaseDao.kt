@@ -6,7 +6,7 @@ import androidx.room.Update
 
 interface BaseDao<T: Any> {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(list: List<T>): List<Long>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)

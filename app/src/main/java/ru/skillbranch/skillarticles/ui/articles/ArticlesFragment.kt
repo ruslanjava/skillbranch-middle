@@ -90,7 +90,7 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         val action = ArticlesFragmentDirections.actionNavArticlesToPageArticle(
                 item.id,
                 item.author,
-                item.authorAvatar,
+                item.authorAvatar ?: "",
                 item.category,
                 item.categoryIcon,
                 item.poster,

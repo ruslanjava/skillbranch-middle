@@ -2,16 +2,35 @@ package ru.skillbranch.skillarticles.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import ru.skillbranch.skillarticles.data.local.entities.Article
+import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
 
 @Dao
 interface ArticlesDao : BaseDao<Article> {
 
-    // TODO upsert
+    @Transaction
+    fun upsert(list: List<Article>) {
+        insert(list)
+            .mapIndexed { index, recortResult -> if (recortResult == -1L) list[index] else null }
+            .filterNotNull()
+            .also { if (it.isNotEmpty()) update(it) }
+    }
 
     @Query("""
         SELECT * FROM articles
     """)
     fun findArticles(): List<Article>
+
+    @Query("""
+        SELECT * FROM articles
+        WHERE id = :id
+    """)
+    fun findArticleById(id: String): Article
+
+    @Query("""
+        SELECT * FROM ArticleItem
+    """)
+    fun findArticleItems(): List<ArticleItem>
 
 }
