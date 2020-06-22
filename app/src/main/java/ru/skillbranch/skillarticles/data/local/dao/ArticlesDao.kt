@@ -13,7 +13,7 @@ interface ArticlesDao : BaseDao<Article> {
     @Transaction
     fun upsert(list: List<Article>) {
         insert(list)
-            .mapIndexed { index, recortResult -> if (recortResult == -1L) list[index] else null }
+            .mapIndexed { index, recordResult -> if (recordResult == -1L) list[index] else null }
             .filterNotNull()
             .also { if (it.isNotEmpty()) update(it) }
     }
@@ -36,5 +36,11 @@ interface ArticlesDao : BaseDao<Article> {
 
     @Delete
     fun delete(article: Article)
+
+    @Query("""
+        SELECT * FROM ArticleItem
+        WHERE category_id IN (:categoryIds)
+    """)
+    fun findArticleItemsByCategoryIds(categoryIds: List<String>): List<ArticleItem>
 
 }

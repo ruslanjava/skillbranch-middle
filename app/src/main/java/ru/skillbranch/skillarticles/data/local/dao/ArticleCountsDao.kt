@@ -11,7 +11,7 @@ interface ArticleCountsDao: BaseDao<ArticleCounts> {
     @Transaction
     fun upsert(list: List<ArticleCounts>) {
         insert(list)
-            .mapIndexed { index, recortResult -> if (recortResult == -1L) list[index] else null }
+            .mapIndexed { index, recordResult -> if (recordResult == -1L) list[index] else null }
             .filterNotNull()
             .also { if (it.isNotEmpty()) update(it) }
     }

@@ -81,6 +81,7 @@ private val articleItems = Array(6) {
         1 -> ArticleItem(
             id = "0",
             categoryIcon = "https://skill-branch.ru/img/mail/bot/android-category.png",
+            categoryId = "1",
             category = "Android",
             title = "Architecture Components pitfalls",
             description = "LiveData and the Fragment lifecycle",
@@ -92,6 +93,7 @@ private val articleItems = Array(6) {
         2 -> ArticleItem(
             id = "0",
             categoryIcon = "https://skill-branch.ru/img/mail/bot/android-category.png",
+            categoryId = "1",
             category = "Android",
             title = "Using Safe args plugin — current state of affairs",
             description = "Article describing usage of Safe args Gradle plugin with the Navigation Architecture Component and current support for argument types",
@@ -103,6 +105,7 @@ private val articleItems = Array(6) {
         3 -> ArticleItem(
             id = "0",
             categoryIcon = "https://skill-branch.ru/img/mail/bot/android-category.png",
+            categoryId = "1",
             category = "Android",
             title = "Observe LiveData from ViewModel in Fragment",
             description = "Google introduced Android architecture components which are basically a collection of libraries that facilitate robust design, testable",
@@ -114,6 +117,7 @@ private val articleItems = Array(6) {
         4 -> ArticleItem(
             id = "0",
             categoryIcon = "https://skill-branch.ru/img/mail/bot/android-category.png",
+            categoryId = "1",
             category = "Android",
             title = "The New Android In-App Navigation",
             description = "How to integrate Navigation Architecture Component in your app in different use cases",
@@ -125,6 +129,7 @@ private val articleItems = Array(6) {
         5 -> ArticleItem(
             id = "0",
             categoryIcon = "https://skill-branch.ru/img/mail/bot/android-category.png",
+            categoryId = "1",
             category = "Android",
             title = "Optimizing Android ViewModel with Lifecycle 2.2.0",
             description = "Initialization, passing arguments, and saved state",
@@ -135,6 +140,7 @@ private val articleItems = Array(6) {
         else -> ArticleItem(
             id = "0",
             categoryIcon = "https://skill-branch.ru/img/mail/bot/android-category.png",
+            categoryId = "1",
             category = "Android",
             author = "Florina Muntenescu",
             authorAvatar = "https://miro.medium.com/fit/c/96/96/1*z2H2HkOuv5bAOuIvUUN-5w.jpeg",

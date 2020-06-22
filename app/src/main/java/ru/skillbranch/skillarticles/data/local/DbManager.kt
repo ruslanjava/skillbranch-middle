@@ -8,9 +8,11 @@ import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.BuildConfig
 import ru.skillbranch.skillarticles.data.local.dao.ArticleCountsDao
 import ru.skillbranch.skillarticles.data.local.dao.ArticlesDao
+import ru.skillbranch.skillarticles.data.local.dao.CategoriesDao
 import ru.skillbranch.skillarticles.data.local.entities.Article
 import ru.skillbranch.skillarticles.data.local.entities.ArticleCounts
 import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
+import ru.skillbranch.skillarticles.data.local.entities.Category
 
 object DbManager {
     val db = Room.databaseBuilder(
@@ -21,7 +23,7 @@ object DbManager {
 }
 
 @Database(
-    entities = [ Article::class, ArticleCounts::class ],
+    entities = [ Article::class, ArticleCounts::class, Category::class ],
     version = AppDb.DATABASE_VERSION,
     exportSchema = false,
     views = [ ArticleItem::class ]
@@ -36,5 +38,6 @@ abstract class AppDb: RoomDatabase() {
 
     abstract fun articlesDao(): ArticlesDao
     abstract fun articleCountsDao(): ArticleCountsDao
+    abstract fun categoriesDao(): CategoriesDao
 
 }
