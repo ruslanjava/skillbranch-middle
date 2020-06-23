@@ -33,11 +33,12 @@ data class Author(
 @DatabaseView("""
     SELECT id, date, author_name AS author, author_avatar, article.title AS title, description, poster, 
     article.category_id AS category_id, category.title as category, category.icon as category_icon, 
-    0 as is_bookmark,
+    personal.is_bookmark as is_bookmark,
     counts.likes AS like_count, counts.comments AS comment_count, counts.read_duration AS read_duration
     FROM articles AS article
     INNER JOIN article_counts AS counts ON counts.article_id = id
     INNER JOIN article_categories AS category ON category.category_id = article.category_id
+    LEFT JOIN article_personal_infos AS personal ON personal.article_id = id
 """)
 data class ArticleItem(
     val id: String,

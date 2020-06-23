@@ -1,9 +1,7 @@
 package ru.skillbranch.skillarticles.data.local.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room.*
+import androidx.sqlite.db.SimpleSQLiteQuery
 import ru.skillbranch.skillarticles.data.local.entities.Article
 import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
 
@@ -42,5 +40,15 @@ interface ArticlesDao : BaseDao<Article> {
         WHERE category_id IN (:categoryIds)
     """)
     fun findArticleItemsByCategoryIds(categoryIds: List<String>): List<ArticleItem>
+
+    @Query("""
+        SELECT * FROM ArticleItem
+        INNER JOIN article_tag_x_ref AS refs ON refs.a_id = id
+        WHERE refs.t_id = :tag
+    """)
+    fun findArticlesByTagId(tag: String): List<ArticleItem>
+
+    @RawQuery(observedEntities = [ArticleItem::class])
+    fun findArticlesByRaw(simpleSQLiteQuery: SimpleSQLiteQuery): List<ArticleItem>
 
 }

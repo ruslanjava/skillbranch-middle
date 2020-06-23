@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import ru.skillbranch.skillarticles.data.EntityGenerator.generateArticleItems
 import ru.skillbranch.skillarticles.data.EntityGenerator.generateComments
 import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
+import ru.skillbranch.skillarticles.data.local.entities.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.models.*
 import java.util.*
 
@@ -31,7 +32,12 @@ object LocalDataHolder {
     fun findArticlePersonalInfo(articleId: String): LiveData<ArticlePersonalInfo?> {
         GlobalScope.launch {
             val article = LOCAL_ARTICLE_ITEMS.find { it.id == articleId }!!
-            articleInfo.postValue(ArticlePersonalInfo(isBookmark = article.isBookmark))
+            articleInfo.postValue(
+                ArticlePersonalInfo(
+                    articleId = article.id,
+                    isBookmark = article.isBookmark
+                )
+            )
         }
         return articleInfo
     }
