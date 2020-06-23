@@ -1,15 +1,21 @@
 package ru.skillbranch.skillarticles.ui.articles
 
+import android.database.Cursor
+import android.database.MatrixCursor
 import android.os.Bundle
+import android.provider.BaseColumns
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.CursorAdapter
+import android.widget.SimpleCursorAdapter
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_articles.*
+import kotlinx.android.synthetic.main.search_view_layout.view.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
@@ -28,6 +34,8 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
     override val binding: ArticlesBinding by lazy { ArticlesBinding() }
     private val args: ArticlesFragmentArgs by navArgs()
 
+    private lateinit var suggestionsAdapter: SimpleCursorAdapter
+
     override val prepareToolbar: (ToolbarBuilder.() -> Unit) = {
         addMenuItem(
                 MenuItemHolder(
@@ -38,21 +46,71 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         )
     }
 
+    private val articlesAdapter = ArticlesAdapter { item, isToggleBookmark ->
+        if (isToggleBookmark) {
+            viewModel.handleToggleBookmark(item.id)
+        } else {
+            val action = ArticlesFragmentDirections.actionNavArticlesToPageArticle(
+                item.id,
+                item.author,
+                item.authorAvatar!!,
+                item.category,
+                item.categoryIcon,
+                item.poster,
+                item.title,
+                item.date
+            )
+            viewModel.navigate(NavigationCommand.To(action.actionId, action.arguments))
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        suggestionsAdapter = SimpleCursorAdapter(
+            context,
+            android.R.layout.simple_list_item_1,
+         null, // cursor
+            arrayOf("tag"), // cursor column for bind on view
+            intArrayOf(android.R.id.text1), // text view id for bind data from cursor columns
+            CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER
+        )
+        suggestionsAdapter.setFilterQueryProvider { constraint -> populateAdapter(constraint) }
         setHasOptionsMenu(true)
+    }
+
+    private fun populateAdapter(constraint: CharSequence?): Cursor {
+        val cursor = MatrixCursor(arrayOf(BaseColumns._ID, "tag")) // create cursor for table with 2 column _id, tag
+        constraint ?: return cursor
+
+        val currentCursor = suggestionsAdapter.cursor
+        currentCursor.moveToFirst()
+
+        for (i in 0 until currentCursor.count) {
+            val tagValue = currentCursor.getString(1) // 2 column with name tag
+            if (tagValue.contains(constraint, true)) {
+                cursor.addRow(arrayOf<Any>(i, tagValue))
+            }
+            currentCursor.moveToNext()
+        }
+
+        return cursor
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         val menuItem = menu.findItem(R.id.action_search)
         val searchView = menuItem.actionView as SearchView
+
         if (binding.isSearch) {
             menuItem.expandActionView()
             searchView.setQuery(binding.searchQuery, false)
             if (binding.isFocusedSearch) searchView.requestFocus()
             else searchView.clearFocus()
         }
+
+        searchView.suggestionsAdapter = suggestionsAdapter
+
 
         menuItem.setOnActionExpandListener(object: MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
@@ -85,21 +143,6 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         }
     }
 
-    private val articlesAdapter = ArticlesAdapter { item ->
-        Log.e("ArticlesFragment", "click on article: ${item.id} ")
-        val action = ArticlesFragmentDirections.actionNavArticlesToPageArticle(
-                item.id,
-                item.author,
-                item.authorAvatar ?: "",
-                item.category,
-                item.categoryIcon,
-                item.poster,
-                item.title,
-                item.date
-        )
-        viewModel.navigate(NavigationCommand.To(action.actionId, action.arguments))
-    }
-
     override fun setupViews() {
         with (rv_articles) {
             layoutManager = LinearLayoutManager(context)
@@ -108,12 +151,17 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         }
 
         articlesAdapter.bookmarkListener = { id, bookmark ->
-            viewModel.handleToggleBookmark(id, bookmark)
+            viewModel.handleToggleBookmark(id)
         }
 
         viewModel.observeList(viewLifecycleOwner, args.isBookmarks) {
             articlesAdapter.submitList(it)
         }
+    }
+
+    override fun onDestroyView() {
+        toolbar.search_view?.setOnQueryTextListener(null)
+        super.onDestroyView()
     }
 
     inner class ArticlesBinding: Binding() {
@@ -125,6 +173,9 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
             // TODO show shimmer on rv_list
         }
 
+        var isHashtagSearch : Boolean by RenderProp(false)
+        var tags: List<String> by RenderProp<List<String>>(emptyList())
+
         override fun bind(data: IViewModelState) {
             data as ArticlesState
             isSearch = data.isSearch
@@ -132,7 +183,19 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
             isLoading = data.isLoading
         }
 
-        // TODO save UI
+        override val afterInflated: (() -> Unit)? = {
+            dependsOn<Boolean, List<String>>(::isHashtagSearch, ::tags) { ihs, tags ->
+                val cursor = MatrixCursor(arrayOf(BaseColumns._ID, "tag"))
+
+                if (ihs && tags.isNotEmpty()) {
+                    for ((counter, tag) in tags.withIndex()) {
+                        cursor.addRow(arrayOf<Any>(counter, tag))
+                    }
+                }
+
+                suggestionsAdapter.changeCursor(cursor)
+            }
+        }
 
     }
 

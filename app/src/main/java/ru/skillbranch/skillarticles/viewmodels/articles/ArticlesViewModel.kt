@@ -2,14 +2,14 @@ package ru.skillbranch.skillarticles.viewmodels.articles
 
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
-import ru.skillbranch.skillarticles.data.repositories.ArticleStrategy
-import ru.skillbranch.skillarticles.data.repositories.ArticlesDataFactory
+import ru.skillbranch.skillarticles.data.repositories.ArticleFilter
 import ru.skillbranch.skillarticles.data.repositories.ArticlesRepository
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
@@ -27,16 +27,8 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
                 .build()
     }
     private val listData = Transformations.switchMap(state) {
-        val searchFn = if (!it.isBookmark) repository::searchArticles
-        else repository::searchBookmarkedArticles
-
-        val defaultFn = if (!it.isBookmark) repository::allArticles
-        else repository::allBookmarked
-
-        when {
-            it.isSearch && !it.searchQuery.isNullOrBlank() -> buildPagedList(searchFn(it.searchQuery))
-            else -> buildPagedList(defaultFn())
-        }
+        val filter = it.toArticleFilter()
+        return@switchMap buildPagedList(repository.rawQueryArticles(filter))
     }
 
     fun observeList(
@@ -49,15 +41,15 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
     }
 
     private fun buildPagedList(
-            dataFactory: ArticlesDataFactory
+            dataFactory: DataSource.Factory<Int, ArticleItem>
     ): LiveData<PagedList<ArticleItem>> {
-        val builder = LivePagedListBuilder<Int, ArticleItem>(
+        val builder = LivePagedListBuilder(
                 dataFactory,
                 listConfig
         )
 
         // if all articles
-        if (dataFactory.strategy is ArticleStrategy.AllArticles) {
+        if (isEmptyFilter()) {
             builder.setBoundaryCallback(ArticlesBoundaryCallback(
                     ::zeroLoadingHandle,
                     ::itemAtEndHandle
@@ -69,33 +61,40 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
                 .build()
     }
 
+    private fun isEmptyFilter(): Boolean = currentState.searchQuery.isNullOrEmpty()
+            && !currentState.isBookmark
+            && currentState.selectedCategories.isEmpty()
+            && !currentState.isHashtagSearch
+
     private fun itemAtEndHandle(lastLoadArticle: ArticleItem) {
-        Log.e("ArticlesViewModel", "itemAtEndHandle: ")
         viewModelScope.launch(Dispatchers.IO) {
             val items = repository.loadArticlesFromNetwork(
                     start = lastLoadArticle.id.toInt().inc(),
                     size = listConfig.pageSize
             )
+
             if (items.isNotEmpty()) {
-                repository.insertArticlesToDb(items)
+                repository.insertResultIntoDb(items)
                 // invalidate data in data source -> create new LiveData<PagedList>
                 listData.value?.dataSource?.invalidate()
             }
 
             withContext(Dispatchers.Main) {
                 notify(Notify.TextMessage(
-                        "Load from network articles from ${items.firstOrNull()?.id} " +
-                                "to ${items.lastOrNull()?.id}"
+                        "Load from network articles from ${items.firstOrNull()?.data?.id} " +
+                                "to ${items.lastOrNull()?.data?.id}"
                 ))
             }
         }
     }
 
     private fun zeroLoadingHandle() {
-        Log.e("ArticlesViewModel", "zeroLoadingHandle: ")
         notify(Notify.TextMessage("Storage is empty"))
         viewModelScope.launch(Dispatchers.IO) {
-            val items = repository.loadArticlesFromNetwork(start = 0, size = listConfig.initialLoadSizeHint)
+            val items = repository.loadArticlesFromNetwork(
+                start = 0,
+                size = listConfig.initialLoadSizeHint
+            )
             if (items.isNotEmpty()) {
                 repository.insertArticlesToDb(items)
                 // invalidate data in data source -> create new LiveData<PagedList>
@@ -104,26 +103,37 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
         }
     }
 
+    fun handleSearch(query: String?) {
+        query ?: return
+        updateState { it.copy(searchQuery = query, isHashtagSearch = query.startsWith("#", true)) }
+    }
+
     fun handleSearchMode(isSearch: Boolean) {
         updateState { it.copy(isSearch = isSearch) }
     }
 
-    fun handleSearch(query: String?) {
-        query ?: return
-        updateState { it.copy(searchQuery = query) }
-    }
-
-    fun handleToggleBookmark(id: String, bookmark: Boolean) {
-        repository.updateBookmark(id, bookmark)
+    fun handleToggleBookmark(articleId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.toggleBookmark(articleId)
+        }
     }
 
 }
+
+private fun ArticlesState.toArticleFilter() = ArticleFilter(
+    search = searchQuery,
+    isBookmark = isBookmark,
+    categories = selectedCategories,
+    isHashtag = isHashtagSearch
+)
 
 data class ArticlesState(
         val isSearch: Boolean = false,
         val searchQuery: String? = null,
         val isLoading: Boolean = true,
-        val isBookmark: Boolean = false
+        val isBookmark: Boolean = false,
+        val selectedCategories: List<String> = emptyList(),
+        val isHashtagSearch: Boolean = false
 ): IViewModelState
 
 class ArticlesBoundaryCallback(

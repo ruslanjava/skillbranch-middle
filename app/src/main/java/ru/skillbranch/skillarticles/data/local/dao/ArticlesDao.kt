@@ -1,5 +1,6 @@
 package ru.skillbranch.skillarticles.data.local.dao
 
+import androidx.paging.DataSource
 import androidx.room.*
 import androidx.sqlite.db.SimpleSQLiteQuery
 import ru.skillbranch.skillarticles.data.local.entities.Article
@@ -49,6 +50,6 @@ interface ArticlesDao : BaseDao<Article> {
     fun findArticlesByTagId(tag: String): List<ArticleItem>
 
     @RawQuery(observedEntities = [ArticleItem::class])
-    fun findArticlesByRaw(simpleSQLiteQuery: SimpleSQLiteQuery): List<ArticleItem>
+    fun findArticlesByRaw(simpleSQLiteQuery: SimpleSQLiteQuery): DataSource.Factory<Int, ArticleItem>
 
 }
