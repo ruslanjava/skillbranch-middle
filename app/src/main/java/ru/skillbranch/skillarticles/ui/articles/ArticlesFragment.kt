@@ -4,11 +4,11 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.os.Bundle
 import android.provider.BaseColumns
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.CursorAdapter
-import android.widget.SimpleCursorAdapter
+import android.widget.AutoCompleteTextView
+import androidx.cursoradapter.widget.CursorAdapter
+import androidx.cursoradapter.widget.SimpleCursorAdapter
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_articles.*
 import kotlinx.android.synthetic.main.search_view_layout.view.*
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.data.local.entities.CategoryData
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
 import ru.skillbranch.skillarticles.ui.base.MenuItemHolder
@@ -38,11 +39,27 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
 
     override val prepareToolbar: (ToolbarBuilder.() -> Unit) = {
         addMenuItem(
-                MenuItemHolder(
-                        "Search", R.id.action_search,
-                        R.drawable.ic_search_black_24dp,
-                        R.layout.search_view_layout
+            MenuItemHolder(
+                "Search",
+                R.id.action_search,
+                R.drawable.ic_search_black_24dp,
+                R.layout.search_view_layout
+            )
+        )
+        addMenuItem(
+            MenuItemHolder(
+                "Filter",
+                R.id.action_search,
+                R.drawable.ic_filter_list_black_24,
+                null
+            ) { _ ->
+                val action = ArticlesFragmentDirections.chooseCategory(
+                    binding.selectedCategories.toTypedArray(),
+                    binding.categories.toTypedArray()
                 )
+
+                viewModel.navigate(NavigationCommand.To(action.actionId, action.arguments))
+            }
         )
     }
 
@@ -105,12 +122,24 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         if (binding.isSearch) {
             menuItem.expandActionView()
             searchView.setQuery(binding.searchQuery, false)
-            if (binding.isFocusedSearch) searchView.requestFocus()
-            else searchView.clearFocus()
         }
 
-        searchView.suggestionsAdapter = suggestionsAdapter
+        val autoTv = searchView.findViewById<AutoCompleteTextView>(R.id.search_src_text)
+        autoTv.threshold = 1
 
+        searchView.suggestionsAdapter = suggestionsAdapter
+        searchView.setOnSuggestionListener(object: SearchView.OnSuggestionListener {
+            override fun onSuggestionSelect(position: Int): Boolean = false
+
+            override fun onSuggestionClick(position: Int): Boolean {
+                suggestionsAdapter.cursor.moveToPosition(position)
+                val tag = suggestionsAdapter.cursor.getString(1)
+                searchView.setQuery(tag, true)
+                viewModel.handleSuggestion(tag)
+                return false
+            }
+
+        })
 
         menuItem.setOnActionExpandListener(object: MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
@@ -150,12 +179,16 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
             addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.VERTICAL))
         }
 
-        articlesAdapter.bookmarkListener = { id, bookmark ->
-            viewModel.handleToggleBookmark(id)
-        }
-
         viewModel.observeList(viewLifecycleOwner, args.isBookmarks) {
             articlesAdapter.submitList(it)
+        }
+
+        viewModel.observeTags(viewLifecycleOwner) {
+            binding.tags = it
+        }
+
+        viewModel.observeCategories(viewLifecycleOwner) {
+            binding.
         }
     }
 
@@ -166,7 +199,11 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
 
     inner class ArticlesBinding: Binding() {
 
-        var isFocusedSearch: Boolean = false
+        val categories: List<CategoryData> = emptyList()
+        var selectedCategories: List<CategoryData> by RenderProp<List<CategoryData>>(emptyList()) {
+            // TODO selected color
+        }
+
         var searchQuery: String? = null
         var isSearch: Boolean = false
         var isLoading: Boolean by RenderProp(true) {
@@ -181,6 +218,9 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
             isSearch = data.isSearch
             searchQuery = data.searchQuery
             isLoading = data.isLoading
+
+            isHashtagSearch = data.isHashtagSearch
+            selectedCategories = data.selectedCategories
         }
 
         override val afterInflated: (() -> Unit)? = {

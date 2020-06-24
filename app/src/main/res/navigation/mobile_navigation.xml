@@ -48,6 +48,9 @@
         <action
             android:id="@+id/action_nav_articles_to_page_article"
             app:destination="@id/page_article" />
+        <action
+            android:id="@+id/choose_category"
+            app:destination="@id/dialog_choose_category" />
     </fragment>
     <fragment
         android:id="@+id/nav_profile"
@@ -66,6 +69,9 @@
         <action
             android:id="@+id/action_nav_articles_to_page_article"
             app:destination="@id/page_article" />
+        <action
+            android:id="@+id/choose_category"
+            app:destination="@id/dialog_choose_category" />
     </fragment>
     <fragment
         android:id="@+id/nav_transcriptions"
@@ -109,5 +115,16 @@
         android:id="@+id/finish_login"
         app:popUpTo="@id/auth"
         app:popUpToInclusive="true" />
+
+    <dialog
+        android:id="@+id/dialog_choose_category"
+        android:name="ru.skillbranch.skillarticles.ui.dialogs.ChooseCategoryDialog"
+        android:label="ChooseCategoryDialog" >
+        <argument
+            android:name="selected_categories"
+            app:argType="string[]" />
+        <argument android:name="categories"
+            app:argType="ru.skillbranch.skillarticles.data.local.entities.CategoryData[]" />
+    </dialog>
 
 </navigation>
