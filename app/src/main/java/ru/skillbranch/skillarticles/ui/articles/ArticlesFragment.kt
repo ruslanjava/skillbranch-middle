@@ -188,7 +188,7 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         }
 
         viewModel.observeCategories(viewLifecycleOwner) {
-            binding.
+            binding.categories = it
         }
     }
 
@@ -199,7 +199,7 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
 
     inner class ArticlesBinding: Binding() {
 
-        val categories: List<CategoryData> = emptyList()
+        var categories: List<CategoryData> = emptyList()
         var selectedCategories: List<CategoryData> by RenderProp<List<CategoryData>>(emptyList()) {
             // TODO selected color
         }

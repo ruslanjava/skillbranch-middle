@@ -6,43 +6,83 @@ import androidx.lifecycle.MutableLiveData
 import androidx.paging.DataSource
 import androidx.paging.ItemKeyedDataSource
 import ru.skillbranch.skillarticles.data.*
+import ru.skillbranch.skillarticles.data.local.DbManager
 import ru.skillbranch.skillarticles.data.local.PrefManager
+import ru.skillbranch.skillarticles.data.local.entities.ArticleFull
 import ru.skillbranch.skillarticles.data.local.entities.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.models.*
 import java.lang.Thread.sleep
 import kotlin.math.abs
 
-object ArticleRepository {
+interface IArticleRepository {
+
+    fun findArticle(articleId: String): LiveData<ArticleFull>
+    fun getAppSettings(): LiveData<AppSettings>
+    fun toggleLike(articleId: String)
+    fun toggleBookmark(articleId: String)
+    fun isAuth(): MutableLiveData<Boolean>
+    fun loadCommentsByRange(slug: String?, size: Int, articleId: String): List<CommentItemData>
+    fun sendMessage(articleId: String, text: String, answerToSlug: String?)
+    fun loadAllComments(articleId: String, total: Int): CommentsDataFactory
+    fun decrementLike(articleId: String)
+    fun incrementLike(articleId: String)
+    fun updateSettings(copy: AppSettings)
+    fun fetchArticleContent(articleId: String)
+    fun findArticleCommentCount(articleId: String): LiveData<Int>
+
+}
+
+object ArticleRepository : IArticleRepository {
 
     private val network = NetworkDataHolder
     private val preferences = PrefManager
+    private val articlesDao = DbManager.db.articlesDao()
+    private val articlePersonalDao = DbManager.db.articlePersonalInfos()
+    private val articleCountsDao = DbManager.db.articleCountsDao()
+    private val articleContentDao = DbManager.db.articleContentsDao()
 
-    fun loadArticleContent(articleId: String): LiveData<List<MarkdownElement>?> {
-        return MutableLiveData(emptyList())
+    override fun findArticle(articleId: String): LiveData<ArticleFull> {
+        return articlesDao.findFullArticle(articleId)
     }
 
-    fun getArticle(articleId: String): LiveData<ArticleData?> {
-        return MutableLiveData(null)
+    override fun getAppSettings(): LiveData<AppSettings> = preferences.getAppSettings() //from preferences
+
+    override fun toggleLike(articleId: String) {
+        articlePersonalDao.toggleLikeOrInsert(articleId)
     }
 
-    fun loadArticlePersonalInfo(articleId: String): LiveData<ArticlePersonalInfo?> {
-        return MutableLiveData(null)
+    override fun toggleBookmark(articleId: String) {
+        articlePersonalDao.toggleBookmarkOrInsert(articleId)
     }
 
-    fun getAppSettings(): LiveData<AppSettings> = preferences.getAppSettings() //from preferences
+    override fun updateSettings(appSettings: AppSettings) {
 
-    fun updateSettings(appSettings: AppSettings) {
+    }
+
+    override fun fetchArticleContent(articleId: String) {
+        val content = network.loadArticleContent(articleId).apply {
+            sleep(1500)
+        }
+        articlesDao.insert(content.toArticleContent())
+    }
+
+    override fun findArticleCommentCount(articleId: String): LiveData<Int> {
+        return articleCountsDao.getCommentsCount(articleId)
     }
 
     fun updateArticlePersonalInfo(info: ArticlePersonalInfo) {
     }
 
-    fun isAuth(): MutableLiveData<Boolean> = preferences.isAuth()
+    override fun isAuth(): MutableLiveData<Boolean> = preferences.isAuth()
 
-    fun allComments(articleId: String, totalCount: Int) = CommentsDataFactory(itemProvider = ::loadCommentsByRange,
-            articleId = articleId, totalCount = totalCount)
+    override fun loadAllComments(articleId: String, totalCount: Int) =
+        CommentsDataFactory(
+            itemProvider = ::loadCommentsByRange,
+            articleId = articleId,
+            totalCount = totalCount
+        )
 
-    fun loadCommentsByRange(slug: String?, size: Int, articleId: String) : List<CommentItemData> {
+    override fun loadCommentsByRange(slug: String?, size: Int, articleId: String) : List<CommentItemData> {
         val data = network.commentsData.getOrElse(articleId) {
             mutableListOf()
         }
@@ -64,14 +104,19 @@ object ArticleRepository {
         }
     }
 
-    fun sendComment(articleId: String, comment: String, answerToSlug: String?) {
+    override fun decrementLike(articleId: String) {
+        articleCountsDao.decrementLike(articleId)
+    }
+
+    override fun incrementLike(articleId: String) {
+        articleCountsDao.incrementLike(articleId)
+    }
+
+    override fun sendMessage(articleId: String, comment: String, answerToSlug: String?) {
         network.sendMessage(articleId, comment, answerToSlug,
                 User("777", "John Doe", "https://skill-branch.ru/img/mail/bot/android-category.png")
         )
-    }
-
-    fun updateBookmark(id: String, bookmark: Boolean) {
-        local.updateBookmark(id, bookmark)
+        articleCountsDao.incrementCommentsCount(articleId)
     }
 
 }

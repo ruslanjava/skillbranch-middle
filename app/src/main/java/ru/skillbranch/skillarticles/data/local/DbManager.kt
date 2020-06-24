@@ -24,7 +24,7 @@ object DbManager {
     ],
     version = AppDb.DATABASE_VERSION,
     exportSchema = false,
-    views = [ ArticleItem::class ]
+    views = [ ArticleItem::class, ArticleFull::class ]
 )
 @TypeConverters(DateConverter::class)
 abstract class AppDb: RoomDatabase() {
@@ -39,6 +39,6 @@ abstract class AppDb: RoomDatabase() {
     abstract fun categoriesDao(): CategoriesDao
     abstract fun articlePersonalInfos(): ArticlePersonalInfosDao
     abstract fun tagsDao(): TagsDao
-    abstract fun articleContentDao(): ArticleContentsDao
+    abstract fun articleContentsDao(): ArticleContentsDao
 
 }
