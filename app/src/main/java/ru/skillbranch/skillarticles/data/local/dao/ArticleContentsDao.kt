@@ -1,9 +1,9 @@
-package ru.skillbranch.skillarticles.data.local.entities
+package ru.skillbranch.skillarticles.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
-import ru.skillbranch.skillarticles.data.local.dao.BaseDao
+import ru.skillbranch.skillarticles.data.local.entities.ArticleContent
 
 @Dao
 interface ArticleContentsDao: BaseDao<ArticleContent> {

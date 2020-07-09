@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
 import ru.skillbranch.skillarticles.App
-import ru.skillbranch.skillarticles.data.delegates.PrefDelegate
 import ru.skillbranch.skillarticles.data.models.AppSettings
 
 object PrefManager {
