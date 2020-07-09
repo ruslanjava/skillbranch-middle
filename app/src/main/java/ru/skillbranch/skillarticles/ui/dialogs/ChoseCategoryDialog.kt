@@ -13,7 +13,7 @@ class ChoseCategoryDialog : DialogFragment() {
     private val viewModel: ArticlesViewModel by activityViewModels()
     private val selectedCategories = mutableListOf<String>()
 
-    private val args: ChooseCategoryDialogArgs by navArgs()
+    private val args: ChoseCategoryDialogArgs by navArgs()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // TODO save checked state and implement custom items
