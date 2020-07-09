@@ -17,7 +17,10 @@ class ChooseCategoryDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // TODO save checked state and implement custom items
-        val categories: List<String> = args.categories.toList().map { "${it.title} (${it.articlesCount})" }.toTypedArray()
+        val categories = args.categories.toList().map {
+            "${it.title} (${it.articlesCount})"
+        }.toTypedArray()
+
         val checked = BooleanArray(args.categories.size) {
             args.selectedCategories.contains(args.categories[it].categoryId)
         }
@@ -30,10 +33,10 @@ class ChooseCategoryDialog : DialogFragment() {
             .setNegativeButton("Reset") { _, _ ->
                 viewModel.applyCategories(emptyList())
             }
-            .setMultiChoiceItems(categories, checked) { dialog, which, isChecked -> {
+            .setMultiChoiceItems(categories, checked) { dialog, which, isChecked ->
                 if (isChecked) selectedCategories.add(args.categories[which].categoryId)
                 else selectedCategories.remove(args.categories[which].categoryId)
-            }}
+            }
 
         return adb.create()
     }

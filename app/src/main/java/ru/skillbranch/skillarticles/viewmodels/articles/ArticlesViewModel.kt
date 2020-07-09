@@ -1,6 +1,5 @@
 package ru.skillbranch.skillarticles.viewmodels.articles
 
-import android.util.Log
 import androidx.lifecycle.*
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
@@ -70,10 +69,10 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
                 .build()
     }
 
-    private fun isEmptyFilter(): Boolean = currentState.searchQuery.isNullOrEmpty()
-            && !currentState.isBookmark
-            && currentState.selectedCategories.isEmpty()
-            && !currentState.isHashtagSearch
+    private fun isEmptyFilter(): Boolean = currentState.searchQuery.isNullOrEmpty() &&
+            !currentState.isBookmark &&
+            currentState.selectedCategories.isEmpty() &&
+            !currentState.isHashtagSearch
 
     private fun itemAtEndHandle(lastLoadArticle: ArticleItem) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -83,7 +82,7 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
             )
 
             if (items.isNotEmpty()) {
-                repository.insertResultIntoDb(items)
+                repository.insertArticlesToDb(items)
                 // invalidate data in data source -> create new LiveData<PagedList>
                 listData.value?.dataSource?.invalidate()
             }

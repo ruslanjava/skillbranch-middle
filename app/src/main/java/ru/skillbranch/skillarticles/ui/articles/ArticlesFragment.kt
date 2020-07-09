@@ -200,7 +200,7 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
     inner class ArticlesBinding: Binding() {
 
         var categories: List<CategoryData> = emptyList()
-        var selectedCategories: List<CategoryData> by RenderProp<List<CategoryData>>(emptyList()) {
+        var selectedCategories: List<String> by RenderProp<List<String>>(emptyList()) {
             // TODO selected color
         }
 

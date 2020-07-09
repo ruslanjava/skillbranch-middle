@@ -11,6 +11,7 @@ import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.data.local.entities.ArticleFull
 import ru.skillbranch.skillarticles.data.local.entities.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.models.*
+import ru.skillbranch.skillarticles.extensions.data.toArticleContent
 import java.lang.Thread.sleep
 import kotlin.math.abs
 
@@ -63,7 +64,7 @@ object ArticleRepository : IArticleRepository {
         val content = network.loadArticleContent(articleId).apply {
             sleep(1500)
         }
-        articlesDao.insert(content.toArticleContent())
+        articleContentDao.insert(content.toArticleContent())
     }
 
     override fun findArticleCommentCount(articleId: String): LiveData<Int> {

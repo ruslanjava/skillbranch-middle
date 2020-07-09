@@ -17,7 +17,7 @@ interface IArticlesRepository {
 
     fun loadArticlesFromNetwork(start: Int = 0, size: Int): List<ArticleRes>
 
-    fun insertResultIntoDb(articles: List<ArticleRes>)
+    fun insertArticlesToDb(articles: List<ArticleRes>)
 
     fun toggleBookmark(articleId: String)
 
@@ -43,13 +43,13 @@ object ArticlesRepository: IArticlesRepository {
     override fun loadArticlesFromNetwork(start: Int, size: Int): List<ArticleRes> =
         network.findArticlesItem(start, size)
 
-    override fun insertResultIntoDb(articles: List<ArticleRes>) {
+    override fun insertArticlesToDb(articles: List<ArticleRes>) {
         articlesDao.upsert(articles.map { it.data.toArticle() })
-        articleCountsDao.upsert(articles.map{ it.counts.toArticleCounts()})
+        articleCountsDao.upsert(articles.map{ it.counts.toArticleCounts() })
 
         val refs = articles.map { it.data }
             .fold(mutableListOf<Pair<String, String>>()) { acc, res ->
-                acc.also { acc.addAll(res.tags.map { res.id to it }) }
+                acc.also { list -> list.addAll(res.tags.map { res.id to it }) }
             }
 
         val tags = refs.map { it.second }
