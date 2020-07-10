@@ -112,7 +112,9 @@ data class ArticleFilter(
     fun toQuery(): String {
         val qb = QueryBuilder()
         qb.table("ArticleItem")
-        if (search != null && !isHashtag) { qb.appendWhere("title LIKE '%$search%'") }
+        if (search != null && !isHashtag) {
+            qb.appendWhere("title LIKE '%${search}%'")
+        }
 
         if (search != null && isHashtag) {
             qb.innerJoin("article_tag_x_ref AS refs", "refs.a_id = id")

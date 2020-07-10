@@ -18,18 +18,14 @@ interface ArticlePersonalInfosDao: BaseDao<ArticlePersonalInfo> {
             .also { if (it.isNotEmpty()) update(it) }
     }
 
-    @Query("""
-        SELECT * FROM article_personal_infos
-    """)
+    @Query("SELECT * FROM article_personal_infos")
     fun findPersonalInfos(): LiveData<List<ArticlePersonalInfo>>
 
-    @Query("""
-        SELECT * FROM article_personal_infos WHERE article_id = :id
-    """)
-    fun findPersonalInfos(id: String): LiveData<ArticlePersonalInfo>
+    @Query("SELECT * FROM article_personal_infos WHERE article_id = :articleId")
+    fun findPersonalInfos(articleId: String): LiveData<ArticlePersonalInfo>
 
     @Query("""
-        UPDATE article_personal_infos SET is_like = NOT is_like, updated_at = CURRENT_TIMESTAMP
+        UPDATE article_personal_infos SET is_like = NOT is_like, updated_at = CURRENT_TIMESTAMP 
         WHERE article_id = :articleId
     """)
     fun toggleLike(articleId: String): Int

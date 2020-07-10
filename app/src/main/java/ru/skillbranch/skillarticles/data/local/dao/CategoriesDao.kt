@@ -32,7 +32,7 @@ interface CategoriesDao: BaseDao<Category> {
         FROM article_categories AS category
         INNER JOIN articles AS article ON category.category_id = article.category_id
         GROUP BY category.category_id
-        ORDER BY articles_count ASC
+        ORDER BY articles_count DESC
     """)
     fun findAllCategoriesData(): LiveData<List<CategoryData>>
 

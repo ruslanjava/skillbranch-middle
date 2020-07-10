@@ -19,20 +19,13 @@ interface ArticlesDao : BaseDao<Article> {
             .also { if (it.isNotEmpty()) update(it) }
     }
 
-    @Query("""
-        SELECT * FROM articles
-    """)
+    @Query("SELECT * FROM articles")
     fun findArticles(): LiveData<List<Article>>
 
-    @Query("""
-        SELECT * FROM articles
-        WHERE id = :id
-    """)
+    @Query("SELECT * FROM articles WHERE id = :id")
     fun findArticleById(id: String): LiveData<Article>
 
-    @Query("""
-        SELECT * FROM ArticleItem
-    """)
+    @Query("SELECT * FROM ArticleItem")
     fun findArticleItems(): LiveData<List<ArticleItem>>
 
     @Delete
@@ -48,6 +41,22 @@ interface ArticlesDao : BaseDao<Article> {
     fun findArticlesByRaw(simpleSQLiteQuery: SimpleSQLiteQuery): DataSource.Factory<Int, ArticleItem>
 
     @Query("SELECT * FROM ArticleFull WHERE id = :articleId")
-    fun findFullArticle(articleId: String): LiveData<ArticleFull>
+    fun findFullArticle(articleId: String): LiveData<ArticleFull> {
+        return findFullArticleInternal(articleId)
+        /*
+        return Transformations.map(findFullArticleInternal(articleId)) { articleFull ->
+            articleFull.tags.clear()
+            val tags = findTagsByArticleId(articleId)
+            articleFull.tags.addAll(tags)
+            articleFull
+        }
+         */
+    }
+
+    @Query("SELECT * FROM ArticleFull WHERE id = :articleId")
+    fun findFullArticleInternal(articleId: String): LiveData<ArticleFull>
+
+    @Query("SELECT t_id FROM article_tag_x_ref WHERE a_id = :articleId")
+    fun findTagsByArticleId(articleId: String): List<String>
 
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
 import ru.skillbranch.skillarticles.App
+import ru.skillbranch.skillarticles.data.delegates.PrefDelegate
 import ru.skillbranch.skillarticles.data.models.AppSettings
 
 object PrefManager {
@@ -13,22 +14,41 @@ object PrefManager {
         PreferenceManager.getDefaultSharedPreferences(App.applicationContext())
     }
 
+    private var darkMode by PrefDelegate(false)
+    private var bigText by PrefDelegate(false)
+
+    private val appSettingsLiveData: MutableLiveData<AppSettings> by lazy {
+        val result = MutableLiveData<AppSettings>()
+        result.postValue(AppSettings().copy(isDarkMode = darkMode ?: false, isBigText = bigText ?: false))
+        return@lazy result
+    }
+
+    private val authLiveData: MutableLiveData<Boolean> by lazy {
+        val result = MutableLiveData<Boolean>()
+        result.postValue(false)
+        return@lazy result
+    }
+
     fun clearAll() {
         preferences.edit().clear().apply()
     }
 
     fun getAppSettings(): LiveData<AppSettings> {
-        // TODO implement me
-        return MutableLiveData(AppSettings())
+        return appSettingsLiveData
     }
 
     fun isAuth(): MutableLiveData<Boolean> {
-        // TODO implement me
-        return MutableLiveData(false)
+        return authLiveData
     }
 
-    fun setAuth(auth: Boolean): Unit {
-        // TODO implement me
+    fun setAuth(auth: Boolean) {
+        authLiveData.postValue(auth)
+    }
+
+    fun updateSettings(appSettings: AppSettings) {
+        darkMode = appSettings.isDarkMode
+        bigText = appSettings.isBigText
+        appSettingsLiveData.postValue(appSettings)
     }
 
 }

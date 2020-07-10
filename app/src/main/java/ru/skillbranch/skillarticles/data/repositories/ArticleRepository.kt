@@ -76,7 +76,7 @@ object ArticleRepository : IArticleRepository {
     }
 
     override fun updateSettings(appSettings: AppSettings) {
-
+        preferences.updateSettings(appSettings)
     }
 
     override fun fetchArticleContent(articleId: String) {
@@ -91,6 +91,7 @@ object ArticleRepository : IArticleRepository {
     }
 
     fun updateArticlePersonalInfo(info: ArticlePersonalInfo) {
+        articlePersonalDao.update(info)
     }
 
     override fun isAuth(): MutableLiveData<Boolean> = preferences.isAuth()
@@ -181,7 +182,5 @@ class CommentsDataSource(
     }
 
     override fun getKey(item: CommentItemData): String = item.slug
-
-
 
 }
