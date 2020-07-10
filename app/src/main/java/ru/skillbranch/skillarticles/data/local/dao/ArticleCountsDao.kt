@@ -20,7 +20,13 @@ interface ArticleCountsDao: BaseDao<ArticleCounts> {
     @Query("""
         SELECT * FROM article_counts
     """)
-    fun findArticleCounts(): List<ArticleCounts>
+    fun findArticleCounts(): LiveData<List<ArticleCounts>>
+
+    @Query("""
+        SELECT * FROM article_counts  
+        WHERE article_id = :id
+    """)
+    fun findArticleCounts(id: String): LiveData<ArticleCounts>
 
     @Query("""
         UPDATE article_counts SET likes = likes + 1, updated_at = CURRENT_TIMESTAMP

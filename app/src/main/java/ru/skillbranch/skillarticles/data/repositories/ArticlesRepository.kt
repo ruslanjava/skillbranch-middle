@@ -1,10 +1,12 @@
 package ru.skillbranch.skillarticles.data.repositories
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import androidx.sqlite.db.SimpleSQLiteQuery
 import ru.skillbranch.skillarticles.data.NetworkDataHolder
 import ru.skillbranch.skillarticles.data.local.DbManager
+import ru.skillbranch.skillarticles.data.local.dao.*
 import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
 import ru.skillbranch.skillarticles.data.local.entities.ArticleTagXRef
 import ru.skillbranch.skillarticles.data.local.entities.CategoryData
@@ -34,11 +36,27 @@ interface IArticlesRepository {
 object ArticlesRepository: IArticlesRepository {
 
     private val network = NetworkDataHolder
-    private val articlesDao = DbManager.db.articlesDao()
-    private val articleCountsDao = DbManager.db.articleCountsDao()
-    private val categoriesDao = DbManager.db.categoriesDao()
-    private val tagsDao = DbManager.db.tagsDao()
-    private val articlePersonalDao = DbManager.db.articlePersonalInfos()
+
+    private var articlesDao = DbManager.db.articlesDao()
+    private var articleCountsDao = DbManager.db.articleCountsDao()
+    private var categoriesDao = DbManager.db.categoriesDao()
+    private var tagsDao = DbManager.db.tagsDao()
+    private var articlePersonalDao = DbManager.db.articlePersonalInfosDao()
+
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    fun setupTestDao(
+        articlesDao: ArticlesDao,
+        articleCountsDao: ArticleCountsDao,
+        categoriesDao: CategoriesDao,
+        tagsDao: TagsDao,
+        articlePersonalDao: ArticlePersonalInfosDao
+    ) {
+        this.articlesDao = articlesDao
+        this.articleCountsDao = articleCountsDao
+        this.categoriesDao = categoriesDao
+        this.tagsDao = tagsDao
+        this.articlePersonalDao = articlePersonalDao
+    }
 
     override fun loadArticlesFromNetwork(start: Int, size: Int): List<ArticleRes> =
         network.findArticlesItem(start, size)
@@ -126,13 +144,13 @@ class QueryBuilder {
     }
 
     fun appendWhere(condition: String, logic: String = "AND") = apply {
-        if (whereCondition.isNullOrEmpty()) whereCondition = "WHERE $condition "
-        else whereCondition += "$logic $condition"
+        if (whereCondition.isNullOrEmpty()) whereCondition = " WHERE $condition "
+        else whereCondition += " $logic $condition"
     }
 
     fun innerJoin(table: String, on: String) = apply {
-        if (joinTables.isNullOrEmpty()) joinTables = "INNER JOIN $table ON $on"
-        else joinTables += "INNER JOIN $table"
+        if (joinTables.isNullOrEmpty()) joinTables = " INNER JOIN $table ON $on"
+        else joinTables += " INNER JOIN $table"
     }
 
     fun build(): String {
