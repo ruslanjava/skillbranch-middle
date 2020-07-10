@@ -410,6 +410,7 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
                 val strikeWidth = markdownBuilder.strikeWidth
 
                 val builder: SpannableStringBuilder = SpannableStringBuilder()
+                builder.append("Article source:\r\n")
                 builder.inSpans(
                     IconLinkSpan(linkIcon, gap, colorSecondary, strikeWidth),
                     URLSpan(it)
