@@ -29,7 +29,7 @@ class MarkdownConverter {
 
 class TagListConverter {
 
-    val pattern: Pattern = Pattern.compile("#([A-Za-z0-9_-]+)")
+    val pattern: Pattern = Pattern.compile("#([A-Za-z0-9_ ]+)")
 
     @TypeConverter
     fun toTagList(text: String?): List<String> {

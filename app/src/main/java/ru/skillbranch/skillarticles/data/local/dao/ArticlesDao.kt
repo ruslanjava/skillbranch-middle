@@ -48,21 +48,7 @@ interface ArticlesDao : BaseDao<Article> {
     fun findArticlesByRaw(simpleSQLiteQuery: SimpleSQLiteQuery): DataSource.Factory<Int, ArticleItem>
 
     @Query("SELECT * FROM ArticleFull WHERE id = :articleId")
-    fun findFullArticle(articleId: String): LiveData<ArticleFull> {
-        val taggedLiveData = MediatorLiveData<ArticleFull>()
-
-        taggedLiveData.addSource(findFullArticleInternal(articleId)) {
-            GlobalScope.launch(Dispatchers.IO) {
-                val tags = findTagsByArticleId(articleId)
-                taggedLiveData.postValue(it.copy(tags = tags))
-            }
-        }
-
-        return taggedLiveData
-    }
-
-    @Query("SELECT * FROM ArticleFull WHERE id = :articleId")
-    fun findFullArticleInternal(articleId: String): LiveData<ArticleFull>
+    fun findFullArticle(articleId: String): LiveData<ArticleFull>
 
     @Query("SELECT t_id FROM article_tag_x_ref WHERE a_id = :articleId")
     fun findTagsByArticleId(articleId: String): List<String>
