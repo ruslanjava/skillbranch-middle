@@ -2,6 +2,7 @@ package ru.skillbranch.skillarticles.data.local.entities
 
 import androidx.room.*
 import ru.skillbranch.skillarticles.data.local.MarkdownConverter
+import ru.skillbranch.skillarticles.data.local.TagListConverter
 import ru.skillbranch.skillarticles.data.repositories.MarkdownElement
 import java.util.*
 
@@ -68,14 +69,14 @@ data class ArticleItem(
 @DatabaseView("""
     SELECT id, article.title AS title, description, author_user_id, author_avatar, author_name, date,
     category.category_id AS category_category_id, category.title AS category_title, category.icon AS category_icon,
-    content.share_link AS share_link, content.content AS content, content.source AS content_source,
+    content.share_link AS share_link, content.content AS content, content.source AS content_source, content.content AS content_tags,
     personal.is_bookmark AS is_bookmark, personal.is_like AS is_like
     FROM articles AS article 
     INNER JOIN article_categories AS category ON category.category_id = article.category_id 
     LEFT JOIN article_contents AS content ON content.article_id = id 
     LEFT JOIN article_personal_infos AS personal ON personal.article_id = id
 """)
-@TypeConverters(MarkdownConverter::class)
+@TypeConverters(MarkdownConverter::class, TagListConverter::class)
 data class ArticleFull(
     val id: String,
     val title: String,
@@ -93,6 +94,7 @@ data class ArticleFull(
     val date: Date,
     val content: List<MarkdownElement>? = null,
     @ColumnInfo(name = "content_source")
-    val source: String? = null
-    // val tags: MutableList<String> = mutableListOf()
+    val source: String? = null,
+    @ColumnInfo(name = "content_tags")
+    val tags: List<String> = listOf()
 )

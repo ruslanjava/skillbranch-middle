@@ -1,9 +1,16 @@
 package ru.skillbranch.skillarticles.data.local.dao
 
+import androidx.arch.core.util.Function
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.paging.DataSource
 import androidx.room.*
 import androidx.sqlite.db.SimpleSQLiteQuery
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import ru.skillbranch.skillarticles.data.local.entities.Article
 import ru.skillbranch.skillarticles.data.local.entities.ArticleFull
 import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
@@ -42,15 +49,16 @@ interface ArticlesDao : BaseDao<Article> {
 
     @Query("SELECT * FROM ArticleFull WHERE id = :articleId")
     fun findFullArticle(articleId: String): LiveData<ArticleFull> {
-        return findFullArticleInternal(articleId)
-        /*
-        return Transformations.map(findFullArticleInternal(articleId)) { articleFull ->
-            articleFull.tags.clear()
-            val tags = findTagsByArticleId(articleId)
-            articleFull.tags.addAll(tags)
-            articleFull
+        val taggedLiveData = MediatorLiveData<ArticleFull>()
+
+        taggedLiveData.addSource(findFullArticleInternal(articleId)) {
+            GlobalScope.launch(Dispatchers.IO) {
+                val tags = findTagsByArticleId(articleId)
+                taggedLiveData.postValue(it.copy(tags = tags))
+            }
         }
-         */
+
+        return taggedLiveData
     }
 
     @Query("SELECT * FROM ArticleFull WHERE id = :articleId")

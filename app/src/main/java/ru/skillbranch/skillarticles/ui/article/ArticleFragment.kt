@@ -5,13 +5,18 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.text.style.URLSpan
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.WindowManager
+import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SearchView
+import androidx.core.text.inSpans
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
@@ -39,6 +44,9 @@ import ru.skillbranch.skillarticles.ui.base.ToolbarBuilder
 import ru.skillbranch.skillarticles.ui.custom.ArticleSubmenu
 import ru.skillbranch.skillarticles.ui.custom.Bottombar
 import ru.skillbranch.skillarticles.ui.custom.ShimmerDrawable
+import ru.skillbranch.skillarticles.ui.custom.markdown.MarkdownBuilder
+import ru.skillbranch.skillarticles.ui.custom.spans.IconLinkSpan
+import ru.skillbranch.skillarticles.ui.custom.spans.InlineCodeSpan
 import ru.skillbranch.skillarticles.ui.delegates.RenderProp
 import ru.skillbranch.skillarticles.viewmodels.article.ArticleState
 import ru.skillbranch.skillarticles.viewmodels.article.ArticleViewModel
@@ -380,14 +388,59 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             // searchView?.setQuery(it, false)
         }
 
-        private var searchResults: List<Pair<Int, Int>> by RenderProp<List<Pair<Int, Int>>>(emptyList())
+        private var searchResults: List<Pair<Int, Int>> by RenderProp(emptyList())
         private var searchPosition: Int by RenderProp(0)
 
-        private var content: List<MarkdownElement> by RenderProp<List<MarkdownElement>>(emptyList()) {
+        private var content: List<MarkdownElement> by RenderProp(emptyList()) {
             tv_text_content.isLoading = it.isEmpty()
             tv_text_content.setContent(it)
             if (it.isNotEmpty()) {
                 setupCopyListener()
+            }
+        }
+
+        private var source: String by RenderProp("") {
+            if (it.isEmpty()) {
+                tv_source.visibility = View.GONE
+            } else {
+                val markdownBuilder = MarkdownBuilder(requireContext())
+                val colorSecondary = markdownBuilder.colorSecondary
+                val linkIcon = markdownBuilder.linkIcon
+                val gap: Float = markdownBuilder.gap
+                val strikeWidth = markdownBuilder.strikeWidth
+
+                val builder: SpannableStringBuilder = SpannableStringBuilder()
+                builder.inSpans(
+                    IconLinkSpan(linkIcon, gap, colorSecondary, strikeWidth),
+                    URLSpan(it)
+                ) {
+                    append(it)
+                }
+                tv_source.setText(builder, TextView.BufferType.SPANNABLE)
+                tv_source.visibility = View.VISIBLE
+            }
+        }
+
+        private var tags: List<String> by RenderProp(emptyList()) {
+            if (it.isEmpty()) {
+                tv_hashtags.visibility = View.GONE
+            } else {
+                val markdownBuilder = MarkdownBuilder(requireContext())
+                val colorOnSurface = markdownBuilder.colorOnSurface
+                val opacityColorSurface = markdownBuilder.opacityColorSurface
+                val gap: Float = markdownBuilder.gap
+                val cornerRadius = markdownBuilder.cornerRadius
+
+                val builder = SpannableStringBuilder()
+                for (hashtag in it) {
+                    if (builder.isNotEmpty()) { builder.append(' ') }
+                    builder.inSpans(InlineCodeSpan(colorOnSurface, opacityColorSurface, cornerRadius, gap)) {
+                        append(hashtag)
+                    }
+                }
+
+                tv_hashtags.setText(builder, TextView.BufferType.SPANNABLE)
+                tv_hashtags.visibility = View.VISIBLE
             }
         }
 
@@ -428,6 +481,9 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
             searchResults = data.searchResults
             answerTo = data.answerTo ?: "Comment"
             isShowBottombar = data.showBottomBar
+
+            source = data.source ?: ""
+            tags = data.tags
         }
 
         override fun saveUi(outState: Bundle) {
