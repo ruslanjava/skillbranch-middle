@@ -10,7 +10,7 @@ import android.widget.AutoCompleteTextView
 import androidx.cursoradapter.widget.CursorAdapter
 import androidx.cursoradapter.widget.SimpleCursorAdapter
 import androidx.appcompat.widget.SearchView
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +22,7 @@ import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
 import ru.skillbranch.skillarticles.ui.base.MenuItemHolder
 import ru.skillbranch.skillarticles.ui.base.ToolbarBuilder
+import ru.skillbranch.skillarticles.ui.custom.ShimmerDrawable
 import ru.skillbranch.skillarticles.ui.delegates.RenderProp
 import ru.skillbranch.skillarticles.viewmodels.articles.ArticlesState
 import ru.skillbranch.skillarticles.viewmodels.articles.ArticlesViewModel
@@ -30,7 +31,8 @@ import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
 
 class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
 
-    override val viewModel: ArticlesViewModel by viewModels()
+    override val viewModel: ArticlesViewModel by activityViewModels()
+
     override val layout: Int = R.layout.fragment_articles
     override val binding: ArticlesBinding by lazy { ArticlesBinding() }
     private val args: ArticlesFragmentArgs by navArgs()
@@ -81,13 +83,23 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         }
     }
 
+    private val shimmerDrawable by lazy(LazyThreadSafetyMode.NONE) {
+        val context = requireContext()
+        val baseColor = context.getColor(R.color.color_gray_light)
+        val dividerColor = context.getColor(R.color.color_divider)
+        ShimmerDrawable.fromView(rv_articles).apply {
+            setBaseColor(baseColor)
+            setHighlightColor(dividerColor)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         suggestionsAdapter = SimpleCursorAdapter(
             context,
             android.R.layout.simple_list_item_1,
-         null, // cursor
+            null, // cursor
             arrayOf("tag"), // cursor column for bind on view
             intArrayOf(android.R.id.text1), // text view id for bind data from cursor columns
             CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER
@@ -193,6 +205,11 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
     }
 
     override fun onDestroyView() {
+        if (rv_articles != null && rv_articles.foreground != null) {
+            shimmerDrawable.stop()
+            rv_articles.foreground = null
+        }
+
         toolbar.search_view?.setOnQueryTextListener(null)
         super.onDestroyView()
     }
@@ -207,10 +224,18 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         var searchQuery: String? = null
         var isSearch: Boolean = false
         var isLoading: Boolean by RenderProp(true) {
-            // TODO show shimmer on rv_list
+            if (it) {
+                rv_articles.foreground = shimmerDrawable
+                shimmerDrawable.start()
+            } else {
+                if (rv_articles.foreground != null) {
+                    shimmerDrawable.stop()
+                    rv_articles.foreground = null
+                }
+            }
         }
 
-        var isHashtagSearch : Boolean by RenderProp(false)
+        var isHashtagSearch: Boolean by RenderProp(false)
         var tags: List<String> by RenderProp<List<String>>(emptyList())
 
         override fun bind(data: IViewModelState) {
