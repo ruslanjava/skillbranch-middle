@@ -193,6 +193,7 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
 
         viewModel.observeList(viewLifecycleOwner, args.isBookmarks) {
             articlesAdapter.submitList(it)
+            binding.isLoading = false
         }
 
         viewModel.observeTags(viewLifecycleOwner) {
@@ -224,6 +225,15 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         var searchQuery: String? = null
         var isSearch: Boolean = false
         var isLoading: Boolean by RenderProp(true) {
+            if (it) {
+                rv_articles.foreground = shimmerDrawable
+                shimmerDrawable.start()
+            } else {
+                if (rv_articles.foreground != null) {
+                    shimmerDrawable.stop()
+                    rv_articles.foreground = null
+                }
+            }
         }
 
         var isHashtagSearch: Boolean by RenderProp(false)
@@ -250,18 +260,6 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
                 }
 
                 suggestionsAdapter.changeCursor(cursor)
-            }
-
-            delegates[::isLoading.name]?.addListener { isLoading ->
-                if (isLoading) {
-                    rv_articles.foreground = shimmerDrawable
-                    shimmerDrawable.start()
-                } else {
-                    if (rv_articles.foreground != null) {
-                        shimmerDrawable.stop()
-                        rv_articles.foreground = null
-                    }
-                }
             }
         }
 
