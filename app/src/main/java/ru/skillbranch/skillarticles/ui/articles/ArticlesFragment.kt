@@ -51,7 +51,7 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         addMenuItem(
             MenuItemHolder(
                 "Filter",
-                R.id.action_search,
+                R.id.action_filter,
                 R.drawable.ic_filter_list_black_24,
                 null
             ) { _ ->
@@ -224,15 +224,6 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         var searchQuery: String? = null
         var isSearch: Boolean = false
         var isLoading: Boolean by RenderProp(true) {
-            if (it) {
-                rv_articles.foreground = shimmerDrawable
-                shimmerDrawable.start()
-            } else {
-                if (rv_articles.foreground != null) {
-                    shimmerDrawable.stop()
-                    rv_articles.foreground = null
-                }
-            }
         }
 
         var isHashtagSearch: Boolean by RenderProp(false)
@@ -259,6 +250,18 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
                 }
 
                 suggestionsAdapter.changeCursor(cursor)
+            }
+
+            delegates[::isLoading.name]?.addListener { isLoading ->
+                if (isLoading) {
+                    rv_articles.foreground = shimmerDrawable
+                    shimmerDrawable.start()
+                } else {
+                    if (rv_articles.foreground != null) {
+                        shimmerDrawable.stop()
+                        rv_articles.foreground = null
+                    }
+                }
             }
         }
 
