@@ -35,11 +35,16 @@ class ChoseCategoryDialog : DialogFragment() {
         categoriesList = view.findViewById(R.id.categories_list)
         categoriesList.adapter = adapter
 
-        // TODO save checked state and implement custom items
         adapter.items = args.categories
 
+        val selectedCategories: Array<String>
+        if (savedInstanceState == null) {
+            selectedCategories = args.selectedCategories
+        } else {
+            selectedCategories = savedInstanceState.getStringArray(SELECTED_CATEGORIES)!!
+        }
         val checked = Array(args.categories.size) {
-            args.selectedCategories.contains(args.categories[it].categoryId)
+            selectedCategories.contains(args.categories[it].categoryId)
         }
         adapter.selectedCategories = checked
 
@@ -64,6 +69,17 @@ class ChoseCategoryDialog : DialogFragment() {
         }
 
         return dialog
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        val selectedCategories = adapter.items
+            .filterIndexed { index, category -> adapter.selectedCategories[index] }
+            .map { category -> category.categoryId }
+            .toTypedArray()
+
+        outState.putStringArray(SELECTED_CATEGORIES, selectedCategories)
     }
 
     class CategoryAdapter: RecyclerView.Adapter<CategoryVH>() {
@@ -129,6 +145,12 @@ class ChoseCategoryDialog : DialogFragment() {
                 containerView.visibility = View.INVISIBLE
             }
         }
+
+    }
+
+    companion object {
+
+        const val SELECTED_CATEGORIES = "selected_categories"
 
     }
 
