@@ -115,17 +115,10 @@ class ChoseCategoryDialog : DialogFragment() {
         override val containerView: View
     ) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
-        val cbSelect: CheckBox
-        val ivCategory: ImageView
-        val tvCategory: TextView
-        val tvCount: TextView
-
-        init {
-            cbSelect = ch_select
-            ivCategory = iv_category
-            tvCategory = tv_category
-            tvCount = tv_count
-        }
+        val cbSelect: CheckBox = ch_select
+        val ivCategory: ImageView = iv_category
+        private val tvCategory: TextView = tv_category
+        val tvCount: TextView = tv_count
 
         fun bind(item: CategoryData?, selected: Boolean, listener: (CategoryData, Boolean) -> Unit) {
             if (item != null) {
@@ -143,6 +136,10 @@ class ChoseCategoryDialog : DialogFragment() {
                 tvCount.text = item.articlesCount.toString()
             } else {
                 containerView.visibility = View.INVISIBLE
+            }
+
+            itemView.setOnClickListener {
+                cbSelect.isChecked = !cbSelect.isChecked
             }
         }
 
