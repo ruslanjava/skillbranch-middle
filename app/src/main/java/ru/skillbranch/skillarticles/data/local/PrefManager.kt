@@ -14,12 +14,12 @@ object PrefManager {
         PreferenceManager.getDefaultSharedPreferences(App.applicationContext())
     }
 
-    private var darkMode by PrefDelegate(false)
+    var isDarkMode by PrefDelegate(false)
     private var bigText by PrefDelegate(false)
 
     private val appSettingsLiveData: MutableLiveData<AppSettings> by lazy {
         val result = MutableLiveData<AppSettings>()
-        result.postValue(AppSettings().copy(isDarkMode = darkMode ?: false, isBigText = bigText ?: false))
+        result.postValue(AppSettings().copy(isDarkMode = isDarkMode ?: false, isBigText = bigText ?: false))
         return@lazy result
     }
 
@@ -46,7 +46,7 @@ object PrefManager {
     }
 
     fun updateSettings(appSettings: AppSettings) {
-        darkMode = appSettings.isDarkMode
+        isDarkMode = appSettings.isDarkMode
         bigText = appSettings.isBigText
         appSettingsLiveData.postValue(appSettings)
     }
