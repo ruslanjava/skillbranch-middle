@@ -9,7 +9,7 @@
         android:id="@+id/page_article"
         android:name="ru.skillbranch.skillarticles.ui.article.ArticleFragment"
         tools:layout="@layout/fragment_article"
-        android:label="ArticleFragment" >
+        android:label="{title}" >
         <argument
             android:name="article_id"
             app:argType="string"

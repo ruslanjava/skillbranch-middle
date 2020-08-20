@@ -82,7 +82,7 @@ class ChoseCategoryDialog : DialogFragment() {
         outState.putStringArray(SELECTED_CATEGORIES, selectedCategories)
     }
 
-    class CategoryAdapter: RecyclerView.Adapter<CategoryVH>() {
+    class CategoryAdapter : RecyclerView.Adapter<CategoryVH>() {
 
         var items: Array<CategoryData> = arrayOf()
         var selectedCategories: Array<Boolean> = arrayOf()
@@ -94,20 +94,20 @@ class ChoseCategoryDialog : DialogFragment() {
         }
 
         override fun onBindViewHolder(holder: CategoryVH, position: Int) {
-                val category = getItem(position)
-                val selected = selectedCategories[position]
-                holder.bind(category, selected) { _, selected ->
-                    selectedCategories[position] = selected
-                }
+            val category = getItem(position)
+            val selected = selectedCategories[position]
+            holder.bind(category, selected) { _, selected ->
+                selectedCategories[position] = selected
             }
+        }
 
-            private fun getItem(position: Int): CategoryData {
-                return items[position]
-            }
+        private fun getItem(position: Int): CategoryData {
+            return items[position]
+        }
 
-            override fun getItemCount(): Int {
-                return items.size
-            }
+        override fun getItemCount(): Int {
+            return items.size
+        }
 
     }
 
@@ -120,13 +120,19 @@ class ChoseCategoryDialog : DialogFragment() {
         private val tvCategory: TextView = tv_category
         val tvCount: TextView = tv_count
 
-        fun bind(item: CategoryData?, selected: Boolean, listener: (CategoryData, Boolean) -> Unit) {
+        fun bind(
+            item: CategoryData?,
+            selected: Boolean,
+            listener: (CategoryData, Boolean) -> Unit
+        ) {
+            itemView.setOnClickListener(null)
+
             if (item != null) {
                 containerView.visibility = View.VISIBLE
 
                 cbSelect.isChecked = selected
-                cbSelect.setOnCheckedChangeListener {
-                        buttonView, isChecked -> listener.invoke(item, isChecked)
+                cbSelect.setOnCheckedChangeListener { buttonView, isChecked ->
+                    listener.invoke(item, isChecked)
                 }
 
                 Glide.with(containerView.context)
@@ -134,12 +140,12 @@ class ChoseCategoryDialog : DialogFragment() {
                     .into(ivCategory)
                 tvCategory.text = item.title
                 tvCount.text = item.articlesCount.toString()
+
+                itemView.setOnClickListener {
+                    cbSelect.isChecked = !cbSelect.isChecked
+                }
             } else {
                 containerView.visibility = View.INVISIBLE
-            }
-
-            itemView.setOnClickListener {
-                cbSelect.isChecked = !cbSelect.isChecked
             }
         }
 
