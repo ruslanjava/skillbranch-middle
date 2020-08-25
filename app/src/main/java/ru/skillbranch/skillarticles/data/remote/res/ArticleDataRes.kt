@@ -1,6 +1,5 @@
 package ru.skillbranch.skillarticles.data.remote.res
 
-import ru.skillbranch.skillarticles.data.local.entities.Author
 import ru.skillbranch.skillarticles.data.local.entities.Category
 import java.util.*
 
