@@ -19,7 +19,7 @@ import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
 interface ArticlesDao : BaseDao<Article> {
 
     @Transaction
-    fun upsert(list: List<Article>) {
+    suspend fun upsert(list: List<Article>) {
         insert(list)
             .mapIndexed { index, recordResult -> if (recordResult == -1L) list[index] else null }
             .filterNotNull()
@@ -36,7 +36,7 @@ interface ArticlesDao : BaseDao<Article> {
     fun findArticleItems(): LiveData<List<ArticleItem>>
 
     @Delete
-    fun delete(article: Article)
+    override suspend fun delete(article: Article)
 
     @Query("SELECT * FROM ArticleItem WHERE category_id IN (:categoryIds)")
     fun findArticleItemsByCategoryIds(categoryIds: List<String>): List<ArticleItem>

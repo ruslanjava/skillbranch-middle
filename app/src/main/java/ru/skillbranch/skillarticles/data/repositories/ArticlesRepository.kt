@@ -4,7 +4,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import androidx.sqlite.db.SimpleSQLiteQuery
-import ru.skillbranch.skillarticles.data.NetworkDataHolder
 import ru.skillbranch.skillarticles.data.local.DbManager
 import ru.skillbranch.skillarticles.data.local.dao.*
 import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
@@ -18,7 +17,7 @@ import ru.skillbranch.skillarticles.extensions.data.toArticleCounts
 
 interface IArticlesRepository {
 
-    suspend fun loadArticlesFromNetwork(start: String? = null, size: Int = 10): List<ArticleRes>
+    suspend fun loadArticlesFromNetwork(start: String? = null, size: Int = 10)
     suspend fun insertArticlesToDb(articles: List<ArticleRes>)
     suspend fun toggleBookmark(articleId: String)
 
@@ -57,8 +56,10 @@ object ArticlesRepository: IArticlesRepository {
         this.articlePersonalDao = articlePersonalDao
     }
 
-    override suspend fun loadArticlesFromNetwork(start: String?, size: Int): List<ArticleRes> =
-        network.articles(start, size)
+    override suspend fun loadArticlesFromNetwork(start: String?, size: Int) {
+        val items = network.articles(start, size)
+        insertArticlesToDb(items)
+    }
 
     override suspend fun insertArticlesToDb(articles: List<ArticleRes>) {
         articlesDao.upsert(articles.map { it.data.toArticle() })

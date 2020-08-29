@@ -9,9 +9,14 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import ru.skillbranch.skillarticles.AppConfig
+import ru.skillbranch.skillarticles.data.remote.res.ArticleContentRes
 import java.util.*
 
 object NetworkManager {
+
+    fun loadArticleContent(articleId: String): ArticleContentRes {
+        TODO("Not yet implemented")
+    }
 
     val api: RestService by lazy {
         val logging = HttpLoggingInterceptor().apply {

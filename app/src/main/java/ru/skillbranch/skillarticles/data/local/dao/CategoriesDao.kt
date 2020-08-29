@@ -11,7 +11,7 @@ import ru.skillbranch.skillarticles.data.local.entities.CategoryData
 interface CategoriesDao: BaseDao<Category> {
 
     @Transaction
-    fun upsert(category: Category) {
+    suspend fun upsert(category: Category) {
         val newId = insert(category)
         if (newId <= 0) {
             update(category)
@@ -19,7 +19,7 @@ interface CategoriesDao: BaseDao<Category> {
     }
 
     @Transaction
-    fun upsert(list: List<Category>) {
+    suspend fun upsert(list: List<Category>) {
         insert(list)
             .mapIndexed { index, recordResult -> if (recordResult == -1L) list[index] else null }
             .filterNotNull()
