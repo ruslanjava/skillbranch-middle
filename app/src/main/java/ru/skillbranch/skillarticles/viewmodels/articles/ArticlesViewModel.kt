@@ -80,24 +80,24 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
         if (isLoadingAfter) return
         else isLoadingAfter = true
 
-        viewModelScope.launch(Dispatchers.IO) {
+        launchSafely( null, { isLoadingAfter = false }) {
             repository.loadArticlesFromNetwork(
-                    start = lastLoadArticle.id,
-                    size = listConfig.pageSize
+                start = lastLoadArticle.id,
+                size = listConfig.pageSize
             )
-        }.invokeOnCompletion { isLoadingAfter = false }
+        }
     }
 
     private fun zeroLoadingHandle() {
         if (isLoadingInitial) return
         else isLoadingInitial = true
 
-        viewModelScope.launch(Dispatchers.IO) {
+        launchSafely(null, { isLoadingInitial = false }) {
             repository.loadArticlesFromNetwork(
                 start = null,
                 size = listConfig.initialLoadSizeHint
             )
-        }.invokeOnCompletion { isLoadingInitial = false }
+        }
     }
 
     fun handleSearch(query: String?) {

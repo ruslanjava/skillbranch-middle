@@ -16,7 +16,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.item_category.*
+import kotlinx.android.synthetic.main.item_category_dialog.*
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.data.local.entities.CategoryData
 import ru.skillbranch.skillarticles.viewmodels.articles.ArticlesViewModel
@@ -89,7 +89,7 @@ class ChoseCategoryDialog : DialogFragment() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryVH {
             val inflater: LayoutInflater = LayoutInflater.from(parent.context)
-            val view = inflater.inflate(R.layout.item_category, parent, false)
+            val view = inflater.inflate(R.layout.item_category_dialog, parent, false)
             return CategoryVH(view)
         }
 
@@ -116,7 +116,7 @@ class ChoseCategoryDialog : DialogFragment() {
     ) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
         val cbSelect: CheckBox = ch_select
-        val ivCategory: ImageView = iv_category
+        val ivIcon: ImageView = iv_icon
         private val tvCategory: TextView = tv_category
         val tvCount: TextView = tv_count
 
@@ -137,7 +137,7 @@ class ChoseCategoryDialog : DialogFragment() {
 
                 Glide.with(containerView.context)
                     .load(item.icon)
-                    .into(ivCategory)
+                    .into(ivIcon)
                 tvCategory.text = item.title
                 tvCount.text = item.articlesCount.toString()
 

@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import com.facebook.stetho.Stetho
 import ru.skillbranch.skillarticles.data.local.PrefManager
+import ru.skillbranch.skillarticles.data.remote.NetworkMonitor
 
 class App : Application() {
 
@@ -14,6 +15,9 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        // start network monitoring
+        NetworkMonitor.registerNetworkMonitor(applicationContext)
 
         // TODO set default Night mode
         val mode: Int = if (PrefManager.isDarkMode == true) AppCompatDelegate.MODE_NIGHT_YES
