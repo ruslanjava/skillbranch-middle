@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
 import ru.skillbranch.skillarticles.data.local.entities.CategoryData
+import ru.skillbranch.skillarticles.data.remote.err.NoNetworkError
 import ru.skillbranch.skillarticles.data.repositories.ArticleFilter
 import ru.skillbranch.skillarticles.data.repositories.ArticlesRepository
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
@@ -110,19 +111,40 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
     }
 
     fun handleToggleBookmark(articleId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.toggleBookmark(articleId)
+        launchSafely(
+            {
+                when(it) {
+                    is NoNetworkError -> notify(Notify.TextMessage("Network Not Available, check internet connection"))
+                    else -> notify(Notify.ErrorMessage(it.message ?: "Something wrong"))
+                }
+            }
+        ) {
+            val isBookmarked = repository.toggleBookmark(articleId)
+            // if bookmarked need fetch content and handle network error
+            if (isBookmarked) repository.fetchArticleContent(articleId)
+            // TODO else remove article content from DB
         }
     }
 
     fun handleSuggestion(tag: String) {
-        viewModelScope.launch(context=Dispatchers.IO) {
+        viewModelScope.launch {
             repository.incrementTagUseCount(tag)
         }
     }
 
     fun applyCategories(selectedCategories: List<String>) {
         updateState { it.copy(selectedCategories = selectedCategories) }
+    }
+
+    fun refresh() {
+        launchSafely {
+            val lastArticleId: String? = repository.findLastArticleId()
+            val count = repository.loadArticlesFromNetwork(
+                start = lastArticleId,
+                size = if (lastArticleId == null) listConfig.initialLoadSizeHint else listConfig.pageSize
+            )
+            notify(Notify.TextMessage("Load $count new articles"))
+        }
     }
 
 }

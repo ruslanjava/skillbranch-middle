@@ -6,10 +6,7 @@ import androidx.paging.DataSource
 import androidx.sqlite.db.SimpleSQLiteQuery
 import ru.skillbranch.skillarticles.data.local.DbManager
 import ru.skillbranch.skillarticles.data.local.dao.*
-import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
-import ru.skillbranch.skillarticles.data.local.entities.ArticleTagXRef
-import ru.skillbranch.skillarticles.data.local.entities.CategoryData
-import ru.skillbranch.skillarticles.data.local.entities.Tag
+import ru.skillbranch.skillarticles.data.local.entities.*
 import ru.skillbranch.skillarticles.data.remote.NetworkManager
 import ru.skillbranch.skillarticles.data.remote.res.ArticleRes
 import ru.skillbranch.skillarticles.extensions.data.toArticle
@@ -17,9 +14,9 @@ import ru.skillbranch.skillarticles.extensions.data.toArticleCounts
 
 interface IArticlesRepository {
 
-    suspend fun loadArticlesFromNetwork(start: String? = null, size: Int = 10)
+    suspend fun loadArticlesFromNetwork(start: String? = null, size: Int = 10): Int
     suspend fun insertArticlesToDb(articles: List<ArticleRes>)
-    suspend fun toggleBookmark(articleId: String)
+    suspend fun toggleBookmark(articleId: String): Boolean
 
     fun findTags(): LiveData<List<String>>
 
@@ -36,6 +33,7 @@ object ArticlesRepository: IArticlesRepository {
     private val network = NetworkManager.api
 
     private var articlesDao = DbManager.db.articlesDao()
+    private var articlesContentDao = DbManager.db.articleContentsDao()
     private var articleCountsDao = DbManager.db.articleCountsDao()
     private var categoriesDao = DbManager.db.categoriesDao()
     private var tagsDao = DbManager.db.tagsDao()
@@ -56,9 +54,10 @@ object ArticlesRepository: IArticlesRepository {
         this.articlePersonalDao = articlePersonalDao
     }
 
-    override suspend fun loadArticlesFromNetwork(start: String?, size: Int) {
+    override suspend fun loadArticlesFromNetwork(start: String?, size: Int) : Int {
         val items = network.articles(start, size)
-        insertArticlesToDb(items)
+        if (items.isNotEmpty()) insertArticlesToDb(items)
+        return items.size
     }
 
     override suspend fun insertArticlesToDb(articles: List<ArticleRes>) {
@@ -81,8 +80,8 @@ object ArticlesRepository: IArticlesRepository {
         tagsDao.insertRefs(refs.map { ArticleTagXRef(it.first, it.second) })
     }
 
-    override suspend fun toggleBookmark(articleId: String) {
-        articlePersonalDao.toggleBookmarkOrInsert(articleId)
+    override suspend fun toggleBookmark(articleId: String): Boolean {
+        return articlePersonalDao.toggleBookmarkOrInsert(articleId)
     }
 
     override fun findTags(): LiveData<List<String>> {
@@ -99,6 +98,13 @@ object ArticlesRepository: IArticlesRepository {
 
     override suspend fun incrementTagUseCount(tag: String) {
         tagsDao.incrementTagUseCount(tag)
+    }
+
+    suspend fun findLastArticleId(): String? = articlesDao.findLastArticleId()
+
+    suspend fun fetchArticleContent(articleId: String) {
+        val content: ArticleContent = network.loadArticleContent(articleId)
+        articlesContentDao.insert(content)
     }
 
 }

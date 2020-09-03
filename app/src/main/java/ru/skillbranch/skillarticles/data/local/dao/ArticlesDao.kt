@@ -53,4 +53,7 @@ interface ArticlesDao : BaseDao<Article> {
     @Query("SELECT t_id FROM article_tag_x_ref WHERE a_id = :articleId")
     fun findTagsByArticleId(articleId: String): List<String>
 
+    @Query("SELECT id FROM articles ORDER BY date DESC LIMIT 1")
+    fun findLastArticleId(): String?
+
 }
