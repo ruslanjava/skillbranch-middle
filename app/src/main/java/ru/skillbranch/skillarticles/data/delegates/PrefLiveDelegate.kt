@@ -28,10 +28,9 @@ internal class SharedPreferenceLiveData<T>(
     var defValue: T
 ): LiveData<T>() {
 
-    private val preferenceChangeListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { _, shKey ->
-            if (shKey == key) {
-                value = readValue(defValue)
+    private val preferenceChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, shKey ->
+        if (shKey == key) {
+            value = readValue(defValue)
         }
     }
 
@@ -46,6 +45,7 @@ internal class SharedPreferenceLiveData<T>(
         super.onInactive()
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun readValue(defaultValue: T): T {
         return when (defaultValue) {
             is Int -> sharedPrefs.getInt(key, defaultValue as Int) as T

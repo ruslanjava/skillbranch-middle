@@ -140,6 +140,7 @@ abstract class BaseViewModel<T : IViewModelState>(
     ) {
         // используется обработчик, переданный в качестве аргумента или обработчик ошибок по умолчанию
         val errHand = CoroutineExceptionHandler { _, throwable ->
+            throwable.printStackTrace()
             errHandler?.invoke(throwable) ?: when(throwable) {
                 is NoNetworkError -> notify(Notify.TextMessage("Network not available, check internet connection"))
                 else -> notify(Notify.ErrorMessage(throwable.message ?: "Something wrong"))

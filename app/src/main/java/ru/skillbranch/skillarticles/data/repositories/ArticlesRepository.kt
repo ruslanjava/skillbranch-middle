@@ -10,6 +10,7 @@ import ru.skillbranch.skillarticles.data.local.entities.*
 import ru.skillbranch.skillarticles.data.remote.NetworkManager
 import ru.skillbranch.skillarticles.data.remote.res.ArticleRes
 import ru.skillbranch.skillarticles.extensions.data.toArticle
+import ru.skillbranch.skillarticles.extensions.data.toArticleContent
 import ru.skillbranch.skillarticles.extensions.data.toArticleCounts
 
 interface IArticlesRepository {
@@ -103,7 +104,7 @@ object ArticlesRepository: IArticlesRepository {
     suspend fun findLastArticleId(): String? = articlesDao.findLastArticleId()
 
     suspend fun fetchArticleContent(articleId: String) {
-        val content: ArticleContent = network.loadArticleContent(articleId)
+        val content = network.loadArticleContent(articleId).toArticleContent()
         articlesContentDao.insert(content)
     }
 

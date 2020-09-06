@@ -5,12 +5,16 @@ import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.squareup.moshi.Json
 
 @Entity(tableName = "article_categories")
 data class Category(
+
     @PrimaryKey
     @ColumnInfo(name = "category_id")
+    @Json(name = "id")
     val categoryId: String,
+
     val icon: String,
     val title: String
 )

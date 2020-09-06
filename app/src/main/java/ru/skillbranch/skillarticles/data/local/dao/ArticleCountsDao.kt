@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
 import ru.skillbranch.skillarticles.data.local.entities.ArticleCounts
+import ru.skillbranch.skillarticles.data.remote.res.ArticleCountsRes
 
 @Dao
 interface ArticleCountsDao: BaseDao<ArticleCounts> {
@@ -34,5 +35,13 @@ interface ArticleCountsDao: BaseDao<ArticleCounts> {
 
     @Query("SELECT comments FROM article_counts WHERE article_id = :articleId")
     fun getCommentsCount(articleId: String): LiveData<Int>
+
+    @Query("""
+        UPDATE article_counts SET comments=comments+1, updated_at = CURRENT_TIMESTAMP
+        WHERE article_id = :articleId
+    """)
+    suspend fun updateCommentsCount(articleId: String, counts: ArticleCountsRes) {
+        TODO("Not yet implemented")
+    }
 
 }

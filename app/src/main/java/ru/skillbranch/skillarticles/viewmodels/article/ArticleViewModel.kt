@@ -7,14 +7,11 @@ import androidx.paging.PagedList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.skillbranch.skillarticles.data.models.ArticleData
-import ru.skillbranch.skillarticles.data.local.entities.ArticlePersonalInfo
-import ru.skillbranch.skillarticles.data.models.CommentItemData
+import ru.skillbranch.skillarticles.data.remote.NetworkManager
+import ru.skillbranch.skillarticles.data.remote.res.CommentRes
 import ru.skillbranch.skillarticles.data.repositories.*
 import ru.skillbranch.skillarticles.extensions.data.toAppSettings
-import ru.skillbranch.skillarticles.extensions.data.toArticlePersonalInfo
 import ru.skillbranch.skillarticles.extensions.indexesOf
-import ru.skillbranch.skillarticles.extensions.format
 import ru.skillbranch.skillarticles.extensions.shortFormat
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
@@ -37,10 +34,21 @@ class ArticleViewModel(
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    private val listData: LiveData<PagedList<CommentItemData>> =
+    private val listData: LiveData<PagedList<CommentRes>> =
         Transformations.switchMap(repository.findArticleCommentCount(articleId)) {
-            buildPagedList(repository.loadAllComments(articleId, it))
+            buildPagedList(CommentsDataFactory(NetworkManager.api, articleId, it, ::commentLoadErrorHandler))
         }
+
+    fun refresh() {
+        launchSafely {
+            launch { repository.fetchArticleContent(articleId) }
+            launch { repository.refreshCommentsCount(articleId) }
+        }
+    }
+
+    private fun commentLoadErrorHandler(throwable: Throwable) {
+        // TODO handle network error here
+    }
 
     init {
         // subscribe on mutable data
@@ -75,7 +83,7 @@ class ArticleViewModel(
     }
 
     private fun fetchContent() {
-        viewModelScope.launch(Dispatchers.IO) {
+        launchSafely {
             repository.fetchArticleContent(articleId)
         }
     }
@@ -179,20 +187,17 @@ class ArticleViewModel(
 
     fun observeList(
             owner: LifecycleOwner,
-            onChanged: (list: PagedList<CommentItemData>) -> Unit
+            onChanged: (list: PagedList<CommentRes>) -> Unit
     ) {
         listData.observe(owner, Observer { onChanged(it) })
     }
 
     private fun buildPagedList(
             dataFactory: CommentsDataFactory
-    ): LiveData<PagedList<CommentItemData>> {
-        return LivePagedListBuilder<String, CommentItemData>(
-                dataFactory,
-                listConfig
-        )
-                .setFetchExecutor(Executors.newSingleThreadExecutor())
-                .build()
+    ): LiveData<PagedList<CommentRes>> {
+        return LivePagedListBuilder<String, CommentRes>(dataFactory, listConfig)
+            .setFetchExecutor(Executors.newSingleThreadExecutor())
+            .build()
     }
 
     fun handleCommentFocus(hasFocus: Boolean) {

@@ -7,9 +7,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import ru.skillbranch.skillarticles.App
+import ru.skillbranch.skillarticles.data.JsonConverter.moshi
 import ru.skillbranch.skillarticles.data.delegates.PrefDelegate
 import ru.skillbranch.skillarticles.data.delegates.PrefLiveDelegate
+import ru.skillbranch.skillarticles.data.delegates.PrefLiveObjDelegate
+import ru.skillbranch.skillarticles.data.delegates.PrefObjDelegate
 import ru.skillbranch.skillarticles.data.models.AppSettings
+import ru.skillbranch.skillarticles.data.models.User
+import ru.skillbranch.skillarticles.data.models.UserJsonAdapter
 
 object PrefManager {
 
@@ -21,7 +26,17 @@ object PrefManager {
     var isDarkMode by PrefDelegate(false)
     var isBigText by PrefDelegate(false)
 
+    var accessToken by PrefDelegate("")
+    var refreshToken by PrefDelegate("")
+
+    var profile: User? by PrefObjDelegate(moshi.adapter(User::class.java))
+
     val isAuthLive: LiveData<Boolean> by PrefLiveDelegate("isAuth", false, preferences)
+    val profileLive: LiveData<User?> by PrefLiveObjDelegate(
+        "profile",
+        moshi.adapter(User::class.java),
+        preferences
+    )
 
     private val appSettingsLiveData: MutableLiveData<AppSettings> = MediatorLiveData<AppSettings>().apply {
         val isDarkModeLive: LiveData<Boolean> by PrefLiveDelegate("isdarkMode", false, preferences)
