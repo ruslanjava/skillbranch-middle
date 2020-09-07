@@ -40,8 +40,12 @@ interface ArticleCountsDao: BaseDao<ArticleCounts> {
         UPDATE article_counts SET comments=comments+1, updated_at = CURRENT_TIMESTAMP
         WHERE article_id = :articleId
     """)
-    suspend fun updateCommentsCount(articleId: String, counts: ArticleCountsRes) {
-        TODO("Not yet implemented")
-    }
+    suspend fun updateCommentsCount(articleId: String, counts: ArticleCountsRes)
+
+    @Query("""
+        UPDATE article_counts SET comments=:commentCount, updated_at = CURRENT_TIMESTAMP
+        WHERE article_id = :articleId
+    """)
+    suspend fun updateCommentsCount(articleId: String, commentCount: Int)
 
 }

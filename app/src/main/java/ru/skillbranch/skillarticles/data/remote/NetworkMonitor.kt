@@ -54,5 +54,8 @@ object NetworkMonitor {
 }
 
 enum class NetworkType {
-    NONE, UNKNOWN, WIFI, CELLULAR
+    NONE,
+    UNKNOWN,
+    WIFI,
+    CELLULAR
 }

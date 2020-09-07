@@ -10,3 +10,7 @@ sealed class ApiError (override val message: String): IOException(message) {
     class InternalServerError(message: String?): ApiError(message ?: "Internal server error")
     class UnknownError(message: String?): ApiError(message ?: "Unknown error")
 }
+
+class ErrorBody(val message: String) {
+
+}

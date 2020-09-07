@@ -6,12 +6,12 @@ import java.lang.IllegalArgumentException
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-class PrefDelegate<T>(private val defaultValue: T) : ReadWriteProperty<PrefManager, T?> {
+class PrefDelegate<T>(private val defaultValue: T) : ReadWriteProperty<PrefManager, T> {
 
     private var storedValue: T? = null
 
     @Suppress("UNCHECKED_CAST")
-    override fun getValue(thisRef: PrefManager, property: KProperty<*>): T? {
+    override fun getValue(thisRef: PrefManager, property: KProperty<*>): T {
         if (storedValue == null) {
             with(thisRef.preferences) {
                 storedValue = when (defaultValue) {
@@ -24,10 +24,10 @@ class PrefDelegate<T>(private val defaultValue: T) : ReadWriteProperty<PrefManag
                 }
             }
         }
-        return storedValue
+        return storedValue!!
     }
 
-    override fun setValue(thisRef: PrefManager, property: KProperty<*>, value: T?) {
+    override fun setValue(thisRef: PrefManager, property: KProperty<*>, value: T) {
         if (storedValue != value) {
             with (thisRef.preferences.edit()) {
                 when (value) {
@@ -74,6 +74,5 @@ class PrefObjDelegate<T>(
 
         }
     }
-
 
 }

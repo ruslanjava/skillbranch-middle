@@ -69,7 +69,7 @@ class ArticleFragment : BaseFragment<ArticleViewModel>(), IArticleView {
     private val commentsAdapter by lazy {
         CommentsAdapter {
             Log.e("ArticleFragment", "click on comment: ${it.id} ${it.slug}")
-            viewModel.handleReplyTo(it.slug, it.user.name)
+            viewModel.handleReplyTo(it.id, it.user.name)
             et_comment.requestFocus()
             scroll.smoothScrollTo(0, wrap_comments.top)
             et_comment.context.showKeyboard(et_comment)

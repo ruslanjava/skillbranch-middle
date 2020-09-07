@@ -6,8 +6,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import ru.skillbranch.skillarticles.AppConfig
 import ru.skillbranch.skillarticles.data.JsonConverter.moshi
+import ru.skillbranch.skillarticles.data.remote.interceptors.ErrorStatusInterceptor
 import ru.skillbranch.skillarticles.data.remote.interceptors.NetworkStatusInterceptor
 import ru.skillbranch.skillarticles.data.remote.res.ArticleContentRes
+import java.util.concurrent.TimeUnit
 
 object NetworkManager {
 
@@ -22,8 +24,11 @@ object NetworkManager {
 
         // client
         val client: OkHttpClient = OkHttpClient().newBuilder()
-            .addInterceptor(NetworkStatusInterceptor())
+            .readTimeout(2, TimeUnit.SECONDS) // socket timeout (GET)
+            .writeTimeout(5, TimeUnit.SECONDS) // socket timeout (POST, PUT, etc)
+            .addInterceptor(NetworkStatusInterceptor()) // intercept network status
             .addInterceptor(logging) // intercept req/res for logging
+            .addInterceptor(ErrorStatusInterceptor()) // intercept status errors
             .build()
 
         // retrofit

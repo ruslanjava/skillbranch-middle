@@ -1,10 +1,7 @@
 package ru.skillbranch.skillarticles.data.local
 
 import android.content.SharedPreferences
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
+import androidx.lifecycle.*
 import androidx.preference.PreferenceManager
 import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.data.JsonConverter.moshi
@@ -14,7 +11,6 @@ import ru.skillbranch.skillarticles.data.delegates.PrefLiveObjDelegate
 import ru.skillbranch.skillarticles.data.delegates.PrefObjDelegate
 import ru.skillbranch.skillarticles.data.models.AppSettings
 import ru.skillbranch.skillarticles.data.models.User
-import ru.skillbranch.skillarticles.data.models.UserJsonAdapter
 
 object PrefManager {
 
@@ -31,7 +27,13 @@ object PrefManager {
 
     var profile: User? by PrefObjDelegate(moshi.adapter(User::class.java))
 
-    val isAuthLive: LiveData<Boolean> by PrefLiveDelegate("isAuth", false, preferences)
+    val isAuthLive: LiveData<Boolean> by lazy {
+        val token: LiveData<String> by PrefLiveDelegate("accessToken", "", preferences)
+        token.map {
+            it.isNotEmpty()
+        }
+    }
+
     val profileLive: LiveData<User?> by PrefLiveObjDelegate(
         "profile",
         moshi.adapter(User::class.java),
@@ -69,10 +71,6 @@ object PrefManager {
 
     fun isAuth(): MutableLiveData<Boolean> {
         return authLiveData
-    }
-
-    fun setAuth(auth: Boolean) {
-        authLiveData.postValue(auth)
     }
 
     fun updateSettings(appSettings: AppSettings) {

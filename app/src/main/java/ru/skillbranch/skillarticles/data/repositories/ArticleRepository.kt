@@ -17,6 +17,7 @@ import ru.skillbranch.skillarticles.data.models.*
 import ru.skillbranch.skillarticles.data.remote.NetworkManager
 import ru.skillbranch.skillarticles.data.remote.RestService
 import ru.skillbranch.skillarticles.data.remote.req.MessageReq
+import ru.skillbranch.skillarticles.data.remote.res.ArticleCountsRes
 import ru.skillbranch.skillarticles.data.remote.res.CommentRes
 import ru.skillbranch.skillarticles.extensions.data.toArticleContent
 
@@ -115,13 +116,13 @@ object ArticleRepository : IArticleRepository {
         articleCountsDao.incrementLike(articleId)
     }
 
-    override suspend fun sendMessage(articleId: String, comment: String, answerToSlug: String?) {
-        val messageReq = MessageReq(
-            comment, answerToSlug,
-            User("777", "John Doe", "https://skill-branch.ru/img/mail/bot/android-category.png")
+    override suspend fun sendMessage(articleId: String, message: String, answerToMessageId: String?) {
+        val (_, messageCount) = network.sendMessage(
+            articleId,
+            MessageReq(message, answerToMessageId),
+            preferences.accessToken
         )
-        network.sendMessage(articleId, messageReq)
-        articleCountsDao.incrementCommentsCount(articleId)
+        articleCountsDao.updateCommentsCount(articleId, messageCount)
     }
 
     suspend fun refreshCommentsCount(articleId: String) {

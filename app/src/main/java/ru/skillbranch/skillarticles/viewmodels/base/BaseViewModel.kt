@@ -4,15 +4,12 @@ import android.os.Bundle
 import androidx.annotation.UiThread
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.*
-import androidx.navigation.NavDestination
 import androidx.navigation.NavOptions
-import androidx.navigation.Navigation
 import androidx.navigation.Navigator
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
+import kotlinx.coroutines.*
+import ru.skillbranch.skillarticles.data.remote.err.ApiError
 import ru.skillbranch.skillarticles.data.remote.err.NoNetworkError
+import java.net.SocketTimeoutException
 
 abstract class BaseViewModel<T : IViewModelState>(
     private val handleState: SavedStateHandle,
@@ -62,25 +59,25 @@ abstract class BaseViewModel<T : IViewModelState>(
      */
     @UiThread
     protected fun notify(content: Notify) {
-        notifications.value = Event(content)
+        notifications.postValue(Event(content))
     }
 
     /**
      * отображение индикатора загрузки (по умолчанию не блокирующий loading)
      */
     protected fun showLoading(loadingType: Loading = Loading.SHOW_LOADING) {
-        loading.value = loadingType
+        loading.postValue(loadingType)
     }
 
     /**
      * скрытие индикатора загрузки
      */
     protected fun hideLoading() {
-        loading.value = Loading.HIDE_LOADING
+        loading.postValue(Loading.HIDE_LOADING)
     }
 
     open fun navigate(command: NavigationCommand) {
-        navigation.value = Event(command)
+        navigation.postValue(Event(command))
     }
 
     /***
@@ -139,21 +136,44 @@ abstract class BaseViewModel<T : IViewModelState>(
         block: suspend CoroutineScope.() -> Unit
     ) {
         // используется обработчик, переданный в качестве аргумента или обработчик ошибок по умолчанию
-        val errHand = CoroutineExceptionHandler { _, throwable ->
-            throwable.printStackTrace()
-            errHandler?.invoke(throwable) ?: when(throwable) {
+        val errHand = CoroutineExceptionHandler { _, err ->
+            err.printStackTrace()
+            errHandler?.invoke(err) ?: when (err) {
                 is NoNetworkError -> notify(Notify.TextMessage("Network not available, check internet connection"))
-                else -> notify(Notify.ErrorMessage(throwable.message ?: "Something wrong"))
+
+                is SocketTimeoutException -> notify(
+                    Notify.ActionMessage(
+                        "Network timeout exception - please try again",
+                        "Retry"
+                    ) {
+                        launchSafely(errHandler, compHandler, block)
+                    })
+
+                is ApiError.InternalServerError -> notify(
+                    Notify.ErrorMessage(
+                        err.message,
+                        "Retry"
+                    ) {
+                        launchSafely(errHandler, compHandler, block)
+                    })
+
+                is ApiError -> notify(Notify.ErrorMessage(err.message))
+
+                else -> notify(Notify.ErrorMessage(err.message ?: "Something wrong"))
             }
         }
 
-        (viewModelScope + errHand).launch {
+        (viewModelScope + errHand).launch(Dispatchers.IO) {
             // отобразить индикатор загрузки
-            showLoading()
+            // withContext(Dispatchers.Main) {
+                showLoading()
+            // }
             block()
         }.invokeOnCompletion {
             // скрыть индикатор загрузки по окончании выполнения suspend-функции
-            hideLoading()
+            // viewModelScope.launch(Dispatchers.Main) {
+                hideLoading()
+            // }
             // вызвать обработчик окончания выполнения suspend-функции, если имеется
             compHandler?.invoke(it)
         }
@@ -215,19 +235,19 @@ sealed class Notify() {
 sealed class NavigationCommand() {
 
     data class To(
-            val destination: Int,
-            val args: Bundle? = null,
-            val options: NavOptions? = null,
-            val extras: Navigator.Extras? = null
-    ): NavigationCommand()
+        val destination: Int,
+        val args: Bundle? = null,
+        val options: NavOptions? = null,
+        val extras: Navigator.Extras? = null
+    ) : NavigationCommand()
 
     data class StartLogin(
-            val privateDestination: Int? = null
-    ): NavigationCommand()
+        val privateDestination: Int? = null
+    ) : NavigationCommand()
 
     data class FinishLogin(
-            val privateDestination: Int? = null
-    ): NavigationCommand()
+        val privateDestination: Int? = null
+    ) : NavigationCommand()
 
 }
 

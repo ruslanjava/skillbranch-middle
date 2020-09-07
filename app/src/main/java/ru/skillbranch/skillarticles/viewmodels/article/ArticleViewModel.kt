@@ -168,19 +168,30 @@ class ArticleViewModel(
         notify(Notify.TextMessage("Code copy to clipboard"))
     }
 
-    override fun handleSendComment(comment: String) {
+    override fun handleSendComment(comment: String?) {
+        if (comment == null) {
+            notify(Notify.TextMessage("Comment must be not empty"))
+            return
+        }
+        updateState { it.copy(commentText = comment) }
+
         if (!currentState.isAuth) {
             navigate(NavigationCommand.StartLogin())
         } else {
-            viewModelScope.launch(Dispatchers.IO) {
+            launchSafely(null, {
+                updateState {
+                    it.copy(
+                        answerTo = null,
+                        answerToMessageId = null,
+                        commentText = null
+                    )
+                }
+            }) {
                 repository.sendMessage(
                     articleId,
                     currentState.commentText!!,
-                    currentState.answerToSlug
+                    currentState.answerToMessageId
                 )
-                withContext(Dispatchers.Main) {
-                    updateState { it.copy(answerTo = null, answerToSlug = null) }
-                }
             }
         }
     }
@@ -205,11 +216,11 @@ class ArticleViewModel(
     }
 
     fun handleClearComment() {
-        updateState { it.copy(answerTo = null, answerToSlug = null) }
+        updateState { it.copy(answerTo = null, answerToMessageId = null) }
     }
 
-    fun handleReplyTo(slug: String, name: String) {
-        updateState { it.copy(answerToSlug = slug, answerTo = "Reply to $name") }
+    fun handleReplyTo(messageId: String, name: String) {
+        updateState { it.copy(answerToMessageId = messageId, answerTo = "Reply to $name") }
     }
 
 }
@@ -238,7 +249,7 @@ data class ArticleState(
     val commentCount: Int = 0,
     val commentText: String? = null,
     val answerTo: String? = null,
-    val answerToSlug: String? = null,
+    val answerToMessageId: String? = null,
     val showBottomBar: Boolean = true,
     val source: String? = null,           // источник статьи
     val tags: List<String> = emptyList()  // теги
