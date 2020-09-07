@@ -83,7 +83,7 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
 
         launchSafely( null, { isLoadingAfter = false }) {
             repository.loadArticlesFromNetwork(
-                start = lastLoadArticle.id,
+                last = lastLoadArticle.id,
                 size = listConfig.pageSize
             )
         }
@@ -95,7 +95,7 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
 
         launchSafely(null, { isLoadingInitial = false }) {
             repository.loadArticlesFromNetwork(
-                start = null,
+                last = null,
                 size = listConfig.initialLoadSizeHint
             )
         }
@@ -140,7 +140,7 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
         launchSafely {
             val lastArticleId: String? = repository.findLastArticleId()
             val count = repository.loadArticlesFromNetwork(
-                start = lastArticleId,
+                last = lastArticleId,
                 size = if (lastArticleId == null) listConfig.initialLoadSizeHint else listConfig.pageSize
             )
             notify(Notify.TextMessage("Load $count new articles"))

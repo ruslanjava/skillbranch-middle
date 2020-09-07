@@ -36,12 +36,23 @@ object ArticlesRepository: IArticlesRepository {
 
     private val network = NetworkManager.api
 
-    private var articlesDao = DbManager.db.articlesDao()
-    private var articlesContentDao = DbManager.db.articleContentsDao()
-    private var articleCountsDao = DbManager.db.articleCountsDao()
-    private var categoriesDao = DbManager.db.categoriesDao()
-    private var tagsDao = DbManager.db.tagsDao()
-    private var articlePersonalDao = DbManager.db.articlePersonalInfosDao()
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    var articlesDao = DbManager.db.articlesDao()
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    var articlesContentDao = DbManager.db.articleContentsDao()
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    var articleCountsDao = DbManager.db.articleCountsDao()
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    var categoriesDao = DbManager.db.categoriesDao()
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    var tagsDao = DbManager.db.tagsDao()
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    var articlePersonalDao = DbManager.db.articlePersonalInfosDao()
 
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     fun setupTestDao(
@@ -49,13 +60,15 @@ object ArticlesRepository: IArticlesRepository {
         articleCountsDao: ArticleCountsDao,
         categoriesDao: CategoriesDao,
         tagsDao: TagsDao,
-        articlePersonalDao: ArticlePersonalInfosDao
+        articlePersonalDao: ArticlePersonalInfosDao,
+        articlesContentDao: ArticleContentsDao
     ) {
         this.articlesDao = articlesDao
         this.articleCountsDao = articleCountsDao
         this.categoriesDao = categoriesDao
         this.tagsDao = tagsDao
         this.articlePersonalDao = articlePersonalDao
+        this.articlesContentDao = articlesContentDao
     }
 
     override suspend fun loadArticlesFromNetwork(last: String?, size: Int) : Int {

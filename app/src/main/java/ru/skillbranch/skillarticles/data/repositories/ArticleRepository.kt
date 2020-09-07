@@ -16,6 +16,7 @@ import ru.skillbranch.skillarticles.data.local.entities.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.models.*
 import ru.skillbranch.skillarticles.data.remote.NetworkManager
 import ru.skillbranch.skillarticles.data.remote.RestService
+import ru.skillbranch.skillarticles.data.remote.err.NoNetworkError
 import ru.skillbranch.skillarticles.data.remote.req.MessageReq
 import ru.skillbranch.skillarticles.data.remote.res.CommentRes
 import ru.skillbranch.skillarticles.extensions.data.toArticleContent
@@ -24,8 +25,7 @@ interface IArticleRepository {
 
     fun findArticle(articleId: String): LiveData<ArticleFull>
     fun getAppSettings(): LiveData<AppSettings>
-    suspend fun toggleLike(articleId: String)
-    suspend fun toggleBookmark(articleId: String)
+    suspend fun toggleBookmark(articleId: String): Boolean
     fun isAuth(): MutableLiveData<Boolean>
     suspend fun sendMessage(articleId: String, text: String, answerToSlug: String?)
 
@@ -35,11 +35,17 @@ interface IArticleRepository {
         errHandler: (Throwable) -> Unit
     ): CommentsDataFactory
 
+    suspend fun toggleLike(articleId: String)
     suspend fun decrementLike(articleId: String)
     suspend fun incrementLike(articleId: String)
+
     fun updateSettings(copy: AppSettings)
     suspend fun fetchArticleContent(articleId: String)
     fun findArticleCommentCount(articleId: String): LiveData<Int>
+
+    suspend fun addBookmark(articleId: String)
+    suspend fun removeBookmark(articleId: String)
+
 }
 
 object ArticleRepository : IArticleRepository {
@@ -75,8 +81,8 @@ object ArticleRepository : IArticleRepository {
         articlePersonalDao.toggleLikeOrInsert(articleId)
     }
 
-    override suspend fun toggleBookmark(articleId: String) {
-        articlePersonalDao.toggleBookmarkOrInsert(articleId)
+    override suspend fun toggleBookmark(articleId: String): Boolean {
+        return articlePersonalDao.isBookmarked(articleId)
     }
 
     override fun updateSettings(appSettings: AppSettings) {
@@ -90,10 +96,6 @@ object ArticleRepository : IArticleRepository {
 
     override fun findArticleCommentCount(articleId: String): LiveData<Int> {
         return articleCountsDao.getCommentsCount(articleId)
-    }
-
-    suspend fun updateArticlePersonalInfo(info: ArticlePersonalInfo) {
-        articlePersonalDao.update(info)
     }
 
     override fun isAuth(): MutableLiveData<Boolean> = preferences.isAuth()
@@ -147,6 +149,22 @@ object ArticleRepository : IArticleRepository {
     suspend fun refreshCommentsCount(articleId: String) {
         val counts = network.loadArticleCounts(articleId)
         articleCountsDao.updateCommentsCount(articleId, counts)
+    }
+
+    override suspend fun addBookmark(articleId: String) {
+        articlePersonalDao.addToBookmark(articleId)
+        if (preferences.accessToken.isEmpty()) {
+            return
+        }
+        network.addBookmark(articleId, preferences.accessToken)
+    }
+
+    override suspend fun removeBookmark(articleId: String) {
+        articlePersonalDao.removeFromBookmark(articleId)
+        if (preferences.accessToken.isEmpty()) {
+            return
+        }
+        network.removeBookmark(articleId, preferences.accessToken)
     }
 
 }

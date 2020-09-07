@@ -38,7 +38,9 @@ interface ArticlePersonalInfosDao: BaseDao<ArticlePersonalInfo> {
 
     @Transaction
     suspend fun toggleBookmarkOrInsert(articleId: String): Boolean {
-        if (toggleBookmark(articleId) == 0) insert(ArticlePersonalInfo(articleId=articleId, isBookmark=true))
+        if (toggleBookmark(articleId) == 0) {
+            insert(ArticlePersonalInfo(articleId = articleId, isBookmark = true))
+        }
         return isBookmarked(articleId)
     }
 
@@ -48,6 +50,22 @@ interface ArticlePersonalInfosDao: BaseDao<ArticlePersonalInfo> {
     @Transaction
     suspend fun toggleLikeOrInsert(articleId: String) {
         if (toggleLike(articleId) == 0) insert(ArticlePersonalInfo(articleId=articleId, isLike=true))
+    }
+
+    // Для RepositoryTest1.kt
+    @Query("SELECT * FROM article_personal_infos WHERE article_id = :articleId")
+    suspend fun findPersonalInfosTest(articleId: String): ArticlePersonalInfo
+
+    @Transaction
+    suspend fun addToBookmark(articleId: String) {
+        toggleBookmarkOrInsert(articleId)
+        if (!isBookmarked(articleId)) toggleBookmark(articleId)
+    }
+
+    @Transaction
+    suspend fun removeFromBookmark(articleId: String) {
+        toggleBookmarkOrInsert(articleId)
+        if (isBookmarked(articleId)) toggleBookmark(articleId)
     }
 
 }

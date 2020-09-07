@@ -1,16 +1,9 @@
 package ru.skillbranch.skillarticles.data.local.dao
 
-import androidx.arch.core.util.Function
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.paging.DataSource
 import androidx.room.*
 import androidx.sqlite.db.SimpleSQLiteQuery
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import ru.skillbranch.skillarticles.data.local.entities.Article
 import ru.skillbranch.skillarticles.data.local.entities.ArticleFull
 import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
@@ -52,6 +45,10 @@ interface ArticlesDao : BaseDao<Article> {
 
     @Query("SELECT t_id FROM article_tag_x_ref WHERE a_id = :articleId")
     fun findTagsByArticleId(articleId: String): List<String>
+
+    // Для RepositoryTest1.kt
+    @Query("SELECT * FROM articles")
+    suspend fun findArticlesTest(): List<Article>
 
     @Query("SELECT id FROM articles ORDER BY date DESC LIMIT 1")
     suspend fun findLastArticleId(): String?

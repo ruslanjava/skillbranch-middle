@@ -64,4 +64,18 @@ interface RestService {
         @Body refreshToken: RefreshReq
     ): Call<RefreshRes>
 
+    //https://skill-articles.skill-branch.ru/api/v1/articles/{articleId}/addBookmark
+    @POST("articles/{article}/addBookmark")
+    suspend fun addBookmark(
+        @Path("article") articleId: String,
+        @Header("Authorization") accessToken: String
+    ): BookmarkRes
+
+    //https://skill-articles.skill-branch.ru/api/v1/articles/{articleId}/removeBookmark
+    @POST("articles/{article}/removeBookmark")
+    suspend fun removeBookmark(
+        @Path("article") articleId: String,
+        @Header("Authorization") accessToken: String
+    ): BookmarkRes
+
 }

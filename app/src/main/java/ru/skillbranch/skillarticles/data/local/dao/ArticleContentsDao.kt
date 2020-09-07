@@ -12,4 +12,8 @@ interface ArticleContentsDao: BaseDao<ArticleContent> {
     @Query("DELETE from article_contents WHERE article_id = :articleId")
     suspend fun remove(articleId: String)
 
+    // для RepositoryTest1.kt
+    @Query("select * from article_contents")
+    suspend fun findArticlesContentsTest(): List<ArticleContent>
+
 }
