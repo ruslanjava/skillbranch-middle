@@ -19,6 +19,9 @@ interface IArticlesRepository {
     suspend fun insertArticlesToDb(articles: List<ArticleRes>)
     suspend fun toggleBookmark(articleId: String): Boolean
 
+    suspend fun fetchArticleContent(articleId: String)
+    suspend fun removeArticleContent(articleId: String)
+
     fun findTags(): LiveData<List<String>>
 
     fun findCategoriesData(): LiveData<List<CategoryData>>
@@ -55,8 +58,8 @@ object ArticlesRepository: IArticlesRepository {
         this.articlePersonalDao = articlePersonalDao
     }
 
-    override suspend fun loadArticlesFromNetwork(start: String?, size: Int) : Int {
-        val items = network.articles(start, size)
+    override suspend fun loadArticlesFromNetwork(last: String?, size: Int) : Int {
+        val items = network.articles(last, size)
         if (items.isNotEmpty()) insertArticlesToDb(items)
         return items.size
     }
@@ -103,9 +106,13 @@ object ArticlesRepository: IArticlesRepository {
 
     suspend fun findLastArticleId(): String? = articlesDao.findLastArticleId()
 
-    suspend fun fetchArticleContent(articleId: String) {
+    override suspend fun fetchArticleContent(articleId: String) {
         val content = network.loadArticleContent(articleId).toArticleContent()
         articlesContentDao.insert(content)
+    }
+
+    override suspend fun removeArticleContent(articleId: String) {
+        articlesContentDao.remove(articleId)
     }
 
 }

@@ -54,6 +54,6 @@ interface ArticlesDao : BaseDao<Article> {
     fun findTagsByArticleId(articleId: String): List<String>
 
     @Query("SELECT id FROM articles ORDER BY date DESC LIMIT 1")
-    fun findLastArticleId(): String?
+    suspend fun findLastArticleId(): String?
 
 }
