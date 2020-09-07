@@ -24,11 +24,14 @@ interface ArticleCountsDao: BaseDao<ArticleCounts> {
     @Query("SELECT * FROM article_counts WHERE article_id = :articleId")
     fun findArticleCounts(articleId: String): LiveData<ArticleCounts>
 
-    @Query("UPDATE article_counts SET likes = likes+1, updated_at = CURRENT_TIMESTAMP WHERE article_id = :articleId")
+    @Query("UPDATE article_counts SET likes=likes+1, updated_at = CURRENT_TIMESTAMP WHERE article_id = :articleId")
     suspend fun incrementLike(articleId: String): Int
 
-    @Query("UPDATE article_counts SET likes = MAX(0, likes-1), updated_at = CURRENT_TIMESTAMP WHERE article_id = :articleId")
+    @Query("UPDATE article_counts SET likes=MAX(0, likes-1), updated_at = CURRENT_TIMESTAMP WHERE article_id = :articleId")
     suspend fun decrementLike(articleId: String): Int
+
+    @Query("UPDATE article_counts SET likes = :likes WHERE article_id = :articleId")
+    suspend fun updateLike(articleId: String, likes: Int)
 
     @Query("UPDATE article_counts SET comments = comments+1, updated_at = CURRENT_TIMESTAMP WHERE article_id = :articleId")
     suspend fun incrementCommentsCount(articleId: String)
@@ -40,7 +43,9 @@ interface ArticleCountsDao: BaseDao<ArticleCounts> {
         UPDATE article_counts SET comments=comments+1, updated_at = CURRENT_TIMESTAMP
         WHERE article_id = :articleId
     """)
-    suspend fun updateCommentsCount(articleId: String, counts: ArticleCountsRes)
+    suspend fun updateCommentsCount(articleId: String, counts: ArticleCountsRes) {
+        // TODO("Not yet implemented")
+    }
 
     @Query("""
         UPDATE article_counts SET comments=:commentCount, updated_at = CURRENT_TIMESTAMP

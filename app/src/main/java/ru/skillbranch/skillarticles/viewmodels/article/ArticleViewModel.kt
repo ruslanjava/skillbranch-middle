@@ -105,25 +105,21 @@ class ArticleViewModel(
 
     override fun handleBookmark() {
         val msg = if (!currentState.isBookmark) "Add to bookmarks" else "Remove from bookmarks"
-        viewModelScope.launch(Dispatchers.IO) {
+        launchSafely(null, { notify(Notify.TextMessage(msg))}) {
             repository.toggleBookmark(articleId)
-            withContext(Dispatchers.Main) {
-                notify(Notify.TextMessage(msg))
-            }
         }
     }
 
     override fun handleLike() {
         val isLiked = currentState.isLike
-        val msg = if (currentState.isLike) Notify.TextMessage("Mark is liked")
-        else Notify.ActionMessage(
-            "Don`t like it anymore",   // message
-            "No, still like it" // action label on snackbar
-        ) {
-            handleLike()
+        val msg = if (isLiked) Notify.TextMessage("Mark is liked")
+        else {
+            Notify.ActionMessage(
+                "Don`t like it anymore",   // message
+                "No, still like it" // action label on snackbar
+            ) { handleLike() }
         }
-
-        viewModelScope.launch(Dispatchers.IO) {
+        launchSafely(null, { notify(msg) }) {
             repository.toggleLike(articleId)
             if (isLiked) repository.decrementLike(articleId) else repository.incrementLike(articleId)
             withContext(Dispatchers.Main) {

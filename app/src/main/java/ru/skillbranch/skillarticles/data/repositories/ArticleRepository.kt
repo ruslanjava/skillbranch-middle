@@ -17,7 +17,6 @@ import ru.skillbranch.skillarticles.data.models.*
 import ru.skillbranch.skillarticles.data.remote.NetworkManager
 import ru.skillbranch.skillarticles.data.remote.RestService
 import ru.skillbranch.skillarticles.data.remote.req.MessageReq
-import ru.skillbranch.skillarticles.data.remote.res.ArticleCountsRes
 import ru.skillbranch.skillarticles.data.remote.res.CommentRes
 import ru.skillbranch.skillarticles.extensions.data.toArticleContent
 
@@ -107,13 +106,33 @@ object ArticleRepository : IArticleRepository {
             errHandler = errHandler
         )
 
-
     override suspend fun decrementLike(articleId: String) {
-        articleCountsDao.decrementLike(articleId)
+        // check auth locally
+        if (preferences.accessToken.isEmpty()) {
+            articleCountsDao.decrementLike(articleId)
+        }
+
+        try {
+            val res = network.decrementLike(articleId, preferences.accessToken)
+            articleCountsDao.updateLike(articleId, res.likeCount)
+        } catch (e: Throwable) {
+            articleCountsDao.decrementLike(articleId)
+            throw e
+        }
     }
 
     override suspend fun incrementLike(articleId: String) {
-        articleCountsDao.incrementLike(articleId)
+        if (preferences.accessToken.isEmpty()) {
+            articleCountsDao.incrementLike(articleId)
+        }
+
+        try {
+            val res = network.incrementLike(articleId, preferences.accessToken)
+            articleCountsDao.updateLike(articleId, res.likeCount)
+        } catch (e: Throwable) {
+            articleCountsDao.decrementLike(articleId)
+            throw e
+        }
     }
 
     override suspend fun sendMessage(articleId: String, message: String, answerToMessageId: String?) {

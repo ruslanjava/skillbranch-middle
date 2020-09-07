@@ -43,4 +43,18 @@ interface RestService {
     @POST("auth/login")
     suspend fun login(@Body loginReq: LoginReq): AuthRes
 
+    // http://skill-articles.skill-branch.ru/api/v1/articles/articleId/decrementLikes
+    @POST("articles/{article}/decrementLikes")
+    suspend fun decrementLike(
+        @Path("article") articleId: String,
+        @Header("Authorization") token: String
+    ): LikeRes
+
+    // http://skill-articles.skill-branch.ru/api/v1/articles/articleId/incrementLikes
+    @POST("articles/{article}/incrementLikes")
+    suspend fun incrementLike(
+        @Path("article") articleId: String,
+        @Header("Authorization") token: String
+    ): LikeRes
+
 }
