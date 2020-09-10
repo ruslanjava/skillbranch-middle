@@ -12,11 +12,9 @@ import ru.skillbranch.skillarticles.data.local.dao.ArticleCountsDao
 import ru.skillbranch.skillarticles.data.local.dao.ArticlePersonalInfosDao
 import ru.skillbranch.skillarticles.data.local.dao.ArticlesDao
 import ru.skillbranch.skillarticles.data.local.entities.ArticleFull
-import ru.skillbranch.skillarticles.data.local.entities.ArticlePersonalInfo
 import ru.skillbranch.skillarticles.data.models.*
 import ru.skillbranch.skillarticles.data.remote.NetworkManager
 import ru.skillbranch.skillarticles.data.remote.RestService
-import ru.skillbranch.skillarticles.data.remote.err.NoNetworkError
 import ru.skillbranch.skillarticles.data.remote.req.MessageReq
 import ru.skillbranch.skillarticles.data.remote.res.CommentRes
 import ru.skillbranch.skillarticles.extensions.data.toArticleContent
@@ -25,26 +23,26 @@ interface IArticleRepository {
 
     fun findArticle(articleId: String): LiveData<ArticleFull>
     fun getAppSettings(): LiveData<AppSettings>
-    suspend fun toggleBookmark(articleId: String): Boolean
     fun isAuth(): MutableLiveData<Boolean>
-    suspend fun sendMessage(articleId: String, text: String, answerToSlug: String?)
+    fun updateSettings(copy: AppSettings)
 
-    suspend fun loadAllComments(
+    suspend fun sendMessage(articleId: String, text: String, answerToSlug: String?)
+    suspend fun toggleLike(articleId: String)
+    suspend fun toggleBookmark(articleId: String): Boolean
+    suspend fun decrementLike(articleId: String)
+    suspend fun incrementLike(articleId: String)
+
+    suspend fun fetchArticleContent(articleId: String)
+
+    suspend fun addBookmark(articleId: String)
+    suspend fun removeBookmark(articleId: String)
+
+    fun findArticleCommentCount(articleId: String): LiveData<Int>
+    fun loadAllComments(
         articleId: String,
         totalCount: Int,
         errHandler: (Throwable) -> Unit
     ): CommentsDataFactory
-
-    suspend fun toggleLike(articleId: String)
-    suspend fun decrementLike(articleId: String)
-    suspend fun incrementLike(articleId: String)
-
-    fun updateSettings(copy: AppSettings)
-    suspend fun fetchArticleContent(articleId: String)
-    fun findArticleCommentCount(articleId: String): LiveData<Int>
-
-    suspend fun addBookmark(articleId: String)
-    suspend fun removeBookmark(articleId: String)
 
 }
 
@@ -99,14 +97,6 @@ object ArticleRepository : IArticleRepository {
     }
 
     override fun isAuth(): MutableLiveData<Boolean> = preferences.isAuth()
-
-    override suspend fun loadAllComments(articleId: String, totalCount: Int, errHandler: (Throwable) -> Unit) =
-        CommentsDataFactory(
-            itemProvider = network,
-            articleId = articleId,
-            totalCount = totalCount,
-            errHandler = errHandler
-        )
 
     override suspend fun decrementLike(articleId: String) {
         // check auth locally
@@ -167,6 +157,14 @@ object ArticleRepository : IArticleRepository {
         network.removeBookmark(articleId, preferences.accessToken)
     }
 
+    override fun loadAllComments(articleId: String, totalCount: Int, errHandler: (Throwable) -> Unit) =
+        CommentsDataFactory(
+            itemProvider = network,
+            articleId = articleId,
+            totalCount = totalCount,
+            errHandler = errHandler
+        )
+
 }
 
 class CommentsDataFactory(
@@ -206,7 +204,7 @@ class CommentsDataSource(
             )
         } catch (e: Exception) {
             // handle network errors in viewModel
-            errHandler.invoke(e)
+            errHandler(e)
         }
     }
 
@@ -219,7 +217,7 @@ class CommentsDataSource(
             ).execute()
             callback.onResult(result.body()!!)
         } catch (e: Exception) {
-            errHandler.invoke(e)
+            errHandler(e)
         }
     }
 
@@ -232,7 +230,7 @@ class CommentsDataSource(
             ).execute()
             callback.onResult(result.body()!!)
         } catch (e: Exception) {
-            errHandler.invoke(e)
+            errHandler(e)
         }
     }
 

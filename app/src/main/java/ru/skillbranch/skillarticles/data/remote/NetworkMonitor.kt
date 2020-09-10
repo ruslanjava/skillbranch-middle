@@ -50,7 +50,7 @@ object NetworkMonitor {
         networkCapabilities == null -> NetworkType.NONE
         networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> NetworkType.WIFI
         networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> NetworkType.CELLULAR
-        else -> NetworkType.NONE
+        else -> NetworkType.UNKNOWN
     }
 
     // для RepositoryTest1.kt
