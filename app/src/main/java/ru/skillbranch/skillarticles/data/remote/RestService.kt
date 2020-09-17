@@ -38,11 +38,15 @@ interface RestService {
 
     // http://skill-articles.skill-branch.ru/api/v1/articles/articleId/counts
     @GET("articles/{article}/counts")
-    fun loadArticleCounts(@Path("article") articleId: String): ArticleCountsRes
+    suspend fun loadArticleCounts(@Path("article") articleId: String): ArticleCountsRes
 
     // http://skill-articles.skill-branch.ru/api/v1/auth/login
     @POST("auth/login")
     suspend fun login(@Body loginReq: LoginReq): AuthRes
+
+    // http://skill-articles.skill-branch.ru/api/v1/auth/login
+    @POST("auth/login")
+    fun loginCall(@Body loginReq: LoginReq): Call<AuthRes>
 
     // http://skill-articles.skill-branch.ru/api/v1/articles/articleId/decrementLikes
     @POST("articles/{article}/decrementLikes")
