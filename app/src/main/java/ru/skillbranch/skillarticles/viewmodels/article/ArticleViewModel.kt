@@ -39,17 +39,6 @@ class ArticleViewModel(
             buildPagedList(CommentsDataFactory(NetworkManager.api, articleId, it, ::commentLoadErrorHandler))
         }
 
-    fun refresh() {
-        launchSafely {
-            launch { repository.fetchArticleContent(articleId) }
-            launch { repository.refreshCommentsCount(articleId) }
-        }
-    }
-
-    private fun commentLoadErrorHandler(throwable: Throwable) {
-        // TODO handle network error here
-    }
-
     init {
         // subscribe on mutable data
         subscribeOnDataSource(repository.findArticle(articleId)) { article, state ->
@@ -80,6 +69,17 @@ class ArticleViewModel(
         subscribeOnDataSource(repository.isAuth()) { auth, state ->
             state.copy(isAuth = auth)
         }
+    }
+
+    fun refresh() {
+        launchSafely {
+            launch { repository.fetchArticleContent(articleId) }
+            launch { repository.refreshCommentsCount(articleId) }
+        }
+    }
+
+    private fun commentLoadErrorHandler(throwable: Throwable) {
+        // TODO handle network error here
     }
 
     private fun fetchContent() {

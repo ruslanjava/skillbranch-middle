@@ -18,7 +18,6 @@ object PrefManager {
         PreferenceManager.getDefaultSharedPreferences(App.applicationContext())
     }
 
-    var isAuth by PrefDelegate(false)
     var isDarkMode by PrefDelegate(false)
     var isBigText by PrefDelegate(false)
 
@@ -28,10 +27,8 @@ object PrefManager {
     var profile: User? by PrefObjDelegate(moshi.adapter(User::class.java))
 
     val isAuthLive: LiveData<Boolean> by lazy {
-        val token: LiveData<String> by PrefLiveDelegate("accessToken", "", preferences)
-        token.map {
-            it.isNotEmpty()
-        }
+        val token by PrefLiveDelegate("accessToken", "", preferences)
+        token.map { it.isNotEmpty() }
     }
 
     val profileLive: LiveData<User?> by PrefLiveObjDelegate(
@@ -40,7 +37,7 @@ object PrefManager {
         preferences
     )
 
-    private val appSettingsLiveData: MutableLiveData<AppSettings> = MediatorLiveData<AppSettings>().apply {
+    val appSettings = MediatorLiveData<AppSettings>().apply {
         val isDarkModeLive: LiveData<Boolean> by PrefLiveDelegate("isdarkMode", false, preferences)
         val isBigTextLive: LiveData<Boolean> by PrefLiveDelegate("isBigText", false, preferences)
 
@@ -55,46 +52,8 @@ object PrefManager {
         }
     }.distinctUntilChanged()
 
-    private val authLiveData: MutableLiveData<Boolean> by lazy {
-        val result = MutableLiveData<Boolean>()
-        result.postValue(false)
-        return@lazy result
-    }
-
     fun clearAll() {
         preferences.edit().clear().apply()
-    }
-
-    fun getAppSettings(): LiveData<AppSettings> {
-        return appSettingsLiveData
-    }
-
-    fun isAuth(): MutableLiveData<Boolean> {
-        return authLiveData
-    }
-
-    fun updateSettings(appSettings: AppSettings) {
-        isDarkMode = appSettings.isDarkMode
-        isBigText = appSettings.isBigText
-        appSettingsLiveData.postValue(appSettings)
-    }
-
-    fun <T> MutableLiveData<T>.distinctUntilChanged(): MutableLiveData<T> = MediatorLiveData<T>().also { mediator ->
-        mediator.addSource(this, object : Observer<T> {
-            private var isInitialized = false
-            private var previousValue: T? = null
-
-            override fun onChanged(newValue: T?) {
-                val wasInitialized = isInitialized
-                if (!isInitialized) {
-                    isInitialized = true
-                }
-                if(!wasInitialized || newValue != previousValue) {
-                    previousValue = newValue
-                    mediator.postValue(newValue)
-                }
-            }
-        })
     }
 
 }

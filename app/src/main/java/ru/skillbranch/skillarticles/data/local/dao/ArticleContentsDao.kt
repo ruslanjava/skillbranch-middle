@@ -9,11 +9,11 @@ interface ArticleContentsDao: BaseDao<ArticleContent> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     override suspend fun insert(obj: ArticleContent): Long
 
-    @Query("DELETE from article_contents WHERE article_id = :articleId")
-    suspend fun remove(articleId: String)
+    @Query("DELETE FROM article_contents WHERE article_id = :articleId")
+    suspend fun delete(articleId: String)
 
     // для RepositoryTest1.kt
-    @Query("select * from article_contents")
+    @Query("SELECT * FROM article_contents")
     suspend fun findArticlesContentsTest(): List<ArticleContent>
 
 }

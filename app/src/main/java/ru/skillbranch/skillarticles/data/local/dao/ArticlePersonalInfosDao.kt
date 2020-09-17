@@ -49,7 +49,9 @@ interface ArticlePersonalInfosDao: BaseDao<ArticlePersonalInfo> {
 
     @Transaction
     suspend fun toggleLikeOrInsert(articleId: String) {
-        if (toggleLike(articleId) == 0) insert(ArticlePersonalInfo(articleId=articleId, isLike=true))
+        if (toggleLike(articleId) == 0) {
+            insert(ArticlePersonalInfo(articleId=articleId, isLike=true))
+        }
     }
 
     // Для RepositoryTest1.kt

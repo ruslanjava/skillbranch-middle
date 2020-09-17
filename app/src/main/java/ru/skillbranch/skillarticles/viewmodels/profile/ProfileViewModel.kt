@@ -24,7 +24,6 @@ class ProfileViewModel(handle: SavedStateHandle) :
 
 }
 
-
 data class ProfileState(
     val avatar: String? = null,
     val name: String? = null,

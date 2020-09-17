@@ -29,7 +29,7 @@ interface ArticlesDao : BaseDao<Article> {
     fun findArticleItems(): LiveData<List<ArticleItem>>
 
     @Delete
-    override suspend fun delete(article: Article)
+    override suspend fun delete(obj: Article)
 
     @Query("SELECT * FROM ArticleItem WHERE category_id IN (:categoryIds)")
     fun findArticleItemsByCategoryIds(categoryIds: List<String>): List<ArticleItem>

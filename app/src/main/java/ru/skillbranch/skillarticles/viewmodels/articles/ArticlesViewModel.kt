@@ -17,11 +17,13 @@ import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
 import java.util.concurrent.Executors
 
-class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>(handle, ArticlesState()) {
+class ArticlesViewModel(handle: SavedStateHandle) :
+    BaseViewModel<ArticlesState>(handle, ArticlesState()) {
+
     private val repository = ArticlesRepository
     private var isLoadingInitial = false
     private var isLoadingAfter = false
-    private val listConfig: PagedList.Config by lazy {
+    private val listConfig by lazy {
         PagedList.Config.Builder()
                 .setEnablePlaceholders(false)
                 .setPageSize(10)
@@ -83,7 +85,7 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
 
         launchSafely( null, { isLoadingAfter = false }) {
             repository.loadArticlesFromNetwork(
-                last = lastLoadArticle.id,
+                start = lastLoadArticle.id,
                 size = listConfig.pageSize
             )
         }
@@ -95,7 +97,7 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
 
         launchSafely(null, { isLoadingInitial = false }) {
             repository.loadArticlesFromNetwork(
-                last = null,
+                start = null,
                 size = listConfig.initialLoadSizeHint
             )
         }
@@ -140,7 +142,7 @@ class ArticlesViewModel(handle: SavedStateHandle) : BaseViewModel<ArticlesState>
         launchSafely {
             val lastArticleId: String? = repository.findLastArticleId()
             val count = repository.loadArticlesFromNetwork(
-                last = lastArticleId,
+                start = lastArticleId,
                 size = if (lastArticleId == null) listConfig.initialLoadSizeHint else listConfig.pageSize
             )
             notify(Notify.TextMessage("Load $count new articles"))

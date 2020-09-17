@@ -12,11 +12,7 @@ object RootRepository {
     private val preferences: PrefManager = PrefManager
     private val network: RestService = NetworkManager.api
 
-    fun isAuth(): LiveData<Boolean> = preferences.isAuth()
-
-    fun setAuth(auth: Boolean) {
-        preferences.isAuth = auth
-    }
+    fun isAuth(): LiveData<Boolean> = preferences.isAuthLive
 
     suspend fun login(login: String, pass: String) {
         val auth: AuthRes = network.login(LoginReq(login, pass))
