@@ -1,5 +1,8 @@
 package ru.skillbranch.skillarticles.ui.profile
 
+import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -11,6 +14,7 @@ import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
 import ru.skillbranch.skillarticles.ui.delegates.RenderProp
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
+import ru.skillbranch.skillarticles.viewmodels.profile.PendingAction
 import ru.skillbranch.skillarticles.viewmodels.profile.ProfileState
 import ru.skillbranch.skillarticles.viewmodels.profile.ProfileViewModel
 
@@ -21,8 +25,47 @@ class ProfileFragment : BaseFragment<ProfileViewModel>() {
     override val layout: Int = R.layout.fragment_profile
     override val binding: Binding by lazy { ProfileBinding() }
 
-    override fun setupViews() {
+    private val permissionsResultCallback =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            val permissionsResult = result.mapValues { (permission, isGranted) ->
+                if (isGranted) true to true
+                else false to ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    permission
+                )
+            }
+            viewModel.handlePermission(permissionsResult)
+        }
 
+    private val galleryResultCallback =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { result ->
+            if (result != null) {
+                val inputStream = requireContext().contentResolver.openInputStream(result)
+                viewModel.handleUploadPhoto(inputStream)
+            }
+        }
+
+    private val settingResultCallback =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            // do something with result if need
+        }
+
+    override fun setupViews() {
+        iv_avatar.setOnClickListener {
+            viewModel.handleTestAction()
+        }
+
+        viewModel.observePermissions(viewLifecycleOwner) {
+            // launch callback for request permissions
+            permissionsResultCallback.launch(it.toTypedArray())
+        }
+
+        viewModel.observeActivityResults(viewLifecycleOwner) {
+            when (it) {
+                is PendingAction.GalleryAction -> galleryResultCallback.launch(it.payload)
+                is PendingAction.SettingsAction -> settingResultCallback.launch(it.payload)
+            }
+        }
     }
 
     private fun updateAvatar(avatarUrl: String) {

@@ -38,16 +38,6 @@ abstract class BaseFragment<T : BaseViewModel<out IViewModelState>> : Fragment()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // prepare toolbar
-        root.toolbarBuilder
-                .prepare(prepareToolbar)
-                .build(root)
-
-        root.bottombarBuilder
-                .invalidate()
-                .prepare(prepareBottombar)
-                .build(root)
-
         // restore state
         viewModel.restoreState()
         binding?.restoreUi(savedInstanceState)
@@ -63,12 +53,23 @@ abstract class BaseFragment<T : BaseViewModel<out IViewModelState>> : Fragment()
         viewModel.observeNavigation(viewLifecycleOwner) { root.viewModel.navigate(it) }
 
         viewModel.observeLoading(viewLifecycleOwner) { renderLoading(it) }
-
-        setupViews()
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
+
+        // prepare toolbar
+        root.toolbarBuilder
+            .prepare(prepareToolbar)
+            .build(root)
+
+        root.bottombarBuilder
+            .invalidate()
+            .prepare(prepareBottombar)
+            .build(root)
+
+        setupViews()
+
         binding?.rebind()
     }
 

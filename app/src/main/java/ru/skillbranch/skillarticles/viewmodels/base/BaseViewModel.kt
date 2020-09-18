@@ -9,6 +9,7 @@ import androidx.navigation.Navigator
 import kotlinx.coroutines.*
 import ru.skillbranch.skillarticles.data.remote.err.ApiError
 import ru.skillbranch.skillarticles.data.remote.err.NoNetworkError
+import ru.skillbranch.skillarticles.viewmodels.profile.PendingAction
 import java.net.SocketTimeoutException
 
 abstract class BaseViewModel<T : IViewModelState>(
@@ -21,6 +22,9 @@ abstract class BaseViewModel<T : IViewModelState>(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     val navigation = MutableLiveData<Event<NavigationCommand>>()
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    val permissions = MutableLiveData<Event<List<String>>>()
 
     private val loading = MutableLiveData<Loading>(Loading.HIDE_LOADING)
 
@@ -177,6 +181,14 @@ abstract class BaseViewModel<T : IViewModelState>(
             // вызвать обработчик окончания выполнения suspend-функции, если имеется
             compHandler?.invoke(it)
         }
+    }
+
+    fun requestPermissions(requestedPermissions: List<String>) {
+        permissions.value = Event(requestedPermissions)
+    }
+
+    fun observePermissions(owner: LifecycleOwner, handle: (permissions: List<String>) -> Unit) {
+        permissions.observe(owner, EventObserver { handle(it) })
     }
 
 }
