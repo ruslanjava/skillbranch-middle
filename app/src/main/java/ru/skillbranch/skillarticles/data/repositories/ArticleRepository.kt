@@ -27,7 +27,7 @@ interface IArticleRepository {
     fun isAuth(): LiveData<Boolean>
     fun updateSettings(copy: AppSettings)
 
-    suspend fun toggleLike(articleId: String)
+    suspend fun toggleLike(articleId: String): Boolean
     suspend fun toggleBookmark(articleId: String)
     suspend fun sendMessage(articleId: String, text: String, answerToSlug: String?)
     suspend fun decrementLike(articleId: String)
@@ -83,8 +83,8 @@ object ArticleRepository : IArticleRepository {
         preferences.isDarkMode = settings.isDarkMode
     }
 
-    override suspend fun toggleLike(articleId: String) {
-        articlePersonalDao.toggleLikeOrInsert(articleId)
+    override suspend fun toggleLike(articleId: String): Boolean {
+        return articlePersonalDao.toggleLikeOrInsert(articleId)
     }
 
     override suspend fun toggleBookmark(articleId: String) {
