@@ -32,7 +32,7 @@ class TokenAuthenticator: Authenticator {
         prefs.refreshToken = refreshRes.refreshToken
 
         return response.request.newBuilder()
-            .header("Authorization", "Bearer ${prefs.accessToken}")
+            .header("Authorization", prefs.accessToken)
             .build()
     }
 
