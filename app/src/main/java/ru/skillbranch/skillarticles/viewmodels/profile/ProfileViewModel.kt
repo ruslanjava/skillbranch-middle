@@ -1,6 +1,7 @@
 package ru.skillbranch.skillarticles.viewmodels.profile
 
 import android.Manifest
+import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
@@ -134,5 +135,8 @@ sealed class PendingAction(): Parcelable {
 
     @Parcelize
     data class SettingsAction(override val payload: Intent): PendingAction()
+
+    @Parcelize
+    data class CameraAction(override val payload: Uri): PendingAction()
 
 }

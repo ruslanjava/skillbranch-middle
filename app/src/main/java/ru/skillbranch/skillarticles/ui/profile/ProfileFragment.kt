@@ -1,6 +1,5 @@
 package ru.skillbranch.skillarticles.ui.profile
 
-import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.viewModels
@@ -9,7 +8,6 @@ import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.fragment_profile.*
 
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.extensions.dpToIntPx
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
 import ru.skillbranch.skillarticles.ui.delegates.RenderProp
@@ -50,6 +48,11 @@ class ProfileFragment : BaseFragment<ProfileViewModel>() {
             // do something with result if need
         }
 
+    private val cameraResultCallback =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) { result ->
+            val (payload) = binding.pendingAction as PendingAction.CameraAction
+        }
+
     override fun setupViews() {
         iv_avatar.setOnClickListener {
             viewModel.handleTestAction()
@@ -69,15 +72,22 @@ class ProfileFragment : BaseFragment<ProfileViewModel>() {
     }
 
     private fun updateAvatar(avatarUrl: String) {
-        Glide.with(root)
-            .load(avatarUrl)
-            .error(R.drawable.ic_avatar)
-            .apply(RequestOptions.circleCropTransform())
-            .override(root.dpToIntPx(168))
-            .into(iv_avatar)
+        if (avatarUrl.isBlank()) {
+            Glide.with(this)
+                .load(R.drawable.ic_avatar)
+                .into(iv_avatar)
+        } else {
+            Glide.with(this)
+                .load(avatarUrl)
+                .placeholder(R.drawable.ic_avatar)
+                .apply(RequestOptions.circleCropTransform())
+                .into(iv_avatar)
+        }
     }
 
     inner class ProfileBinding: Binding() {
+
+        var pendingAction: PendingAction? = null
 
         var avatar by RenderProp("") {
             updateAvatar(it)
@@ -106,6 +116,7 @@ class ProfileFragment : BaseFragment<ProfileViewModel>() {
             if (data.about != null) about = data.about
             rating = data.rating
             respect = data.respect
+            pendingAction = data.pendingAction
         }
 
     }
