@@ -1,7 +1,12 @@
 package ru.skillbranch.skillarticles.ui.profile
 
+import android.net.Uri
+import android.os.Environment
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -15,13 +20,16 @@ import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.profile.PendingAction
 import ru.skillbranch.skillarticles.viewmodels.profile.ProfileState
 import ru.skillbranch.skillarticles.viewmodels.profile.ProfileViewModel
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ProfileFragment : BaseFragment<ProfileViewModel>() {
 
     override val viewModel: ProfileViewModel by viewModels()
 
     override val layout: Int = R.layout.fragment_profile
-    override val binding: Binding by lazy { ProfileBinding() }
+    override val binding: ProfileBinding by lazy { ProfileBinding() }
 
     private val permissionsResultCallback =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
@@ -51,11 +59,21 @@ class ProfileFragment : BaseFragment<ProfileViewModel>() {
     private val cameraResultCallback =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { result ->
             val (payload) = binding.pendingAction as PendingAction.CameraAction
+            // if take photo from camera upload to server
+            if (result) {
+                val inputStream = requireContext().contentResolver.openInputStream(payload)
+                viewModel.handleUploadPhoto(inputStream)
+            } else {
+                // else remove temp uri
+                removeTempUri(payload)
+
+            }
         }
 
     override fun setupViews() {
         iv_avatar.setOnClickListener {
-            viewModel.handleTestAction()
+            val uri = prepareTempUri()
+            viewModel.handleTestAction(uri)
         }
 
         viewModel.observePermissions(viewLifecycleOwner) {
@@ -67,6 +85,7 @@ class ProfileFragment : BaseFragment<ProfileViewModel>() {
             when (it) {
                 is PendingAction.GalleryAction -> galleryResultCallback.launch(it.payload)
                 is PendingAction.SettingsAction -> settingResultCallback.launch(it.payload)
+                is PendingAction.CameraAction -> cameraResultCallback.launch(it.payload)
             }
         }
     }
@@ -83,6 +102,32 @@ class ProfileFragment : BaseFragment<ProfileViewModel>() {
                 .apply(RequestOptions.circleCropTransform())
                 .into(iv_avatar)
         }
+    }
+
+    private fun prepareTempUri(): Uri {
+        val timestamp = SimpleDateFormat("HHmmss", Locale.US).format(Date())
+        val storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        // create empty temp file with unique name
+        val tempFile = File.createTempFile(
+            "JPG${timestamp}",
+            ".jpg",
+            storageDir
+        )
+
+        // must return content:uri not file: uri
+        val contentUri = FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.provider",
+            tempFile
+        )
+
+        Log.e("ProfileFragment", "file uri: ${tempFile.toUri()} content uri: $contentUri")
+
+        return contentUri
+    }
+
+    private fun removeTempUri(uri: Uri) {
+        requireContext().contentResolver.delete(uri, null, null)
     }
 
     inner class ProfileBinding: Binding() {

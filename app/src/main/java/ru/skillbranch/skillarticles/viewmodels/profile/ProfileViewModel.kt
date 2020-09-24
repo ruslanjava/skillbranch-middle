@@ -1,7 +1,6 @@
 package ru.skillbranch.skillarticles.viewmodels.profile
 
 import android.Manifest
-import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
@@ -45,8 +44,8 @@ class ProfileViewModel(handle: SavedStateHandle) :
         activityResults.value = Event(action)
     }
 
-    fun handleTestAction() {
-        val pendingAction = PendingAction.GalleryAction("image/jpeg")
+    fun handleTestAction(uri: Uri) {
+        val pendingAction = PendingAction.CameraAction(uri)
         updateState { it.copy(pendingAction = pendingAction) }
         requestPermissions(storagePermissions)
     }
