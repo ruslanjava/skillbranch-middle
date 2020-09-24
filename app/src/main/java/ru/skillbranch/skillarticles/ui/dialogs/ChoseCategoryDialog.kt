@@ -4,16 +4,15 @@ import android.app.Dialog
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.viewmodels.articles.ArticlesViewModel
 
 class ChoseCategoryDialog : DialogFragment() {
 
-    private val viewModel: ArticlesViewModel by activityViewModels()
     private val args: ChoseCategoryDialogArgs by navArgs()
 
     private lateinit var categoriesList: RecyclerView
@@ -48,13 +47,13 @@ class ChoseCategoryDialog : DialogFragment() {
             val selectedCategories = adapter.items
                 .filterIndexed { index, category -> adapter.selectedCategories[index] }
                 .map { category -> category.categoryId }
-            viewModel.applyCategories(selectedCategories)
+            setFragmentResult(CHOSE_CATEGORY_KEY, bundleOf(SELECTED_CATEGORIES to selectedCategories.toList()))
             dialog.dismiss()
         }
 
         val resetButton = view.findViewById<Button>(R.id.reset_button)
         resetButton.setOnClickListener {
-            viewModel.applyCategories(emptyList())
+            setFragmentResult(CHOSE_CATEGORY_KEY, bundleOf(SELECTED_CATEGORIES to emptyList<String>()))
             dialog.dismiss()
         }
 
@@ -75,6 +74,7 @@ class ChoseCategoryDialog : DialogFragment() {
     companion object {
 
         const val SELECTED_CATEGORIES = "selected_categories"
+        const val CHOSE_CATEGORY_KEY = "CHOSE_CATEGORY_KEY"
 
     }
 

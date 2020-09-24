@@ -151,7 +151,7 @@ data class ArticleFilter(
         }
 
         if (categories.isNotEmpty()) {
-            qb.appendWhere("category_id IN (${categories.joinToString(",")})")
+            qb.appendWhere("category_id IN (${categories.joinToString("\",\"", "\"")})")
         }
 
         qb.orderBy("date")

@@ -3,12 +3,15 @@ package ru.skillbranch.skillarticles.viewmodels.profile
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
+import android.os.Parcel
 import android.os.Parcelable
 import android.provider.Settings
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.android.parcel.Parcelize
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -44,8 +47,8 @@ class ProfileViewModel(handle: SavedStateHandle) :
         activityResults.value = Event(action)
     }
 
-    fun handleTestAction(uri: Uri) {
-        val pendingAction = PendingAction.CameraAction(uri)
+    fun handleTestAction(source: Uri, destination: Uri) {
+        val pendingAction = PendingAction.EditAction(source to destination)
         updateState { it.copy(pendingAction = pendingAction) }
         requestPermissions(storagePermissions)
     }
@@ -90,18 +93,42 @@ class ProfileViewModel(handle: SavedStateHandle) :
 
     fun handleUploadPhoto(inputStream: InputStream?) {
         inputStream ?: return // or show error notification
-        val byteArray = inputStream.use { input -> input.readBytes() }
 
-        val reqFile: RequestBody = byteArray.toRequestBody("image/jpeg".toMediaType())
-        val body: MultipartBody.Part = MultipartBody.Part.createFormData("avatar", "name.jpg", reqFile)
+        launchSafely(null, { updateState { it.copy(pendingAction = null) }}) {
+            // read file stream on background thread (IO)
+            val byteArray = withContext(Dispatchers.IO) {
+                inputStream.use { input -> input.readBytes() }
+            }
 
-        launchSafely {
+            val reqFile: RequestBody = byteArray.toRequestBody("image/jpeg".toMediaType())
+            val body: MultipartBody.Part =
+                MultipartBody.Part.createFormData("avatar", "name.jpg", reqFile)
+
             repository.uploadAvatar(body)
         }
     }
 
     fun observeActivityResults(owner: LifecycleOwner, handle: (action: PendingAction) -> Unit) {
-        activityResults.observe(owner, EventObserver { handle(it) } )
+        activityResults.observe(owner, EventObserver { handle(it) })
+    }
+
+    fun handleCameraAction(destination: Uri) {
+        updateState { it.copy(pendingAction = PendingAction.CameraAction(destination)) }
+        requestPermissions(storagePermissions)
+    }
+
+    fun handleGalleryAction() {
+        updateState { it.copy(pendingAction = PendingAction.GalleryAction("image/jpeg")) }
+        requestPermissions(storagePermissions)
+    }
+
+    fun handleDeleteAction() {
+        TODO("Not yet implemented")
+    }
+
+    fun handleEditAction(source: Uri, destination: Uri) {
+        updateState { it.copy(pendingAction = PendingAction.EditAction(source to destination)) }
+        requestPermissions(storagePermissions)
     }
 
 }
@@ -113,7 +140,7 @@ data class ProfileState(
     val rating: Int = 0,
     val respect: Int = 0,
     val pendingAction: PendingAction? = null
-): IViewModelState {
+) : IViewModelState {
 
     override fun save(outState: SavedStateHandle) {
         outState.set("pendingAction", pendingAction)
@@ -125,17 +152,41 @@ data class ProfileState(
 
 }
 
-sealed class PendingAction(): Parcelable {
+sealed class PendingAction() : Parcelable {
 
     abstract val payload: Any?
 
     @Parcelize
-    data class GalleryAction(override val payload: String): PendingAction()
+    data class GalleryAction(override val payload: String) : PendingAction()
 
     @Parcelize
-    data class SettingsAction(override val payload: Intent): PendingAction()
+    data class SettingsAction(override val payload: Intent) : PendingAction()
 
     @Parcelize
-    data class CameraAction(override val payload: Uri): PendingAction()
+    data class CameraAction(override val payload: Uri) : PendingAction()
+
+    data class EditAction(override val payload: Pair<Uri, Uri>) : PendingAction(), Parcelable {
+        constructor(parcel: Parcel) : this(Uri.parse(parcel.readString()) to Uri.parse(parcel.readString()))
+
+        override fun writeToParcel(parcel: Parcel, flags: Int) {
+            parcel.writeString(payload.first.toString())
+            parcel.writeString(payload.second.toString())
+        }
+
+        override fun describeContents(): Int {
+            return 0
+        }
+
+        companion object CREATOR : Parcelable.Creator<EditAction> {
+            override fun createFromParcel(parcel: Parcel): EditAction {
+                return EditAction(parcel)
+            }
+
+            override fun newArray(size: Int): Array<EditAction?> {
+                return arrayOfNulls(size)
+            }
+        }
+
+    }
 
 }

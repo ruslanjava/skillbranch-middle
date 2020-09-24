@@ -1,22 +1,30 @@
 package ru.skillbranch.skillarticles.ui.profile
 
 import android.net.Uri
+import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.fragment_profile.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
 import ru.skillbranch.skillarticles.ui.delegates.RenderProp
+import ru.skillbranch.skillarticles.ui.dialogs.AvatarActionsDialog
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
+import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
 import ru.skillbranch.skillarticles.viewmodels.profile.PendingAction
 import ru.skillbranch.skillarticles.viewmodels.profile.ProfileState
 import ru.skillbranch.skillarticles.viewmodels.profile.ProfileViewModel
@@ -70,10 +78,46 @@ class ProfileFragment : BaseFragment<ProfileViewModel>() {
             }
         }
 
+    private val editPhotoResultCallback =
+        registerForActivityResult(EditImageContract()) { result ->
+            if (result != null) {
+                val inputStream = requireContext().contentResolver.openInputStream(result)
+                viewModel.handleUploadPhoto(inputStream)
+            } else {
+                val (payload) = binding.pendingAction as PendingAction.EditAction
+                removeTempUri(payload.second)
+            }
+        }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setFragmentResultListener(AvatarActionsDialog.AVATAR_ACTIONS_KEY) { _, bundle ->
+            when (bundle[AvatarActionsDialog.SELECT_ACTION_KEY] as String) {
+                AvatarActionsDialog.CAMERA_KEY -> viewModel.handleCameraAction(prepareTempUri())
+                AvatarActionsDialog.GALLERY_KEY -> viewModel.handleGalleryAction()
+                AvatarActionsDialog.DELETE_KEY -> viewModel.handleDeleteAction()
+                AvatarActionsDialog.EDIT_KEY -> {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        // Glide submit get it is sync call, don't call on UI thread
+                        val sourceFile = Glide.with(requireActivity()).asFile().load(binding.avatar).submit().get()
+                        val sourceUri = FileProvider.getUriForFile(
+                            requireContext(),
+                            "${requireContext().packageName}.provider",
+                            sourceFile
+                        )
+                        withContext(Dispatchers.Main) {
+                            viewModel.handleEditAction(sourceUri, prepareTempUri())
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     override fun setupViews() {
         iv_avatar.setOnClickListener {
-            val uri = prepareTempUri()
-            viewModel.handleTestAction(uri)
+            val action = ProfileFragmentDirections.actionNavProfileToDialogAvatarAction(binding.avatar.isNotBlank())
+            viewModel.navigate(NavigationCommand.To(action.id, action.arguments))
         }
 
         viewModel.observePermissions(viewLifecycleOwner) {
@@ -86,6 +130,7 @@ class ProfileFragment : BaseFragment<ProfileViewModel>() {
                 is PendingAction.GalleryAction -> galleryResultCallback.launch(it.payload)
                 is PendingAction.SettingsAction -> settingResultCallback.launch(it.payload)
                 is PendingAction.CameraAction -> cameraResultCallback.launch(it.payload)
+                is PendingAction.EditAction -> editPhotoResultCallback.launch(it.payload)
             }
         }
     }
