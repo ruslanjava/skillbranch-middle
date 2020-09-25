@@ -3,6 +3,7 @@ package ru.skillbranch.skillarticles.data.remote
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.*
+import ru.skillbranch.skillarticles.data.remote.req.EditProfileReq
 import ru.skillbranch.skillarticles.data.remote.req.LoginReq
 import ru.skillbranch.skillarticles.data.remote.req.MessageReq
 import ru.skillbranch.skillarticles.data.remote.req.RefreshReq
@@ -93,5 +94,11 @@ interface RestService {
     suspend fun  avatarRemove(
         @Header("Authorization") accessToken: String
     ): UploadRes
+
+    @PUT("profile")
+    suspend fun  editProfile(
+        @Body editProfileReq: EditProfileReq,
+        @Header("Authorization") accessToken: String
+    ): EditProfileRes // Возврашается Url (пустой)
 
 }
