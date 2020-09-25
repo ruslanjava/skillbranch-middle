@@ -1,6 +1,7 @@
 package ru.skillbranch.skillarticles.data.remote.req
 
-data class LoginReq(
-    val login:String,
+data class RegisterReq(
+    val name: String,
+    val login: String,
     val password: String
 )
