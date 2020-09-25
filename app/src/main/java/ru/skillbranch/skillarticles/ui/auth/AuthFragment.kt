@@ -33,9 +33,14 @@ class AuthFragment : BaseFragment<AuthViewModel>() {
             )
         }
 
+        tv_register.setOnClickListener {
+            viewModel.navigate(NavigationCommand.To(R.id.nav_registration))
+        }
+
         val color = root.attrValue(R.attr.colorPrimary)
         (tv_access_code.text as Spannable).let { it[0..it.length] = UnderlineSpan(color) }
         (tv_privacy.text as Spannable).let { it[0..it.length] = UnderlineSpan(color) }
+        (tv_register.text as Spannable).let { it[0..it.length] = UnderlineSpan(color) }
     }
 
 }
