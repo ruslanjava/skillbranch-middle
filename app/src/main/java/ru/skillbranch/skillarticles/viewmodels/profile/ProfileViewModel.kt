@@ -123,7 +123,9 @@ class ProfileViewModel(handle: SavedStateHandle) :
     }
 
     fun handleDeleteAction() {
-        TODO("Not yet implemented")
+        launchSafely {
+            repository.removeAvatar()
+        }
     }
 
     fun handleEditAction(source: Uri, destination: Uri) {
