@@ -117,7 +117,7 @@ class ProfileFragment : BaseFragment<ProfileViewModel>() {
     override fun setupViews() {
         iv_avatar.setOnClickListener {
             val action = ProfileFragmentDirections.actionNavProfileToDialogAvatarAction(binding.avatar.isNotBlank())
-            viewModel.navigate(NavigationCommand.To(action.id, action.arguments))
+            viewModel.navigate(NavigationCommand.To(action.actionId, action.arguments))
         }
 
         viewModel.observePermissions(viewLifecycleOwner) {
