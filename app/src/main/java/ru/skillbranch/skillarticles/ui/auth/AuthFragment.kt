@@ -34,7 +34,8 @@ class AuthFragment : BaseFragment<AuthViewModel>() {
         }
 
         tv_register.setOnClickListener {
-            viewModel.navigate(NavigationCommand.To(R.id.nav_registration))
+            val registrationArgs = RegistrationFragmentArgs(args.privateDestination)
+            viewModel.navigate(NavigationCommand.To(R.id.nav_registration, registrationArgs.toBundle()))
         }
 
         val color = root.attrValue(R.attr.colorPrimary)

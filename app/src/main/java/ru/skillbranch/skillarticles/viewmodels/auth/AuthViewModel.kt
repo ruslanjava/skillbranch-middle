@@ -1,6 +1,8 @@
 package ru.skillbranch.skillarticles.viewmodels.auth
 
 import androidx.lifecycle.SavedStateHandle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import ru.skillbranch.skillarticles.data.repositories.RootRepository
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
@@ -20,7 +22,18 @@ class AuthViewModel(handle: SavedStateHandle) : BaseViewModel<AuthState>(handle,
     override fun handleLogin(login: String, pass:String, dest: Int?) {
         launchSafely {
             repository.login(login, pass)
-            navigate(NavigationCommand.FinishLogin(dest))
+            withContext(Dispatchers.Main) {
+                navigate(NavigationCommand.FinishLogin(dest))
+            }
+        }
+    }
+
+    override fun handleRegister(name: String, login: String, password: String, dest: Int?) {
+        launchSafely {
+            repository.register(name, login, password)
+            withContext(Dispatchers.Main) {
+                navigate(NavigationCommand.FinishLogin(dest))
+            }
         }
     }
 

@@ -1,20 +1,27 @@
 package ru.skillbranch.skillarticles.ui.auth
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
+import kotlinx.android.synthetic.main.fragment_registration.*
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.ui.base.BaseFragment
+import ru.skillbranch.skillarticles.viewmodels.auth.AuthViewModel
 
-class RegistrationFragment : Fragment() {
+class RegistrationFragment : BaseFragment<AuthViewModel>()  {
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_registration, container, false)
+    override val viewModel: AuthViewModel by viewModels()
+    override val layout: Int = R.layout.fragment_registration
+    private val args: RegistrationFragmentArgs by navArgs()
+
+    override fun setupViews() {
+        btn_register.setOnClickListener {
+            viewModel.handleRegister(
+                et_name.text.toString(),
+                et_login.text.toString(),
+                et_password.text.toString(),
+                args.privateDestination
+            )
+        }
     }
 
 }
