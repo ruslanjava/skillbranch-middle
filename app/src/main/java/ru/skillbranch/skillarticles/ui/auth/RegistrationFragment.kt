@@ -17,8 +17,7 @@ import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.viewmodels.auth.AuthViewModel
 
 class RegistrationFragment() : BaseFragment<AuthViewModel>() {
-    // for testing
-    private lateinit var resultRegistry: ActivityResultRegistry
+
     var _mockFactory: ((SavedStateRegistryOwner)-> ViewModelProvider.Factory)? = null
 
     override val viewModel: AuthViewModel by viewModels {
@@ -31,12 +30,10 @@ class RegistrationFragment() : BaseFragment<AuthViewModel>() {
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     constructor(
         mockRoot: RootActivity,
-        testRegistry: ActivityResultRegistry? = null,
         mockFactory: ((SavedStateRegistryOwner) -> ViewModelProvider.Factory)? = null
     ) : this() {
         _mockRoot = mockRoot
         _mockFactory = mockFactory
-        if (testRegistry != null) resultRegistry = testRegistry
     }
 
     override fun setupViews() {
