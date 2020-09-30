@@ -5,10 +5,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ru.skillbranch.skillarticles.App
+import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.data.repositories.RootRepository
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
+import ru.skillbranch.skillarticles.viewmodels.base.Notify
 
 class AuthViewModel(handle: SavedStateHandle) : BaseViewModel<AuthState>(handle, AuthState()),
     IAuthViewModel {
@@ -36,6 +39,19 @@ class AuthViewModel(handle: SavedStateHandle) : BaseViewModel<AuthState>(handle,
     }
 
     override fun handleRegister(name: String, login: String, password: String, dest: Int?) {
+        if (!name.matches(NAME_REGEX)) {
+            notify(Notify.ErrorMessage(App.applicationContext().getString(R.string.auth_invalid_name)))
+            return
+        }
+        if (!login.matches(EMAIL_REGEX)) {
+            notify(Notify.ErrorMessage(App.applicationContext().getString(R.string.auth_invalid_email)))
+            return
+        }
+        if (!password.matches(PASSWORD_REGEX)) {
+            notify(Notify.ErrorMessage(App.applicationContext().getString(R.string.auth_invalid_password)))
+            return
+        }
+
         launchSafely {
             repository.register(name, login, password)
             withContext(Dispatchers.Main) {
