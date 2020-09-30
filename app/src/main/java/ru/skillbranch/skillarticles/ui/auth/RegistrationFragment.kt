@@ -2,20 +2,42 @@ package ru.skillbranch.skillarticles.ui.auth
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.ActivityResultRegistry
+import androidx.annotation.VisibleForTesting
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.navArgs
+import androidx.savedstate.SavedStateRegistryOwner
 import kotlinx.android.synthetic.main.fragment_registration.*
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.ui.RootActivity
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.viewmodels.auth.AuthViewModel
 
-class RegistrationFragment : BaseFragment<AuthViewModel>() {
+class RegistrationFragment() : BaseFragment<AuthViewModel>() {
+    // for testing
+    private lateinit var resultRegistry: ActivityResultRegistry
+    var _mockFactory: ((SavedStateRegistryOwner)-> ViewModelProvider.Factory)? = null
 
-    override val viewModel: AuthViewModel by viewModels()
+    override val viewModel: AuthViewModel by viewModels {
+        _mockFactory?.invoke(this)?: defaultViewModelProviderFactory
+    }
+
     override val layout: Int = R.layout.fragment_registration
     private val args: RegistrationFragmentArgs by navArgs()
+
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    constructor(
+        mockRoot: RootActivity,
+        testRegistry: ActivityResultRegistry? = null,
+        mockFactory: ((SavedStateRegistryOwner) -> ViewModelProvider.Factory)? = null
+    ) : this() {
+        _mockRoot = mockRoot
+        _mockFactory = mockFactory
+        if (testRegistry != null) resultRegistry = testRegistry
+    }
 
     override fun setupViews() {
         btn_register.isEnabled = false
