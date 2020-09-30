@@ -39,6 +39,10 @@ class AuthViewModel(handle: SavedStateHandle) : BaseViewModel<AuthState>(handle,
     }
 
     override fun handleRegister(name: String, login: String, password: String, dest: Int?) {
+        if (name.isBlank() || login.isBlank() || password.isBlank()) {
+            notify(Notify.ErrorMessage(App.applicationContext().getString(R.string.auth_empty_fields)))
+            return
+        }
         if (!name.matches(NAME_REGEX)) {
             notify(Notify.ErrorMessage(App.applicationContext().getString(R.string.auth_invalid_name)))
             return
