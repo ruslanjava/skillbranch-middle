@@ -22,8 +22,8 @@ object RootRepository {
         preferences.refreshToken = auth.refreshToken
     }
 
-    suspend fun register(name: String, login: String, pass: String) {
-        val auth: AuthRes = network.register(RegisterReq(name, login, pass))
+    suspend fun register(name: String, email: String, pass: String) {
+        val auth: AuthRes = network.register(RegisterReq(name, email, pass))
         preferences.profile = auth.user
         preferences.accessToken = "Bearer ${auth.accessToken}"
         preferences.refreshToken = auth.refreshToken
