@@ -21,6 +21,7 @@ Nullam sem sem, rhoncus vitae porttitor et, pretium eu ipsum. Sed semper semper 
     <string name="title_authorization">Authorization</string>
     <string name="title_privacy_policy">Privacy policy</string>
 
+    <string name="auth_empty_fields">Name, login, password it is required fields and not must be empty</string>
     <string name="auth_invalid_name">The name must be at least 3 characters long and contain only letters and numbers and can also contain the characters \"-\" and \"_\"</string>
     <string name="auth_invalid_password">Password must be at least 8 characters long and contain only letters and numbers</string>
     <string name="auth_invalid_email">Incorrect Email entered</string>
