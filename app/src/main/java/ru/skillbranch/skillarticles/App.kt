@@ -6,8 +6,11 @@ import androidx.appcompat.app.AppCompatDelegate
 import kotlinx.android.synthetic.main.activity_root.view.*
 import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.data.remote.NetworkMonitor
+import ru.skillbranch.skillarticles.di.components.ActivityComponent
 import ru.skillbranch.skillarticles.di.components.AppComponent
+import ru.skillbranch.skillarticles.di.components.DaggerActivityComponent
 import ru.skillbranch.skillarticles.di.components.DaggerAppComponent
+import ru.skillbranch.skillarticles.di.modules.ActivityModule
 import ru.skillbranch.skillarticles.di.modules.NetworkUtilsModule
 import ru.skillbranch.skillarticles.di.modules.PreferencesModule
 import javax.inject.Inject
@@ -31,6 +34,11 @@ class App : Application() {
             .networkUtilsModule(NetworkUtilsModule(applicationContext))
             .build()
 
+        activityComponent = DaggerActivityComponent.builder()
+            .activityModule(ActivityModule())
+            .appComponent(appComponent)
+            .build()
+
         appComponent.inject(this)
 
         // start network monitoring
@@ -44,6 +52,7 @@ class App : Application() {
 
     companion object {
 
+        lateinit var activityComponent: ActivityComponent
         lateinit var appComponent: AppComponent
 
         private var instance: App? = null
@@ -51,6 +60,7 @@ class App : Application() {
         fun applicationContext() : Context {
             return instance!!.applicationContext
         }
+
     }
 
 }

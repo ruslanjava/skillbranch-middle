@@ -4,8 +4,8 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import androidx.paging.ItemKeyedDataSource
+import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.data.local.DbManager.db
-import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.data.local.dao.ArticleContentsDao
 import ru.skillbranch.skillarticles.data.local.dao.ArticleCountsDao
 import ru.skillbranch.skillarticles.data.local.dao.ArticlePersonalInfosDao
@@ -14,7 +14,6 @@ import ru.skillbranch.skillarticles.data.local.entities.ArticleFull
 import ru.skillbranch.skillarticles.data.models.*
 import ru.skillbranch.skillarticles.data.remote.NetworkManager
 import ru.skillbranch.skillarticles.data.remote.RestService
-import ru.skillbranch.skillarticles.data.remote.err.ApiError
 import ru.skillbranch.skillarticles.data.remote.err.NoNetworkError
 import ru.skillbranch.skillarticles.data.remote.req.MessageReq
 import ru.skillbranch.skillarticles.data.remote.res.CommentRes
@@ -50,7 +49,9 @@ interface IArticleRepository {
 object ArticleRepository : IArticleRepository {
 
     private val network = NetworkManager.api
-    private val preferences = PrefManager
+    private val preferences by lazy {
+        App.appComponent.getPreferences()
+    }
 
     private var articlesDao = db.articlesDao()
     private var articlePersonalDao = db.articlePersonalInfosDao()
@@ -74,7 +75,8 @@ object ArticleRepository : IArticleRepository {
         return articlesDao.findFullArticle(articleId)
     }
 
-    override fun getAppSettings(): LiveData<AppSettings> = preferences.appSettings //from preferences
+    override fun getAppSettings(): LiveData<AppSettings> =
+        preferences.appSettings //from preferences
 
     override fun isAuth(): LiveData<Boolean> = preferences.isAuthLive
 
@@ -187,22 +189,25 @@ object ArticleRepository : IArticleRepository {
         return articleCountsDao.getCommentsCount(articleId)
     }
 
-    override fun loadAllComments(articleId: String, totalCount: Int, errHandler: (Throwable) -> Unit) =
+    override fun loadAllComments(
+        articleId: String,
+        totalCount: Int,
+        errHandler: (Throwable) -> Unit
+    ) =
         CommentsDataFactory(
             itemProvider = network,
             articleId = articleId,
             totalCount = totalCount,
             errHandler = errHandler
         )
-
 }
 
 class CommentsDataFactory(
-        private val itemProvider: RestService,
-        private val articleId: String,
-        private val totalCount: Int,
-        private val errHandler: (Throwable) -> Unit
-): DataSource.Factory<String?, CommentRes>() {
+    private val itemProvider: RestService,
+    private val articleId: String,
+    private val totalCount: Int,
+    private val errHandler: (Throwable) -> Unit
+) : DataSource.Factory<String?, CommentRes>() {
     override fun create(): DataSource<String?, CommentRes> = CommentsDataSource(
         itemProvider, articleId, totalCount, errHandler
     )
@@ -213,11 +218,11 @@ class CommentsDataSource(
     private val articleId: String,
     private val totalCount: Int,
     private val errHandler: (Throwable) -> Unit
-): ItemKeyedDataSource<String, CommentRes>() {
+) : ItemKeyedDataSource<String, CommentRes>() {
 
     override fun loadInitial(
-            params: LoadInitialParams<String>,
-            callback: LoadInitialCallback<CommentRes>
+        params: LoadInitialParams<String>,
+        callback: LoadInitialCallback<CommentRes>
     ) {
         try {
             // sync call execute

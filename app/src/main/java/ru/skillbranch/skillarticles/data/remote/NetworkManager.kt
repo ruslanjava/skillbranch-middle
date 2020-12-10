@@ -4,6 +4,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.AppConfig
 import ru.skillbranch.skillarticles.data.JsonConverter.moshi
 import ru.skillbranch.skillarticles.data.remote.interceptors.ErrorStatusInterceptor
@@ -18,12 +19,14 @@ object NetworkManager {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
+        val networkMonitor = App.appComponent.getNetworkMonitor()
+
         // client
         val client: OkHttpClient = OkHttpClient().newBuilder()
             .readTimeout(2, TimeUnit.SECONDS) // socket timeout (GET)
             .writeTimeout(5, TimeUnit.SECONDS) // socket timeout (POST, PUT, etc)
             .authenticator(TokenAuthenticator())
-            .addInterceptor(NetworkStatusInterceptor()) // intercept network status
+            .addInterceptor(NetworkStatusInterceptor(networkMonitor)) // intercept network status
             .addInterceptor(logging) // intercept req/res for logging
             .addInterceptor(ErrorStatusInterceptor()) // intercept status errors
             .build()

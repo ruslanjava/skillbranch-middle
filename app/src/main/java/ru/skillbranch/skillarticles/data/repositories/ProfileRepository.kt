@@ -2,6 +2,7 @@ package ru.skillbranch.skillarticles.data.repositories
 
 import androidx.lifecycle.LiveData
 import okhttp3.MultipartBody
+import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.data.models.User
 import ru.skillbranch.skillarticles.data.remote.NetworkManager
@@ -14,9 +15,11 @@ interface IProfileRepository {
     suspend fun editProfile(name: String, about: String)
 }
 
-object ProfileRepository: IProfileRepository {
+object ProfileRepository : IProfileRepository {
 
-    private val prefs = PrefManager
+    private val prefs by lazy {
+        App.appComponent.getPreferences()
+    }
     private val network = NetworkManager.api
 
     override fun getProfile(): LiveData<User?> {
@@ -44,5 +47,4 @@ object ProfileRepository: IProfileRepository {
             about = profileRes.about
         )
     }
-
 }
