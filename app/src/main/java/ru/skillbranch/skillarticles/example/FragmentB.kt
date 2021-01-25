@@ -5,19 +5,15 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import kotlinx.android.synthetic.main.fragment_a.*
+import kotlinx.android.synthetic.main.fragment_a.tv_activity
+import kotlinx.android.synthetic.main.fragment_b.*
+import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.di.components.DaggerFragmentBComponent
+import ru.skillbranch.skillarticles.di.modules.FragmentBModule
 import javax.inject.Inject
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [FragmentB.newInstance] factory method to
- * create an instance of this fragment.
- */
 class FragmentB : Fragment() {
 
     @Inject
@@ -27,6 +23,11 @@ class FragmentB : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        DaggerFragmentBComponent.builder().activityComponent(App.activityComponent)
+            .fragmentBModule(FragmentBModule())
+            .build()
+            .inject(this)
     }
 
     override fun onCreateView(
@@ -37,23 +38,11 @@ class FragmentB : Fragment() {
         return inflater.inflate(R.layout.fragment_b, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment FragmentB.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            FragmentB().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        tv_activity.text = "${activity.title} ${System.identityHashCode(activity)}"
+        tv_is_big_text.text = "isBigText: ${System.identityHashCode(isBigText)}"
     }
+
 }

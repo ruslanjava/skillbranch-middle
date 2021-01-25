@@ -6,6 +6,8 @@ import kotlinx.android.synthetic.main.activity_test.*
 import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.data.local.PrefManager
+import ru.skillbranch.skillarticles.di.components.DaggerActivityComponent
+import ru.skillbranch.skillarticles.di.modules.ActivityModule
 import javax.inject.Inject
 
 class TestActivity: AppCompatActivity() {
@@ -18,17 +20,38 @@ class TestActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_root)
+        setContentView(R.layout.activity_test)
 
-        btn_inject.setOnClickListener {
-            injectDependency()
+        App.activityComponent = DaggerActivityComponent.builder()
+            .activityModule(ActivityModule(this))
+            .appComponent(App.appComponent)
+            .build()
+
+        injectDependency()
+
+        btn_a.setOnClickListener {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.container, FragmentA())
+                .commit()
         }
+        btn_b.setOnClickListener {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.container, FragmentA())
+                .commit()
+        }
+        btn_clear.setOnClickListener {
+            val old = supportFragmentManager.findFragmentById(R.id.container)
+            if (old != null) {
+                supportFragmentManager.beginTransaction()
+                    .remove(old)
+                    .commit()
+            }
+        }
+
     }
 
     fun injectDependency() {
         App.activityComponent.inject(this)
-        tv_text.text = "isDarkMode: ${preferences.isDarkMode} preferences instance:${System.identityHashCode(preferences)} " +
-                "inject field value: ${injectPair.first} ${injectPair.second} pair instance:${System.identityHashCode(injectPair)}"
     }
 
 }

@@ -3,7 +3,6 @@ package ru.skillbranch.skillarticles
 import android.app.Application
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
-import kotlinx.android.synthetic.main.activity_root.view.*
 import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.data.remote.NetworkMonitor
 import ru.skillbranch.skillarticles.di.components.ActivityComponent
@@ -32,11 +31,6 @@ class App : Application() {
         appComponent = DaggerAppComponent.builder()
             .preferencesModule(PreferencesModule(applicationContext))
             .networkUtilsModule(NetworkUtilsModule(applicationContext))
-            .build()
-
-        activityComponent = DaggerActivityComponent.builder()
-            .activityModule(ActivityModule())
-            .appComponent(appComponent)
             .build()
 
         appComponent.inject(this)

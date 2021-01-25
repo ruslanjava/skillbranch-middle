@@ -26,6 +26,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".example.TestActivity" android:exported="true">
+        </activity>
         
         <provider
             android:authorities="${applicationId}.provider"
