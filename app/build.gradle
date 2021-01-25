@@ -4,6 +4,7 @@ plugins {
     id 'kotlin-android-extensions'
     id 'androidx.navigation.safeargs.kotlin'
     id 'kotlin-kapt'
+    id 'scabbard.gradle'
 }
 
 apply from: "../versions.gradle"
@@ -48,6 +49,12 @@ android {
         exclude 'META-INF/AL2.0'
         exclude 'META-INF/LGPL2.1'
     }
+}
+
+scabbard {
+    enabled true
+    failOnError true
+    outputFormat "svg"
 }
 
 dependencies {
