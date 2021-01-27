@@ -24,7 +24,8 @@ class FragmentB : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        DaggerFragmentBComponent.builder().activityComponent(App.activityComponent)
+        DaggerFragmentBComponent.builder()
+            .activityComponent(App.activityComponent)
             .fragmentBModule(FragmentBModule())
             .build()
             .inject(this)
@@ -42,7 +43,7 @@ class FragmentB : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         tv_activity.text = "${activity.title} ${System.identityHashCode(activity)}"
-        tv_is_big_text.text = "isBigText: ${System.identityHashCode(isBigText)}"
+        tv_is_big_text.text = "isBigText: $isBigText"
     }
 
 }

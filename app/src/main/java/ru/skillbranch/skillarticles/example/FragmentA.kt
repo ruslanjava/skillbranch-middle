@@ -33,7 +33,8 @@ class FragmentA : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        DaggerFragmentAComponent.builder().activityComponent(App.activityComponent)
+        DaggerFragmentAComponent.builder()
+            .activityComponent(App.activityComponent)
             .fragmentAModule(FragmentAModule())
             .build()
             .inject(this)
