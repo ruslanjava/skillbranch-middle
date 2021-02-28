@@ -18,9 +18,11 @@ interface IProfileRepository {
 object ProfileRepository : IProfileRepository {
 
     private val prefs by lazy {
-        App.appComponent.getPreferences()
+        App.appComponent.getPrefManager()
     }
-    private val network = NetworkManager.api
+    private val network by lazy {
+        App.appComponent.getNetworkManager().api
+    }
 
     override fun getProfile(): LiveData<User?> {
         return prefs.profileLive

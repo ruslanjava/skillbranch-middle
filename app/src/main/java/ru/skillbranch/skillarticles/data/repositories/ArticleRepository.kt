@@ -17,6 +17,7 @@ import ru.skillbranch.skillarticles.data.remote.RestService
 import ru.skillbranch.skillarticles.data.remote.err.NoNetworkError
 import ru.skillbranch.skillarticles.data.remote.req.MessageReq
 import ru.skillbranch.skillarticles.data.remote.res.CommentRes
+import ru.skillbranch.skillarticles.di.components.AppComponent
 import ru.skillbranch.skillarticles.extensions.data.toArticleContent
 
 interface IArticleRepository {
@@ -48,10 +49,8 @@ interface IArticleRepository {
 
 object ArticleRepository : IArticleRepository {
 
-    private val network = NetworkManager.api
-    private val preferences by lazy {
-        App.appComponent.getPreferences()
-    }
+    private val network = App.appComponent.getNetworkManager().api
+    private val preferences = App.appComponent.getPrefManager()
 
     private var articlesDao = db.articlesDao()
     private var articlePersonalDao = db.articlePersonalInfosDao()

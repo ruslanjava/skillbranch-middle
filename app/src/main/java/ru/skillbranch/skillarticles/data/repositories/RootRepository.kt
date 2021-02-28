@@ -2,8 +2,6 @@ package ru.skillbranch.skillarticles.data.repositories
 
 import androidx.lifecycle.LiveData
 import ru.skillbranch.skillarticles.App
-import ru.skillbranch.skillarticles.data.local.PrefManager
-import ru.skillbranch.skillarticles.data.remote.NetworkManager
 import ru.skillbranch.skillarticles.data.remote.RestService
 import ru.skillbranch.skillarticles.data.remote.req.LoginReq
 import ru.skillbranch.skillarticles.data.remote.req.RegisterReq
@@ -12,9 +10,11 @@ import ru.skillbranch.skillarticles.data.remote.res.AuthRes
 object RootRepository {
 
     private val preferences by lazy {
-        App.appComponent.getPreferences()
+        App.appComponent.getPrefManager()
     }
-    private val network: RestService = NetworkManager.api
+    private val network: RestService by lazy {
+        App.appComponent.getNetworkManager().api
+    }
 
     fun isAuth(): LiveData<Boolean> = preferences.isAuthLive
 

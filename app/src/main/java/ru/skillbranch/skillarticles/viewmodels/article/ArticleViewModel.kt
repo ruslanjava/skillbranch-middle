@@ -7,6 +7,7 @@ import androidx.paging.PagedList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.data.remote.NetworkManager
 import ru.skillbranch.skillarticles.data.remote.res.CommentRes
 import ru.skillbranch.skillarticles.data.repositories.*
@@ -24,6 +25,9 @@ class ArticleViewModel(
     private val articleId: String
 ) : BaseViewModel<ArticleState>(handle, ArticleState()), IArticleViewModel {
 
+    private val api by lazy {
+        App.appComponent.getNetworkManager().api
+    }
     private val repository = ArticleRepository
     private var clearContent: String? = null
     private val listConfig: PagedList.Config by lazy {
@@ -36,7 +40,7 @@ class ArticleViewModel(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     private val listData: LiveData<PagedList<CommentRes>> =
         Transformations.switchMap(repository.findArticleCommentCount(articleId)) {
-            buildPagedList(CommentsDataFactory(NetworkManager.api, articleId, it, ::commentLoadErrorHandler))
+            buildPagedList(CommentsDataFactory(api, articleId, it, ::commentLoadErrorHandler))
         }
 
     init {

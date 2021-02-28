@@ -5,8 +5,7 @@ import dagger.BindsInstance
 import dagger.Component
 import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.data.local.PrefManager
-import ru.skillbranch.skillarticles.data.remote.NetworkMonitor
-import ru.skillbranch.skillarticles.di.modules.ActivityModule
+import ru.skillbranch.skillarticles.data.remote.NetworkManager
 import ru.skillbranch.skillarticles.di.modules.NetworkUtilsModule
 import ru.skillbranch.skillarticles.di.modules.PreferencesModule
 import javax.inject.Singleton
@@ -21,6 +20,9 @@ interface AppComponent {
     }
 
     fun inject(app: App)
+
+    fun getNetworkManager(): NetworkManager
+    fun getPrefManager(): PrefManager
 
     val activityComponent: ActivityComponent.Factory
 

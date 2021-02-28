@@ -22,8 +22,7 @@ class FragmentB : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        App.activityComponent.plusFragmentBComponent(FragmentBModule())
-                .inject(this)
+        App.activityComponent.plusFragmentBComponent().inject(this)
     }
 
     override fun onCreateView(

@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import androidx.sqlite.db.SimpleSQLiteQuery
+import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.data.local.DbManager
 import ru.skillbranch.skillarticles.data.local.DbManager.db
 import ru.skillbranch.skillarticles.data.local.dao.*
@@ -30,9 +31,11 @@ interface IArticlesRepository {
 
 }
 
-object ArticlesRepository: IArticlesRepository {
+object ArticlesRepository : IArticlesRepository {
 
-    private val network = NetworkManager.api
+    private val network by lazy {
+        App.appComponent.getNetworkManager().api
+    }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var articlesDao = db.articlesDao()
@@ -54,12 +57,12 @@ object ArticlesRepository: IArticlesRepository {
 
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     fun setupTestDao(
-        articlesDao: ArticlesDao,
-        articleCountsDao: ArticleCountsDao,
-        categoriesDao: CategoriesDao,
-        tagsDao: TagsDao,
-        articlePersonalDao: ArticlePersonalInfosDao,
-        articlesContentDao: ArticleContentsDao
+            articlesDao: ArticlesDao,
+            articleCountsDao: ArticleCountsDao,
+            categoriesDao: CategoriesDao,
+            tagsDao: TagsDao,
+            articlePersonalDao: ArticlePersonalInfosDao,
+            articlesContentDao: ArticleContentsDao
     ) {
         this.articlesDao = articlesDao
         this.articleCountsDao = articleCountsDao
@@ -104,16 +107,16 @@ object ArticlesRepository: IArticlesRepository {
 
     override suspend fun insertArticlesToDb(articles: List<ArticleRes>) {
         articlesDao.upsert(articles.map { it.data.toArticle() })
-        articleCountsDao.upsert(articles.map{ it.counts.toArticleCounts() })
+        articleCountsDao.upsert(articles.map { it.counts.toArticleCounts() })
 
         val refs = articles.map { it.data }
-            .fold(mutableListOf<Pair<String, String>>()) { acc, res ->
-                acc.also { list -> list.addAll(res.tags.map { res.id to it }) }
-            }
+                .fold(mutableListOf<Pair<String, String>>()) { acc, res ->
+                    acc.also { list -> list.addAll(res.tags.map { res.id to it }) }
+                }
 
         val tags = refs.map { it.second }
-            .distinct()
-            .map { Tag(it) }
+                .distinct()
+                .map { Tag(it) }
 
         val categories = articles.map { it.data.category }
 
@@ -125,14 +128,14 @@ object ArticlesRepository: IArticlesRepository {
     override suspend fun removeArticleContent(articleId: String) {
         articlesContentDao.delete(articleId)
     }
-
 }
 
+
 data class ArticleFilter(
-    val search: String? = null,
-    val isBookmark: Boolean = false,
-    val categories: List<String> = listOf(),
-    val isHashtag: Boolean = false
+        val search: String? = null,
+        val isBookmark: Boolean = false,
+        val categories: List<String> = listOf(),
+        val isHashtag: Boolean = false
 ) {
     fun toQuery(): String {
         val qb = QueryBuilder()
@@ -172,7 +175,7 @@ class QueryBuilder {
     }
 
     fun orderBy(column: String, isDesc: Boolean = true) = apply {
-        order = " ORDER BY $column ${if(isDesc) "DESC" else "ASC"}"
+        order = " ORDER BY $column ${if (isDesc) "DESC" else "ASC"}"
     }
 
     fun appendWhere(condition: String, logic: String = "AND") = apply {
@@ -186,10 +189,10 @@ class QueryBuilder {
     }
 
     fun build(): String {
-        check(table != null) {"table must be not null" }
+        check(table != null) { "table must be not null" }
         val strBuilder = StringBuilder("SELECT ")
-            .append("$selectColumns ")
-            .append("FROM $table")
+                .append("$selectColumns ")
+                .append("FROM $table")
 
         joinTables?.let { strBuilder.append(joinTables) }
 

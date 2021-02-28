@@ -19,7 +19,7 @@ interface ActivityComponent {
 
     fun inject(activity: TestActivity)
 
-    fun plusFragmentAComponent(module: FragmentAModule): FragmentAComponent
-    fun plusFragmentBComponent(module: FragmentBModule): FragmentBComponent
+    fun plusFragmentAComponent(): FragmentAComponent
+    fun plusFragmentBComponent(): FragmentBComponent
 
 }
