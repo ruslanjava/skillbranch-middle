@@ -6,7 +6,7 @@ import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.di.scopes.FragmentScope
 
 @Module
-class FragmentBModule {
+object FragmentBModule {
 
     @Provides
     @FragmentScope

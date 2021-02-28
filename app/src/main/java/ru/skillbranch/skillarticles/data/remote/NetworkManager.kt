@@ -19,7 +19,7 @@ object NetworkManager {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
-        val networkMonitor = App.appComponent.getNetworkMonitor()
+        val networkMonitor = App.appComponent.getNetforkMonitor()
 
         // client
         val client: OkHttpClient = OkHttpClient().newBuilder()

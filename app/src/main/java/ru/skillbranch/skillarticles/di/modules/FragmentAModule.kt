@@ -6,7 +6,7 @@ import ru.skillbranch.skillarticles.di.scopes.FragmentScope
 import javax.inject.Named
 
 @Module
-class FragmentAModule {
+object FragmentAModule {
 
     @Provides
     @FragmentScope

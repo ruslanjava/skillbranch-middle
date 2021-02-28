@@ -5,12 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.fragment_a.*
 import kotlinx.android.synthetic.main.fragment_a.tv_activity
 import kotlinx.android.synthetic.main.fragment_b.*
 import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.di.components.DaggerFragmentBComponent
 import ru.skillbranch.skillarticles.di.modules.FragmentBModule
 import javax.inject.Inject
 
@@ -24,11 +22,8 @@ class FragmentB : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        DaggerFragmentBComponent.builder()
-            .activityComponent(App.activityComponent)
-            .fragmentBModule(FragmentBModule())
-            .build()
-            .inject(this)
+        App.activityComponent.plusFragmentBComponent(FragmentBModule())
+                .inject(this)
     }
 
     override fun onCreateView(

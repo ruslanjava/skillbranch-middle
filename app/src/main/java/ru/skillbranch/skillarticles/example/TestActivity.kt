@@ -6,7 +6,6 @@ import kotlinx.android.synthetic.main.activity_test.*
 import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.data.local.PrefManager
-import ru.skillbranch.skillarticles.di.components.DaggerActivityComponent
 import ru.skillbranch.skillarticles.di.modules.ActivityModule
 import javax.inject.Inject
 
@@ -22,10 +21,7 @@ class TestActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_test)
 
-        App.activityComponent = DaggerActivityComponent.builder()
-            .activityModule(ActivityModule(this))
-            .appComponent(App.appComponent)
-            .build()
+        App.activityComponent = App.appComponent.activityComponent.create(this)
 
         injectDependency()
 

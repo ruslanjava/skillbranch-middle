@@ -7,11 +7,7 @@ import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.data.remote.NetworkMonitor
 import ru.skillbranch.skillarticles.di.components.ActivityComponent
 import ru.skillbranch.skillarticles.di.components.AppComponent
-import ru.skillbranch.skillarticles.di.components.DaggerActivityComponent
 import ru.skillbranch.skillarticles.di.components.DaggerAppComponent
-import ru.skillbranch.skillarticles.di.modules.ActivityModule
-import ru.skillbranch.skillarticles.di.modules.NetworkUtilsModule
-import ru.skillbranch.skillarticles.di.modules.PreferencesModule
 import javax.inject.Inject
 
 class App : Application() {
@@ -28,10 +24,8 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        appComponent = DaggerAppComponent.builder()
-            .preferencesModule(PreferencesModule(applicationContext))
-            .networkUtilsModule(NetworkUtilsModule(applicationContext))
-            .build()
+        appComponent = DaggerAppComponent.factory()
+            .create(applicationContext)
 
         appComponent.inject(this)
 

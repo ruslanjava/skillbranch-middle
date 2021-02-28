@@ -7,10 +7,10 @@ import ru.skillbranch.skillarticles.data.local.PrefManager
 import javax.inject.Singleton
 
 @Module
-class PreferencesModule(val context: Context) {
+object PreferencesModule {
 
     @Provides
     @Singleton
-    fun providePrefManager(): PrefManager = PrefManager(context)
+    fun providePrefManager(context: Context): PrefManager = PrefManager(context)
 
 }

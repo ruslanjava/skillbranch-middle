@@ -9,7 +9,6 @@ import kotlinx.android.synthetic.main.fragment_a.*
 import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.data.local.PrefManager
-import ru.skillbranch.skillarticles.di.components.DaggerFragmentAComponent
 import ru.skillbranch.skillarticles.di.modules.FragmentAModule
 import javax.inject.Inject
 import javax.inject.Named
@@ -33,11 +32,8 @@ class FragmentA : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        DaggerFragmentAComponent.builder()
-            .activityComponent(App.activityComponent)
-            .fragmentAModule(FragmentAModule())
-            .build()
-            .inject(this)
+        App.activityComponent.plusFragmentAComponent(FragmentAModule())
+                .inject(this)
     }
 
     override fun onCreateView(

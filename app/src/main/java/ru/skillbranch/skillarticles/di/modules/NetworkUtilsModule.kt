@@ -7,10 +7,10 @@ import ru.skillbranch.skillarticles.data.remote.NetworkMonitor
 import javax.inject.Singleton
 
 @Module
-class NetworkUtilsModule(val context: Context) {
+object NetworkUtilsModule {
 
     @Provides
     @Singleton
-    fun providesNetworkMonitor(): NetworkMonitor = NetworkMonitor(context)
+    fun providesNetworkMonitor(context: Context): NetworkMonitor = NetworkMonitor(context)
 
 }

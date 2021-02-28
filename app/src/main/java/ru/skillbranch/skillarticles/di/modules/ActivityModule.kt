@@ -6,13 +6,10 @@ import ru.skillbranch.skillarticles.di.scopes.ActivityScope
 import ru.skillbranch.skillarticles.example.TestActivity
 
 @Module
-class ActivityModule(val activity: TestActivity) {
+object ActivityModule {
 
     @ActivityScope
     @Provides
     fun providePair(): Pair<String, String> = "inject" to "pair"
-
-    @Provides
-    fun provideTestActivity(): TestActivity = activity
 
 }
