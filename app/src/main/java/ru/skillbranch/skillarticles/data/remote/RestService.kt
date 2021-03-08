@@ -7,6 +7,7 @@ import ru.skillbranch.skillarticles.data.remote.req.*
 import ru.skillbranch.skillarticles.data.remote.res.*
 
 interface RestService {
+
     //https://skill-articles.skill-branch.ru/api/v1/articles?last=articleId&limit=10
     @GET("articles")
     suspend fun articles(

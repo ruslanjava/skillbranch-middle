@@ -6,16 +6,14 @@ import kotlinx.android.synthetic.main.activity_test.*
 import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.data.local.PrefManager
+import ru.skillbranch.skillarticles.data.repositories.RootRepository
 import ru.skillbranch.skillarticles.di.modules.ActivityModule
 import javax.inject.Inject
 
 class TestActivity: AppCompatActivity() {
 
     @Inject
-    lateinit var injectPair: Pair<String, String>
-
-    @Inject
-    lateinit var preferences: PrefManager
+    lateinit var testViewModel: TestViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

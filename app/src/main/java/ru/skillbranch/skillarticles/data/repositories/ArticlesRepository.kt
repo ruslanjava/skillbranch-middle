@@ -5,14 +5,11 @@ import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import androidx.sqlite.db.SimpleSQLiteQuery
 import ru.skillbranch.skillarticles.App
-import ru.skillbranch.skillarticles.data.local.DbManager
 import ru.skillbranch.skillarticles.data.local.DbManager.db
 import ru.skillbranch.skillarticles.data.local.dao.*
 import ru.skillbranch.skillarticles.data.local.entities.*
-import ru.skillbranch.skillarticles.data.remote.NetworkManager
 import ru.skillbranch.skillarticles.data.remote.res.ArticleRes
 import ru.skillbranch.skillarticles.extensions.data.toArticle
-import ru.skillbranch.skillarticles.extensions.data.toArticleContent
 import ru.skillbranch.skillarticles.extensions.data.toArticleCounts
 
 interface IArticlesRepository {

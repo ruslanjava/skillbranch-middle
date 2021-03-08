@@ -1,20 +1,18 @@
 package ru.skillbranch.skillarticles.data.repositories
 
 import androidx.lifecycle.LiveData
-import ru.skillbranch.skillarticles.App
+import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.data.remote.RestService
 import ru.skillbranch.skillarticles.data.remote.req.LoginReq
 import ru.skillbranch.skillarticles.data.remote.req.RegisterReq
 import ru.skillbranch.skillarticles.data.remote.res.AuthRes
+import javax.inject.Inject
 
-object RootRepository {
-
-    private val preferences by lazy {
-        App.appComponent.getPrefManager()
-    }
-    private val network: RestService by lazy {
-        App.appComponent.getNetworkManager().api
-    }
+class RootRepository
+@Inject constructor(
+        private val preferences: PrefManager,
+        private val network: RestService
+) {
 
     fun isAuth(): LiveData<Boolean> = preferences.isAuthLive
 

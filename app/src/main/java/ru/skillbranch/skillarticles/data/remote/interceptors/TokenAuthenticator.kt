@@ -5,18 +5,18 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
 import ru.skillbranch.skillarticles.data.local.PrefManager
-import ru.skillbranch.skillarticles.data.remote.NetworkManager
+import ru.skillbranch.skillarticles.data.remote.RestService
 import ru.skillbranch.skillarticles.data.remote.req.RefreshReq
 import java.net.HttpURLConnection
 
-class TokenAuthenticator(val prefs: PrefManager, val networkManager: NetworkManager) : Authenticator {
+class TokenAuthenticator(val prefs: PrefManager, val lazyApi: Lazy<RestService>) : Authenticator {
 
     override fun authenticate(route: Route?, response: Response): Request? {
         if (response.code != HttpURLConnection.HTTP_UNAUTHORIZED) {
             return null
         }
 
-        val res = networkManager.api.refreshAccessToken(
+        val res = lazyApi.value.refreshAccessToken(
             RefreshReq(prefs.refreshToken)
         ).execute()
 

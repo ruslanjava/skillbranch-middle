@@ -7,10 +7,12 @@ import ru.skillbranch.skillarticles.data.repositories.RootRepository
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
+import javax.inject.Inject
 
 class RootViewModel(handle: SavedStateHandle) : BaseViewModel<RootState>(handle, RootState()) {
 
-    private val repository: RootRepository = RootRepository
+    @Inject
+    lateinit var repository: RootRepository
 
     private val privateRoutes = listOf(R.id.nav_profile)
 

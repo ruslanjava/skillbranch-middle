@@ -4,8 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.*
 import androidx.preference.PreferenceManager
-import ru.skillbranch.skillarticles.App
-import ru.skillbranch.skillarticles.data.JsonConverter.moshi
+import com.squareup.moshi.Moshi
 import ru.skillbranch.skillarticles.data.delegates.PrefDelegate
 import ru.skillbranch.skillarticles.data.delegates.PrefLiveDelegate
 import ru.skillbranch.skillarticles.data.delegates.PrefLiveObjDelegate
@@ -13,7 +12,7 @@ import ru.skillbranch.skillarticles.data.delegates.PrefObjDelegate
 import ru.skillbranch.skillarticles.data.models.AppSettings
 import ru.skillbranch.skillarticles.data.models.User
 
-class PrefManager(context: Context) {
+class PrefManager(context: Context, val moshi: Moshi) {
 
     val preferences: SharedPreferences =
         PreferenceManager.getDefaultSharedPreferences(context)
