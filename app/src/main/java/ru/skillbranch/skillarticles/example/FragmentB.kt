@@ -1,10 +1,13 @@
 package ru.skillbranch.skillarticles.example
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.android.synthetic.main.fragment_a.tv_activity
 import kotlinx.android.synthetic.main.fragment_b.*
 import ru.skillbranch.skillarticles.App
@@ -18,11 +21,18 @@ class FragmentB : Fragment() {
     lateinit var activity: TestActivity
     @Inject
     lateinit var isBigText: String
+    @Inject
+    lateinit var factory: TestViewModelFactory
+    val viewModel: ViewModelA by viewModels { factory.create(this, arguments) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        App.activityComponent.plusFragmentBComponent().inject(this)
+        App.activityComponent
+                .plusFragmentBComponent()
+                .inject(this)
+
+        Log.e("FragmentB", "viewModelInstance: ${System.identityHashCode(viewModel)}")
     }
 
     override fun onCreateView(

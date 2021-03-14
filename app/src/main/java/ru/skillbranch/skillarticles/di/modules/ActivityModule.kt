@@ -1,26 +1,43 @@
 package ru.skillbranch.skillarticles.di.modules
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import dagger.Binds
-import dagger.BindsInstance
 import dagger.Module
-import dagger.Provides
-import ru.skillbranch.skillarticles.data.local.PrefManager
-import ru.skillbranch.skillarticles.data.remote.RestService
+import dagger.multibindings.IntoMap
 import ru.skillbranch.skillarticles.data.repositories.IRepository
 import ru.skillbranch.skillarticles.data.repositories.RootRepository
+import ru.skillbranch.skillarticles.di.ViewModelKey
 import ru.skillbranch.skillarticles.di.scopes.ActivityScope
-import ru.skillbranch.skillarticles.example.TestActivity
-import ru.skillbranch.skillarticles.example.TestViewModel
-import java.util.prefs.Preferences
+import ru.skillbranch.skillarticles.example.*
 
 @Module
 abstract class ActivityModule {
 
     @Binds
+    @ActivityScope
     abstract fun bindRootRepository(repository: RootRepository): IRepository
 
     @Binds
-    abstract fun bindViewModel(viewModel: TestViewModel): ViewModel
+    @IntoMap
+    @ViewModelKey(TestViewModel::class)
+    @ActivityScope
+    abstract fun bindViewModel(vm: TestViewModel.Factory): ViewModelAssistedFactory<ViewModel>
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ViewModelA::class)
+    @ActivityScope
+    abstract fun bindViewModelA(vm: ViewModelA.Factory): ViewModelAssistedFactory<ViewModel>
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(ViewModelB::class)
+    @ActivityScope
+    abstract fun bindViewModelB(vm: ViewModelB.Factory): ViewModelAssistedFactory<ViewModel>
+
+    @Binds
+    @ActivityScope
+    abstract fun bindVmFactory(factory: TestViewModelFactory): ViewModelProvider.Factory
 
 }

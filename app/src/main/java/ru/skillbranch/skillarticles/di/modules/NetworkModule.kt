@@ -92,7 +92,6 @@ object NetworkModule {
                 .build()
     }
 
-    @Singleton
     @Provides
     fun provideRestService(retrofit: Retrofit): RestService {
         return retrofit.create(RestService::class.java)
