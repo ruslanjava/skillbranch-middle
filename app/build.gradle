@@ -5,6 +5,7 @@ plugins {
     id 'androidx.navigation.safeargs.kotlin'
     id 'kotlin-kapt'
     id 'scabbard.gradle'
+    id 'dagger.hilt.android.plugin'
 }
 
 apply from: "../versions.gradle"
@@ -100,6 +101,7 @@ dependencies {
     // activity / fragment result api
     implementation "androidx.activity:activity-ktx:$activity_ktx_version"
     implementation "androidx.fragment:fragment-ktx:$fragments_ktx_version"
+    implementation "androidx.fragment:fragment-ktx:$fragments_ktx_version"
 
     // coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
@@ -112,8 +114,10 @@ dependencies {
     compileOnly "com.squareup.inject:assisted-inject-annotations-dagger2:0.6.0"
     kapt "com.squareup.inject:assisted-inject-processor-dagger2:0.6.0"
 
-    implementation "com.google.dagger:dagger-android-support:2.29.1"
-    kapt "com.google.dagger:dagger-android-processor:2.29.1"
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    implementation "androidx.hilt:hilt-lifecycle-viewmodel:$hilt_vm_version"
+    kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
+    kapt "androidx.hilt:hilt-compiler:$hilt_vm_version"
 
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"
     testImplementation 'junit:junit:4.12'

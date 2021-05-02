@@ -2,20 +2,19 @@ package ru.skillbranch.skillarticles.example
 
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_a.*
-import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.R
 import ru.skillbranch.skillarticles.data.local.PrefManager
-import ru.skillbranch.skillarticles.di.modules.FragmentAModule
 import javax.inject.Inject
 import javax.inject.Named
 
+@AndroidEntryPoint
 class FragmentA : Fragment() {
 
     @Inject
@@ -32,16 +31,10 @@ class FragmentA : Fragment() {
     @Inject
     lateinit var activity: TestActivity
 
-    @Inject
-    lateinit var factory:   TestViewModelFactory
-    val viewModel: ViewModelA by viewModels { factory.create(this, arguments) }
+    val viewModel: ViewModelA by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        App.activityComponent
-                .plusFragmentAComponent()
-                .inject(this)
 
         Log.e("FragmentA", "viewModelInstance: ${System.identityHashCode(viewModel)}")
     }
