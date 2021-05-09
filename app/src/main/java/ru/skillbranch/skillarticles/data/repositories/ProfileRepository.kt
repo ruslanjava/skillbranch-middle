@@ -2,9 +2,11 @@ package ru.skillbranch.skillarticles.data.repositories
 
 import androidx.lifecycle.LiveData
 import okhttp3.MultipartBody
-import ru.skillbranch.skillarticles.App
+import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.data.models.User
+import ru.skillbranch.skillarticles.data.remote.RestService
 import ru.skillbranch.skillarticles.data.remote.req.EditProfileReq
+import javax.inject.Inject
 
 interface IProfileRepository {
     fun getProfile(): LiveData<User?>
@@ -13,14 +15,9 @@ interface IProfileRepository {
     suspend fun editProfile(name: String, about: String)
 }
 
-object ProfileRepository : IProfileRepository {
-
-    private val prefs by lazy {
-        App.appComponent.getPrefManager()
-    }
-    private val network by lazy {
-        App.appComponent.getRestService()
-    }
+class ProfileRepository @Inject constructor(
+    val prefs: PrefManager, val network: RestService
+) : IProfileRepository {
 
     override fun getProfile(): LiveData<User?> {
         return prefs.profileLive

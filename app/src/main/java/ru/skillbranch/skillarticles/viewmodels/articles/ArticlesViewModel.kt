@@ -1,26 +1,29 @@
 package ru.skillbranch.skillarticles.viewmodels.articles
 
+import androidx.hilt.Assisted
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
-import kotlinx.coroutines.Dispatchers
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
 import ru.skillbranch.skillarticles.data.local.entities.CategoryData
 import ru.skillbranch.skillarticles.data.remote.err.NoNetworkError
 import ru.skillbranch.skillarticles.data.repositories.ArticleFilter
-import ru.skillbranch.skillarticles.data.repositories.ArticlesRepository
+import ru.skillbranch.skillarticles.data.repositories.IArticlesRepository
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
 import java.util.concurrent.Executors
 
-class ArticlesViewModel(handle: SavedStateHandle) :
-    BaseViewModel<ArticlesState>(handle, ArticlesState()) {
+@AndroidEntryPoint
+class ArticlesViewModel @ViewModelInject constructor(
+    @Assisted handle: SavedStateHandle,
+    private val repository: IArticlesRepository
+): BaseViewModel<ArticlesState>(handle, ArticlesState()) {
 
-    private val repository = ArticlesRepository
     private var isLoadingInitial = false
     private var isLoadingAfter = false
     private val listConfig by lazy {

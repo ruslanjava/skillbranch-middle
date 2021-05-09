@@ -27,9 +27,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".example.TestActivity" android:exported="true">
-        </activity>
-        
         <provider
             android:authorities="${applicationId}.provider"
             android:name=".data.providers.ImageFileProvider"

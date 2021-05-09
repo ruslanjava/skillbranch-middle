@@ -1,11 +1,9 @@
 package ru.skillbranch.skillarticles.data.repositories
 
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import androidx.paging.ItemKeyedDataSource
-import ru.skillbranch.skillarticles.App
-import ru.skillbranch.skillarticles.data.local.DbManager.db
+import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.data.local.dao.ArticleContentsDao
 import ru.skillbranch.skillarticles.data.local.dao.ArticleCountsDao
 import ru.skillbranch.skillarticles.data.local.dao.ArticlePersonalInfosDao
@@ -17,8 +15,9 @@ import ru.skillbranch.skillarticles.data.remote.err.NoNetworkError
 import ru.skillbranch.skillarticles.data.remote.req.MessageReq
 import ru.skillbranch.skillarticles.data.remote.res.CommentRes
 import ru.skillbranch.skillarticles.extensions.data.toArticleContent
+import javax.inject.Inject
 
-interface IArticleRepository {
+interface IArticleRepository: IRepository {
 
     fun findArticle(articleId: String): LiveData<ArticleFull>
     fun getAppSettings(): LiveData<AppSettings>
@@ -45,28 +44,14 @@ interface IArticleRepository {
 
 }
 
-object ArticleRepository : IArticleRepository {
-
-    private val network = App.appComponent.getRestService()
-    private val preferences = App.appComponent.getPrefManager()
-
-    private var articlesDao = db.articlesDao()
-    private var articlePersonalDao = db.articlePersonalInfosDao()
-    private var articleCountsDao = db.articleCountsDao()
-    private var articleContentDao = db.articleContentsDao()
-
-    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
-    fun setupTestDao(
-        articlesDao: ArticlesDao,
-        articlePersonalDao: ArticlePersonalInfosDao,
-        articleCountsDao: ArticleCountsDao,
-        articleContentDao: ArticleContentsDao
-    ) {
-        this.articlesDao = articlesDao
-        this.articlePersonalDao = articlePersonalDao
-        this.articleCountsDao = articleCountsDao
-        this.articleContentDao = articleContentDao
-    }
+class ArticleRepository @Inject constructor(
+    private val network: RestService,
+    private val preferences: PrefManager,
+    private var articlesDao: ArticlesDao,
+    private var articlePersonalDao: ArticlePersonalInfosDao,
+    private var articleCountsDao: ArticleCountsDao,
+    private var articleContentDao: ArticleContentsDao
+) : IArticleRepository {
 
     override fun findArticle(articleId: String): LiveData<ArticleFull> {
         return articlesDao.findFullArticle(articleId)

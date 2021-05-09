@@ -5,13 +5,21 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityComponent
-import ru.skillbranch.skillarticles.example.TestActivity
+import ru.skillbranch.skillarticles.data.local.PrefManager
+import ru.skillbranch.skillarticles.data.remote.RestService
+import ru.skillbranch.skillarticles.data.repositories.RootRepository
+import ru.skillbranch.skillarticles.ui.RootActivity
 
 @InstallIn(ActivityComponent::class)
 @Module
 class ActivityModule {
 
     @Provides
-    fun provideActivity(activity: Activity): TestActivity = activity as TestActivity
+    fun provideActivity(activity: Activity): RootActivity = activity as RootActivity
+
+    @Provides
+    fun provideRootRepository(preferences: PrefManager, restService: RestService): RootRepository {
+        return RootRepository(preferences, restService)
+    }
 
 }

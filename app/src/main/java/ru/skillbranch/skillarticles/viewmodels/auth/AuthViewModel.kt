@@ -1,22 +1,26 @@
 package ru.skillbranch.skillarticles.viewmodels.auth
 
+import androidx.hilt.Assisted
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.R
-import ru.skillbranch.skillarticles.data.repositories.RootRepository
+import ru.skillbranch.skillarticles.data.repositories.IRootRepository
 import ru.skillbranch.skillarticles.viewmodels.base.BaseViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
 
-class AuthViewModel(handle: SavedStateHandle) : BaseViewModel<AuthState>(handle, AuthState()),
-    IAuthViewModel {
-
-    private val repository = RootRepository
+@AndroidEntryPoint
+class AuthViewModel @ViewModelInject constructor(
+    @Assisted handle: SavedStateHandle,
+    val repository: IRootRepository
+): BaseViewModel<AuthState>(handle, AuthState()), IAuthViewModel {
 
     private val validNames = MutableLiveData<Boolean>()
     private val validEmails = MutableLiveData<Boolean>()

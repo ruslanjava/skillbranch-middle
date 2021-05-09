@@ -7,10 +7,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
 import ru.skillbranch.skillarticles.ui.custom.ArticleItemView
+import javax.inject.Inject
 
-class ArticlesAdapter(
-        private val listener: (ArticleItem, Boolean) -> Unit
-) : PagedListAdapter<ArticleItem, ArticleVH>(ArticleDiffCallback()) {
+class ArticlesAdapter @Inject constructor(val listener: IArticleClickListener) : PagedListAdapter<ArticleItem, ArticleVH>(ArticleDiffCallback()) {
 
     var bookmarkListener: ((String, Boolean) -> Unit)? = null
 
@@ -36,11 +35,11 @@ class ArticleDiffCallback: DiffUtil.ItemCallback<ArticleItem>() {
 class ArticleVH(val containerView: View) : RecyclerView.ViewHolder(containerView) {
 
     fun bind(
-        item: ArticleItem?, listener: (ArticleItem, Boolean) -> Unit, toggleBookmarkListener: ((String, Boolean) -> Unit)?
+        item: ArticleItem?, listener: IArticleClickListener, toggleBookmarkListener: ((String, Boolean) -> Unit)?
     ) {
         // if use placeholder item me be null
         (containerView as ArticleItemView).bind(item!!, toggleBookmarkListener)
-        itemView.setOnClickListener { listener(item, item.isBookmark) }
+        itemView.setOnClickListener { listener.clickArticle(item, item.isBookmark) }
     }
 
 }

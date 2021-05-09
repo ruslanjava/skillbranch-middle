@@ -1,13 +1,14 @@
 package ru.skillbranch.skillarticles.viewmodels.article
 
 import androidx.annotation.VisibleForTesting
+import androidx.hilt.Assisted
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.skillbranch.skillarticles.App
 import ru.skillbranch.skillarticles.data.remote.res.CommentRes
 import ru.skillbranch.skillarticles.data.repositories.*
 import ru.skillbranch.skillarticles.extensions.data.toAppSettings
@@ -19,15 +20,13 @@ import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
 import ru.skillbranch.skillarticles.viewmodels.base.Notify
 import java.util.concurrent.Executors
 
-class ArticleViewModel(
-    handle: SavedStateHandle,
-    private val articleId: String
+class ArticleViewModel @ViewModelInject constructor(
+    @Assisted handle: SavedStateHandle,
+    private val repository: IArticleRepository
 ) : BaseViewModel<ArticleState>(handle, ArticleState()), IArticleViewModel {
 
-    private val api by lazy {
-        App.appComponent.getNetworkManager().api
-    }
-    private val repository = ArticleRepository
+    private val articleId: String = handle["article_id"]!! // bundle key default args
+
     private var clearContent: String? = null
     private val listConfig: PagedList.Config by lazy {
         PagedList.Config.Builder()
@@ -39,7 +38,7 @@ class ArticleViewModel(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     private val listData: LiveData<PagedList<CommentRes>> =
         Transformations.switchMap(repository.findArticleCommentCount(articleId)) {
-            buildPagedList(CommentsDataFactory(api, articleId, it, ::commentLoadErrorHandler))
+            buildPagedList(repository.loadAllComments(articleId, it, ::commentLoadErrorHandler))
         }
 
     init {

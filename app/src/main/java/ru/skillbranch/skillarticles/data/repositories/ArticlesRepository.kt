@@ -1,18 +1,19 @@
 package ru.skillbranch.skillarticles.data.repositories
 
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import androidx.sqlite.db.SimpleSQLiteQuery
-import ru.skillbranch.skillarticles.App
-import ru.skillbranch.skillarticles.data.local.DbManager.db
+import ru.skillbranch.skillarticles.data.local.PrefManager
 import ru.skillbranch.skillarticles.data.local.dao.*
 import ru.skillbranch.skillarticles.data.local.entities.*
+import ru.skillbranch.skillarticles.data.remote.RestService
 import ru.skillbranch.skillarticles.data.remote.res.ArticleRes
 import ru.skillbranch.skillarticles.extensions.data.toArticle
+import ru.skillbranch.skillarticles.extensions.data.toArticleContent
 import ru.skillbranch.skillarticles.extensions.data.toArticleCounts
+import javax.inject.Inject
 
-interface IArticlesRepository {
+interface IArticlesRepository: IRepository {
 
     fun findTags(): LiveData<List<String>>
     fun findCategoriesData(): LiveData<List<CategoryData>>
@@ -28,46 +29,16 @@ interface IArticlesRepository {
 
 }
 
-object ArticlesRepository : IArticlesRepository {
-
-    private val network by lazy {
-        App.appComponent.getNetworkManager().api
-    }
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    var articlesDao = db.articlesDao()
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    var articlesContentDao = db.articleContentsDao()
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    var articleCountsDao = db.articleCountsDao()
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    var categoriesDao = db.categoriesDao()
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    var tagsDao = db.tagsDao()
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    var articlePersonalDao = db.articlePersonalInfosDao()
-
-    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
-    fun setupTestDao(
-            articlesDao: ArticlesDao,
-            articleCountsDao: ArticleCountsDao,
-            categoriesDao: CategoriesDao,
-            tagsDao: TagsDao,
-            articlePersonalDao: ArticlePersonalInfosDao,
-            articlesContentDao: ArticleContentsDao
-    ) {
-        this.articlesDao = articlesDao
-        this.articleCountsDao = articleCountsDao
-        this.categoriesDao = categoriesDao
-        this.tagsDao = tagsDao
-        this.articlePersonalDao = articlePersonalDao
-        this.articlesContentDao = articlesContentDao
-    }
+class ArticlesRepository @Inject constructor(
+    private val network: RestService,
+    private val prefs: PrefManager,
+    private val articlesDao: ArticlesDao,
+    private val articlesContentDao: ArticleContentsDao,
+    private val articleCountsDao: ArticleCountsDao,
+    private val categoriesDao: CategoriesDao,
+    private val tagsDao: TagsDao,
+    private val articlePersonalDao: ArticlePersonalInfosDao
+) : IArticlesRepository {
 
     override fun findTags(): LiveData<List<String>> {
         return tagsDao.findTags()

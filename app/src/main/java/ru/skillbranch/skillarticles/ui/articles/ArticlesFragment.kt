@@ -16,10 +16,12 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_root.*
 import kotlinx.android.synthetic.main.fragment_articles.*
 import kotlinx.android.synthetic.main.search_view_layout.view.*
 import ru.skillbranch.skillarticles.R
+import ru.skillbranch.skillarticles.data.local.entities.ArticleItem
 import ru.skillbranch.skillarticles.data.local.entities.CategoryData
 import ru.skillbranch.skillarticles.ui.base.BaseFragment
 import ru.skillbranch.skillarticles.ui.base.Binding
@@ -33,8 +35,10 @@ import ru.skillbranch.skillarticles.viewmodels.articles.ArticlesViewModel
 import ru.skillbranch.skillarticles.viewmodels.base.IViewModelState
 import ru.skillbranch.skillarticles.viewmodels.base.Loading
 import ru.skillbranch.skillarticles.viewmodels.base.NavigationCommand
+import javax.inject.Inject
 
-class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
+@AndroidEntryPoint
+class ArticlesFragment : BaseFragment<ArticlesViewModel>(), IArticleClickListener {
 
     override val viewModel: ArticlesViewModel by activityViewModels()
 
@@ -42,7 +46,11 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
     override val binding: ArticlesBinding by lazy { ArticlesBinding() }
     private val args: ArticlesFragmentArgs by navArgs()
 
-    private lateinit var suggestionsAdapter: SimpleCursorAdapter
+    @Inject
+    lateinit var suggestionsAdapter: SimpleCursorAdapter
+
+    @Inject
+    lateinit var articlesAdapter: ArticlesAdapter
 
     override val prepareToolbar: (ToolbarBuilder.() -> Unit) = {
         addMenuItem(
@@ -70,24 +78,6 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         )
     }
 
-    private val articlesAdapter = ArticlesAdapter { item, isToggleBookmark ->
-        if (isToggleBookmark) {
-            viewModel.handleToggleBookmark(item.id)
-        } else {
-            val action = ArticlesFragmentDirections.actionNavArticlesToPageArticle(
-                item.id,
-                item.author,
-                item.authorAvatar!!,
-                item.category,
-                item.categoryIcon,
-                item.poster,
-                item.title,
-                item.date
-            )
-            viewModel.navigate(NavigationCommand.To(action.actionId, action.arguments))
-        }
-    }
-
     private val shimmerDrawable by lazy(LazyThreadSafetyMode.NONE) {
         val context = requireContext()
         val baseColor = context.getColor(R.color.color_gray_light)
@@ -106,14 +96,6 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
             viewModel.applyCategories(bundle[ChoseCategoryDialog.SELECTED_CATEGORIES] as List<String>)
         }
 
-        suggestionsAdapter = SimpleCursorAdapter(
-            context,
-            android.R.layout.simple_list_item_1,
-            null, // cursor
-            arrayOf("tag"), // cursor column for bind on view
-            intArrayOf(android.R.id.text1), // text view id for bind data from cursor columns
-            CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER
-        )
         suggestionsAdapter.setFilterQueryProvider { constraint -> populateAdapter(constraint) }
         setHasOptionsMenu(true)
     }
@@ -216,6 +198,7 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
     }
 
     override fun setupViews() {
+
         with (rv_articles) {
             layoutManager = LinearLayoutManager(context)
             adapter = articlesAdapter
@@ -289,5 +272,29 @@ class ArticlesFragment : BaseFragment<ArticlesViewModel>() {
         }
 
     }
+
+    override fun clickArticle(item: ArticleItem, isToggleBookmark: Boolean) {
+        if (isToggleBookmark) {
+            viewModel.handleToggleBookmark(item.id)
+        } else {
+            val action = ArticlesFragmentDirections.actionNavArticlesToPageArticle(
+                item.id,
+                item.author,
+                item.authorAvatar!!,
+                item.category,
+                item.categoryIcon,
+                item.poster,
+                item.title,
+                item.date
+            )
+            viewModel.navigate(NavigationCommand.To(action.actionId, action.arguments))
+        }
+    }
+
+}
+
+interface IArticleClickListener {
+
+    fun clickArticle(item: ArticleItem, isBookmarked: Boolean)
 
 }
