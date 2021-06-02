@@ -41,9 +41,15 @@ class SearchFragment : Fragment() {
     }
 
     private fun renderState(searchState: SearchState) {
-        adapter.items = searchState.items
-        adapter.notifyDataSetChanged()
+        when (searchState) {
+            is SearchState.Loading -> {
 
+            }
+            is SearchState.Result -> {
+                adapter.items = searchState.items
+                adapter.notifyDataSetChanged()
+            }
+        }
     }
 
     override fun onDestroyView() {
