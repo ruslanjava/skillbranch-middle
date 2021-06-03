@@ -4,35 +4,40 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.skillbranch.sbdelivery.core.notifier.BasketNotifier
 import ru.skillbranch.sbdelivery.core.notifier.event.BasketEvent
 import ru.skillbranch.sbdelivery.databinding.FragmentBasketBinding
+import ru.skillbranch.sbdelivery.ui.main.MainViewModel
 
 class BasketFragment : Fragment() {
-    companion object {
-        fun newInstance() = BasketFragment()
-    }
 
-    private val notifier: BasketNotifier by inject()
+    private lateinit var tvDishes: TextView
 
-    private var _binding: FragmentBasketBinding? = null
-    private val binding get() = _binding!!
+    private val viewModel: BasketViewModel by viewModel()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentBasketBinding.inflate(inflater, container, false)
+        val binding = FragmentBasketBinding.inflate(inflater, container, false)
+        tvDishes = binding.tvDishes
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        notifier.eventSubscribe()
-            .subscribe {
-                if (it is BasketEvent.AddDish) {
-                    binding.tvDishes.text = "${binding.tvDishes.text}\n\n ${it.title} стоимость ${it.price}"
-                }
-
-            }
+        viewModel.observeEvents(viewLifecycleOwner, ::showEvent)
     }
+
+    private fun showEvent(event: BasketEvent) {
+        if (event is BasketEvent.AddDish) {
+            tvDishes.text = "${tvDishes.text}\n\n ${event.title} стоимость ${event.price}"
+        }
+    }
+
+    companion object {
+        fun newInstance() = BasketFragment()
+    }
+
 }

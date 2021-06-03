@@ -70,13 +70,16 @@ class MainFragment : Fragment() {
         binding.toolbar.isVisible = state is MainState.Result
         binding.tvErrorMessage.isVisible = state is MainState.Error
         binding.btnRetry.isVisible = state is MainState.Error
-        if (state is MainState.Result) {
-            btnBasket.isVisible = true
-            categoriesAdapter.items = state.categories
-            productAdapter.items = state.productItems
-            productAdapter.notifyDataSetChanged()
-        } else if (state is MainState.Error) {
-            binding.tvErrorMessage.text = state.message
+        when (state) {
+            is MainState.Result -> {
+                btnBasket.isVisible = true
+                categoriesAdapter.items = state.categories
+                productAdapter.items = state.productItems
+                productAdapter.notifyDataSetChanged()
+            }
+            is MainState.Error -> {
+                binding.tvErrorMessage.text = state.message
+            }
         }
     }
 
