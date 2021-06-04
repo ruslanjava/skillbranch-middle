@@ -18,7 +18,7 @@ interface DishesDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertDishes(dishes: List<DishPersistEntity>)
 
-    @Query("SELECT * FROM dishes_table WHERE name LIKE :searchText ORDER BY name")
-    fun findDishesByName(searchText: String): Observable<List<DishEntity>>
+    @Query("SELECT * FROM dishes_table WHERE name LIKE :searchText ORDER BY name ASC")
+    fun findDishesByName(searchText: String): Single<List<DishPersistEntity>>
 
 }
