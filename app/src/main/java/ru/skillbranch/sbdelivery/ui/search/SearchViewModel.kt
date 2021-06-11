@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
-import kotlinx.coroutines.delay
 import ru.skillbranch.sbdelivery.core.BaseViewModel
 import ru.skillbranch.sbdelivery.domain.SearchUseCase
 import ru.skillbranch.sbdelivery.repository.mapper.DishesMapper
@@ -33,13 +32,13 @@ class SearchViewModel(
 
     fun setSearchEvent(searchEvent: Observable<String>) {
         searchEvent
+            .delay(2, TimeUnit.SECONDS)
             .debounce(800L, TimeUnit.MILLISECONDS)
             .distinctUntilChanged()
             .switchMap {
                 action.value = SearchState.Loading
                 useCase.findDishesByName(it)
             }
-            .delay(2L, TimeUnit.SECONDS)
             .map { mapper.mapDtoToState(it) }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
@@ -48,9 +47,6 @@ class SearchViewModel(
             }, {
                 val newState = SearchState.Error(it.message!!)
                 action.value = newState
-            })
-            .track()
-
+            }).track()
     }
-
 }

@@ -5,4 +5,6 @@
     <string name="search_dishes_hint">Поиск блюд</string>
     <string name="btn_retry_error">Повторить</string>
     <string name="basket_title">Корзина</string>
+    <string name="empty_list">Данные не найдены</string>
+    <string name="try_again">Повторить запрос</string>
 </resources>
