@@ -6,6 +6,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import ru.skillbranch.sbdelivery.core.BaseViewModel
 import ru.skillbranch.sbdelivery.domain.SearchUseCase
+import ru.skillbranch.sbdelivery.repository.error.EmptyDishesError
 import ru.skillbranch.sbdelivery.repository.mapper.DishesMapper
 import java.util.concurrent.TimeUnit
 
@@ -42,8 +43,13 @@ class SearchViewModel(
             .map { mapper.mapDtoToState(it) }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                val newState = SearchState.Result(it)
-                action.value = newState
+                if (it.isEmpty()) {
+                    val newState = SearchState.Error(EmptyDishesError().messageDishes)
+                    action.value = newState
+                } else {
+                    val newState = SearchState.Result(it)
+                    action.value = newState
+                }
             }, {
                 val newState = SearchState.Error(it.message!!)
                 action.value = newState

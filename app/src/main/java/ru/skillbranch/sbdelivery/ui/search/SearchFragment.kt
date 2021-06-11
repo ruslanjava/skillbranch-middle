@@ -57,6 +57,7 @@ class SearchFragment : Fragment() {
                 adapter.notifyDataSetChanged()
             }
             is SearchState.Error -> {
+                binding.tvError.text = searchState.errorDescription
                 if (searchState.errorDescription == EmptyDishesError().message) {
                     binding.tvError.text = requireContext().getString(R.string.empty_list)
                 } else {

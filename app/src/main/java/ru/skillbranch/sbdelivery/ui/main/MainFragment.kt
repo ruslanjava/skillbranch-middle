@@ -56,7 +56,7 @@ class MainFragment : Fragment() {
         }
         btnBasket.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.container, BasketFragment.newInstance())
+                .replace(R.id.container, BasketFragment())
                 .addToBackStack(null)
                 .commit()
         }
