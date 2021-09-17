@@ -60,37 +60,3 @@ class RootActivity : AppCompatActivity() {
     }
 }
 
-@Composable
-fun ELMDemo(value: Int) {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Text(
-            text = "$value",
-            fontSize = 24.sp,
-            textAlign = TextAlign.Center,
-            color = Color.White,
-            modifier = Modifier.fillMaxSize()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Button(onClick = { /* TODO */ }) {
-                Text(text = "Next")
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Button(onClick = { /* TODO */ }) {
-                Text(text = "Clear")
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-fun ElmPreview() {
-    ELMDemo(value = 0)
-}

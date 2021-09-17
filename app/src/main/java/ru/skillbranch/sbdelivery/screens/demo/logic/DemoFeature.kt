@@ -1,11 +1,9 @@
 package ru.skillbranch.sbdelivery.screens.demo.logic
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import ru.skillbranch.sbdelivery.screens.root.logic.IEffHandler
 
 object DemoFeature {
 
@@ -25,15 +23,31 @@ object DemoFeature {
         }
     }
 
-    fun listen(scope: CoroutineScope, effHandler: IEffHandler<>) {
-
+    fun listen(scope: CoroutineScope, effHandler: IEffHandler<Eff, Msg>) {
+        _scope = scope
+        _scope.launch {
+            mutations
+                .onEach { Log.e("DemoEffHandler", "EFF $it") }
+                .scan(initialState() to initialEffects()) { (s, _), m ->
+                    // reduce state
+                    s.reduce(m)
+                }
+                .collect { (s, eff) ->
+                    _state.emit(s)
+                    eff.forEach {
+                        launch {
+                            effHandler.handle(it, ::mutate)
+                        }
+                    }
+                }
+        }
     }
 
     data class State(val count: Int = 0, val isLoading: Boolean = false)
-    sealed class Msg {
-        object Increment: Msg()
-        object Clear: Msg()
 
+    sealed class Msg {
+        object NextRandom: Msg()
+        object Clear: Msg()
         data class ShowValue(val value: Int) : Msg()
     }
     sealed class Eff {
